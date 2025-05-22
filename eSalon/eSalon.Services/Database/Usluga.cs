@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace eSalon.Services.Database;
 
-public partial class Usluga
+public partial class Usluga : ISoftDelete
 {
     public int UslugaId { get; set; }
 
     public string Naziv { get; set; } = null!;
 
-    public string? Opis { get; set; }
+    public string Opis { get; set; } = null!;
 
     public decimal Cijena { get; set; }
 

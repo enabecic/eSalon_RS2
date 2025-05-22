@@ -15,9 +15,9 @@ public partial class RecenzijaOdgovor
 
     public DateTime DatumDodavanja { get; set; }
 
-    public int? BrojLajkova { get; set; }
+    public int BrojLajkova { get; set; }
 
-    public int? BrojDislajkova { get; set; }
+    public int BrojDislajkova { get; set; }
 
     public bool IsDeleted { get; set; }
 

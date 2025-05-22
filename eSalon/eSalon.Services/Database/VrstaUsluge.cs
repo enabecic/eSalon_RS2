@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace eSalon.Services.Database;
 
-public partial class VrstaUsluge
+public partial class VrstaUsluge:ISoftDelete
 {
     public int VrstaId { get; set; }
 

@@ -17,11 +17,12 @@ public partial class Rezervacija
 
     public TimeSpan VrijemePocetka { get; set; }
 
-    public TimeSpan VrijemeKraja { get; set; }
+    public TimeSpan? VrijemeKraja { get; set; }
+    public bool TerminZatvoren { get; set; }
 
     public decimal UkupnaCijena { get; set; }
 
-    public int UkupnoTrajanje { get; set; }
+    public int? UkupnoTrajanje { get; set; }
 
     public int? UkupanBrojUsluga { get; set; }
 
