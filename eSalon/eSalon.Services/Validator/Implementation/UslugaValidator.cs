@@ -29,13 +29,6 @@ namespace eSalon.Services.Validator.Implementation
             if (postoji)
                 throw new UserException($"Usluga „{usluga.Naziv}“ vrste #{usluga.VrstaId} već postoji!");
 
-
-            if (usluga.Cijena <= 0)
-                throw new UserException("Cijena mora biti veća od 0.");
-
-            if (usluga.Trajanje <= 0)
-                throw new UserException("Trajanje mora biti veća od 0.");
-
         }
 
         public async Task ValidateUpdateAsync(int id, UslugaUpdateRequest usluga, CancellationToken cancellationToken = default)
@@ -51,13 +44,6 @@ namespace eSalon.Services.Validator.Implementation
                 throw new UserException(
                     $"Druga usluga „{usluga.Naziv}“ iste vrste već postoji!");
 
-
-            if (usluga.Cijena <= 0)
-                throw new UserException("Cijena mora biti veća od 0.");
-
-
-            if (usluga.Trajanje <= 0)
-                throw new UserException("Trajanje mora biti veća od 0.");
         }
     }
 }

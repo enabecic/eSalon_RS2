@@ -15,11 +15,13 @@ builder.Services.AddTransient<IUlogaService, UlogaService>();
 builder.Services.AddTransient<IVrstaUslugeService, VrstaUslugeService>();
 builder.Services.AddTransient<INacinPlacanjaService, NacinPlacanjaService>();
 builder.Services.AddTransient<IUslugaService, UslugaService>();
+builder.Services.AddTransient<IKorisnikService, KorisnikService>();
 
 
 builder.Services.AddTransient<IUlogaValidator, UlogaValidator>();
 builder.Services.AddTransient<IVrstaUslugeValidator, VrstaUslugeValidator>();
 builder.Services.AddTransient<IUslugaValidator, UslugaValidator>();
+builder.Services.AddTransient<IKorisnikValidator, KorisnikValidator>();
 
 
 builder.Services.AddTransient<IPasswordService, PasswordService>();
