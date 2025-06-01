@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace eSalon.Services.Database;
 
-public partial class Obavijest
+public partial class Obavijest : ISoftDelete
 {
     public int ObavijestId { get; set; }
 

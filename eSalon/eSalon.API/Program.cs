@@ -2,6 +2,7 @@ using eSalon.API.Filters;
 using eSalon.Services;
 using eSalon.Services.Auth;
 using eSalon.Services.Database;
+using eSalon.Services.Helpers;
 using eSalon.Services.Validator.Implementation;
 using eSalon.Services.Validator.Interfaces;
 using Mapster;
@@ -16,15 +17,23 @@ builder.Services.AddTransient<IVrstaUslugeService, VrstaUslugeService>();
 builder.Services.AddTransient<INacinPlacanjaService, NacinPlacanjaService>();
 builder.Services.AddTransient<IUslugaService, UslugaService>();
 builder.Services.AddTransient<IKorisnikService, KorisnikService>();
+builder.Services.AddTransient<IPromocijaService, PromocijaService>();
+builder.Services.AddTransient<IFavoritService, FavoritService>();
+builder.Services.AddTransient<IAktiviranaPromocijaService, AktiviranaPromocijaService>();
+builder.Services.AddTransient<IArhivaService, ArhivaService>();
+builder.Services.AddTransient<IObavijestService, ObavijestService>();
 
 
 builder.Services.AddTransient<IUlogaValidator, UlogaValidator>();
 builder.Services.AddTransient<IVrstaUslugeValidator, VrstaUslugeValidator>();
 builder.Services.AddTransient<IUslugaValidator, UslugaValidator>();
 builder.Services.AddTransient<IKorisnikValidator, KorisnikValidator>();
+builder.Services.AddTransient<IPromocijaValidator, PromocijaValidator>();
 
 
 builder.Services.AddTransient<IPasswordService, PasswordService>();
+builder.Services.AddTransient<ICodeGenerator, CodeGenerator>();
+
 
 
 builder.Services.AddControllers(x =>

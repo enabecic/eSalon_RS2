@@ -27,7 +27,7 @@ namespace eSalon.Services.BaseServicesImplementation
         }
 
 
-        public async Task<PagedResult<TModel>> GetPagedAsync(TSearch search, CancellationToken cancellationToken = default)
+        public virtual async Task<PagedResult<TModel>> GetPagedAsync(TSearch search, CancellationToken cancellationToken = default)
         {
             List<TModel> result = new List<TModel>();
 
