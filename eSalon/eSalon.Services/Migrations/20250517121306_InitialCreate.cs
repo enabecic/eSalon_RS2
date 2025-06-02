@@ -361,7 +361,8 @@ namespace eSalon.Services.Migrations
                 name: "RecenzijaReakcija",
                 columns: table => new
                 {
-                    RecenzijaReakcijaId = table.Column<int>(type: "int", nullable: false),
+                    RecenzijaReakcijaId = table.Column<int>(type: "int", nullable: false)
+                         .Annotation("SqlServer:Identity", "1, 1"),
                     RecenzijaId = table.Column<int>(type: "int", nullable: false),
                     KorisnikId = table.Column<int>(type: "int", nullable: false),
                     JeLajk = table.Column<bool>(type: "bit", nullable: false),
@@ -434,7 +435,8 @@ namespace eSalon.Services.Migrations
                 name: "RecenzijaOdgovorReakcija",
                 columns: table => new
                 {
-                    RecenzijaOdgovorReakcijaId = table.Column<int>(type: "int", nullable: false),
+                    RecenzijaOdgovorReakcijaId = table.Column<int>(type: "int", nullable: false)
+                         .Annotation("SqlServer:Identity", "1, 1"),
                     RecenzijaOdgovorId = table.Column<int>(type: "int", nullable: false),
                     KorisnikId = table.Column<int>(type: "int", nullable: false),
                     JeLajk = table.Column<bool>(type: "bit", nullable: false),

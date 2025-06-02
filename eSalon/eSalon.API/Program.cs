@@ -22,6 +22,10 @@ builder.Services.AddTransient<IFavoritService, FavoritService>();
 builder.Services.AddTransient<IAktiviranaPromocijaService, AktiviranaPromocijaService>();
 builder.Services.AddTransient<IArhivaService, ArhivaService>();
 builder.Services.AddTransient<IObavijestService, ObavijestService>();
+builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
+builder.Services.AddTransient<IRecenzijaOdgovorService, RecenzijaOdgovorService>();
+builder.Services.AddTransient<IOcjenaService, OcjenaService>();
+
 
 
 builder.Services.AddTransient<IUlogaValidator, UlogaValidator>();
@@ -29,6 +33,7 @@ builder.Services.AddTransient<IVrstaUslugeValidator, VrstaUslugeValidator>();
 builder.Services.AddTransient<IUslugaValidator, UslugaValidator>();
 builder.Services.AddTransient<IKorisnikValidator, KorisnikValidator>();
 builder.Services.AddTransient<IPromocijaValidator, PromocijaValidator>();
+builder.Services.AddTransient<IRecenzijaValidator, RecenzijaValidator>();
 
 
 builder.Services.AddTransient<IPasswordService, PasswordService>();

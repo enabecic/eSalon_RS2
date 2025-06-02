@@ -303,7 +303,7 @@ public partial class ESalonContext : DbContext
 
             entity.ToTable("RecenzijaOdgovorReakcija");
 
-            entity.Property(e => e.RecenzijaOdgovorReakcijaId).ValueGeneratedNever();
+           // entity.Property(e => e.RecenzijaOdgovorReakcijaId).ValueGeneratedNever();
             entity.Property(e => e.DatumReakcije).HasColumnType("datetime");
             entity.Property(e => e.VrijemeBrisanja).HasColumnType("datetime");
 
@@ -324,7 +324,7 @@ public partial class ESalonContext : DbContext
 
             entity.ToTable("RecenzijaReakcija");
 
-            entity.Property(e => e.RecenzijaReakcijaId).ValueGeneratedNever();
+           // entity.Property(e => e.RecenzijaReakcijaId).ValueGeneratedNever();
             entity.Property(e => e.DatumReakcije).HasColumnType("datetime");
             entity.Property(e => e.VrijemeBrisanja).HasColumnType("datetime");
 
