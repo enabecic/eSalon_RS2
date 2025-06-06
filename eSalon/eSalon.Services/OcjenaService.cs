@@ -72,7 +72,7 @@ namespace eSalon.Services
             }
 
             var imaRezervaciju = await Context.Rezervacijas
-          .Where(r => r.KorisnikId == request.KorisnikId && !r.IsDeleted && r.StateMachine == "Zavrsena")
+          .Where(r => r.KorisnikId == request.KorisnikId && !r.IsDeleted && r.StateMachine == "zavrsena")
            .AnyAsync(r => r.StavkeRezervacijes.Any(sr => sr.UslugaId == request.UslugaId), cancellationToken);
 
             if (!imaRezervaciju)

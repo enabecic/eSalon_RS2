@@ -3,6 +3,7 @@ using eSalon.Services;
 using eSalon.Services.Auth;
 using eSalon.Services.Database;
 using eSalon.Services.Helpers;
+using eSalon.Services.RezervacijaStateMachine;
 using eSalon.Services.Validator.Implementation;
 using eSalon.Services.Validator.Interfaces;
 using Mapster;
@@ -25,6 +26,15 @@ builder.Services.AddTransient<IObavijestService, ObavijestService>();
 builder.Services.AddTransient<IRecenzijaService, RecenzijaService>();
 builder.Services.AddTransient<IRecenzijaOdgovorService, RecenzijaOdgovorService>();
 builder.Services.AddTransient<IOcjenaService, OcjenaService>();
+builder.Services.AddTransient<IRezervacijaService, RezervacijaService>();
+builder.Services.AddTransient<IStavkeRezervacijeService, StavkeRezervacijeService>();
+
+builder.Services.AddTransient<BaseRezervacijaState>();
+builder.Services.AddTransient<InitialRezervacijaState>();
+builder.Services.AddTransient<KreiranaRezervacijaState>();
+builder.Services.AddTransient<PonistenaRezervacijaState>();
+builder.Services.AddTransient<OdobrenaRezervacijaState>();
+builder.Services.AddTransient<ZavrsenaRezervacijaState>();
 
 
 
@@ -34,6 +44,7 @@ builder.Services.AddTransient<IUslugaValidator, UslugaValidator>();
 builder.Services.AddTransient<IKorisnikValidator, KorisnikValidator>();
 builder.Services.AddTransient<IPromocijaValidator, PromocijaValidator>();
 builder.Services.AddTransient<IRecenzijaValidator, RecenzijaValidator>();
+builder.Services.AddTransient<IRezervacijaValidator, RezervacijaValidator>();
 
 
 builder.Services.AddTransient<IPasswordService, PasswordService>();
