@@ -13,5 +13,7 @@ namespace eSalon.Services
     public interface IKorisnikService : ICRUDServiceAsync<Korisnik, KorisnikSearchObject, KorisnikInsertRequest, KorisnikUpdateRequest>
     {
         Task<Korisnik> LoginAsync(KorisnikLoginRequest request, CancellationToken cancellationToken = default);
+        Task<Korisnik> GetInfoAsync(CancellationToken cancellationToken = default);
+
     }
 }

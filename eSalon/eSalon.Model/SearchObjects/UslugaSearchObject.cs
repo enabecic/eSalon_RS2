@@ -15,5 +15,6 @@ namespace eSalon.Model.SearchObjects
         public decimal? CijenaLTE { get; set; }
 
         public int? VrstaId { get; set; }
+        public int? BrojZadnjeDodanih { get; set; }
     }
 }

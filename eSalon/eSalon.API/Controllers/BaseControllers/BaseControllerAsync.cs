@@ -1,12 +1,14 @@
 ﻿using eSalon.Model;
 using eSalon.Model.SearchObjects;
 using eSalon.Services.BaseServicesInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eSalon.API.Controllers.BaseControllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
 
     public class BaseControllerAsync<TModel, TSearch> : ControllerBase where TSearch : BaseSearchObject
     {

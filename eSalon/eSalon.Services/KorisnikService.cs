@@ -1,4 +1,5 @@
-﻿using eSalon.Model.Exceptions;
+﻿using Azure.Core;
+using eSalon.Model.Exceptions;
 using eSalon.Model.Requests;
 using eSalon.Model.SearchObjects;
 using eSalon.Services.Auth;
@@ -22,13 +23,15 @@ namespace eSalon.Services
         private readonly IKorisnikValidator _korisnikValidator;
         private readonly ILogger<KorisnikService> _logger;
         private readonly IPasswordService _passwordService;
+        private readonly IActiveUserServiceAsync _activeUserService;
         public KorisnikService(ESalonContext context, IMapper mapper, IUlogaValidator ulogaValidator, IKorisnikValidator korisnikValidator,
-            ILogger<KorisnikService> logger, IPasswordService passwordService) : base(context, mapper)
+            ILogger<KorisnikService> logger, IPasswordService passwordService, IActiveUserServiceAsync activeUserService) : base(context, mapper)
         {
             _ulogaValidator = ulogaValidator;
             _korisnikValidator = korisnikValidator;
             _logger = logger;
             _passwordService = passwordService;
+            _activeUserService = activeUserService;
         }
 
         public override IQueryable<Korisnik> AddFilter(KorisnikSearchObject search, IQueryable<Korisnik> query)
@@ -57,11 +60,6 @@ namespace eSalon.Services
             if (!string.IsNullOrWhiteSpace(search.Telefon))
                 query = query.Where(k => k.Telefon != null &&
                                          k.Telefon.Contains(search.Telefon));
-
-            if (search?.IsDeleted != null)
-            {
-                query = query.Where(x => x.IsDeleted == search.IsDeleted);
-            }
 
             if (search.JeAktivan.HasValue)
                 query = query.Where(k => k.JeAktivan == search.JeAktivan);
@@ -143,6 +141,14 @@ namespace eSalon.Services
         {
             await base.BeforeUpdateAsync(request, entity, cancellationToken);
 
+            var loggedUserId = await _activeUserService.GetActiveUserIdAsync(cancellationToken);
+            var loggedUserRole = await _activeUserService.GetActiveUserRoleAsync(cancellationToken);
+
+            if (loggedUserRole != "Admin" && loggedUserId != entity.KorisnikId)
+            {
+                throw new UserException("Nemate ovlasti da modifikujete tuđi profil.");
+            }
+
             await _korisnikValidator.ValidateUpdateAsync(entity.KorisnikId, request, cancellationToken);
 
             bool zeliPromijenitiLozinku =
@@ -210,5 +216,19 @@ namespace eSalon.Services
 
             return dto;
         }
+
+        public async Task<Model.Korisnik> GetInfoAsync(CancellationToken cancellationToken = default)
+        {
+            var userId = await _activeUserService.GetActiveUserIdAsync(cancellationToken)
+                ?? throw new UserException("Korisnik nije prijavljen.");
+
+            var user = await Context.Korisniks
+                .Where(x => x.KorisnikId == userId)
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new UserException("Korisnik nije pronađen.");
+
+            return Mapper.Map<Model.Korisnik>(user);
+        }
+
     }
 }

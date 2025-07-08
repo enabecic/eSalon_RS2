@@ -179,10 +179,10 @@ namespace eSalon.Services
                 throw new UserException("Promocija je u upotrebi i ne može biti obrisana.");
             }
 
-            if (entity.DatumKraja > DateTime.Now)
-            {
-                throw new UserException("Promociju nije moguće obrisati jer još uvijek nije istekla.");
-            }
+            //if (entity.DatumKraja > DateTime.Now)
+            //{
+            //    throw new UserException("Promociju nije moguće obrisati jer još uvijek nije istekla.");
+            //}
 
             await base.BeforeDeleteAsync(entity, cancellationToken);
         }

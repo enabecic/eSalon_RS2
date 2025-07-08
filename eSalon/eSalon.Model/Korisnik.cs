@@ -25,5 +25,8 @@ namespace eSalon.Model
         public List<string> Uloge { get; set; } = new List<string>();
 
         public byte[]? Slika { get; set; }
+
+        public virtual ICollection<KorisniciUloge> KorisniciUloges { get; set; } = new List<KorisniciUloge>(); 
+      
     }
 }

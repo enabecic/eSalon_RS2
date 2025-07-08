@@ -62,6 +62,13 @@ namespace eSalon.Services
                 query = query.Where(x => x.VrstaId == search.VrstaId);
             }
 
+            if (search.BrojZadnjeDodanih.HasValue && search.BrojZadnjeDodanih > 0)
+            {
+                query = query
+                    .OrderByDescending(x => x.DatumObjavljivanja)
+                    .Take(search.BrojZadnjeDodanih.Value);
+            }
+
             if (search?.IsDeleted != null)
             {
                 query = query.Where(x => x.IsDeleted == search.IsDeleted);
@@ -112,16 +119,12 @@ namespace eSalon.Services
 
         public override async Task BeforeDeleteAsync(Usluga entity, CancellationToken cancellationToken)
         {
-            bool uUpotrebi =
-               await Context.Arhivas.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted, cancellationToken) ||
-               await Context.Promocijas.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted, cancellationToken) ||
-               await Context.Favorits.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted, cancellationToken) ||
-               await Context.StavkeRezervacijes.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted, cancellationToken) ||
-               await Context.Recenzijas.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted, cancellationToken);
-
+            bool uUpotrebi = await Context.Promocijas.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted &&
+             x.DatumPocetka <= DateTime.Now && x.DatumKraja >= DateTime.Now, cancellationToken);
+            
             if (uUpotrebi)
             {
-                throw new UserException("Usluga je u upotrebi i ne može biti obrisana.");
+                throw new UserException("Usluga je trenutno u aktivnoj promociji i ne može biti obrisana dok promocija ne istekne.");
             }
             await base.BeforeDeleteAsync(entity, cancellationToken);
         }

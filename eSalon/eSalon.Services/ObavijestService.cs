@@ -1,6 +1,7 @@
 ﻿using eSalon.Model.Exceptions;
 using eSalon.Model.Requests;
 using eSalon.Model.SearchObjects;
+using eSalon.Services.Auth;
 using eSalon.Services.BaseServicesImplementation;
 using eSalon.Services.Database;
 using MapsterMapper;
@@ -15,8 +16,10 @@ namespace eSalon.Services
 {
     public class ObavijestService : BaseCRUDServiceAsync<Model.Obavijest, ObavijestSearchObject, Database.Obavijest, ObavijestInsertRequest, ObavijestUpdateRequest>, IObavijestService
     {
-        public ObavijestService(ESalonContext context, IMapper mapper) : base(context, mapper)
+        private readonly IActiveUserServiceAsync _activeUserService;
+        public ObavijestService(ESalonContext context, IMapper mapper,  IActiveUserServiceAsync activeUserService) : base(context, mapper)
         {
+            _activeUserService = activeUserService;
         }
 
         public override IQueryable<Obavijest> AddFilter(ObavijestSearchObject search, IQueryable<Obavijest> query)
@@ -117,11 +120,16 @@ namespace eSalon.Services
 
         public async Task OznaciKaoProcitanuAsync(int obavijestId, CancellationToken cancellationToken = default)
         {
+            var currentUserId = await _activeUserService.GetActiveUserIdAsync(cancellationToken);
+
             var obavijest = await Context.Obavijests
          .FirstOrDefaultAsync(o => o.ObavijestId == obavijestId && !o.IsDeleted, cancellationToken);
 
             if (obavijest == null)
                 throw new UserException("Obavijest nije pronađena.");
+
+            if (currentUserId == null || obavijest.KorisnikId != currentUserId)
+                throw new UserException("Nemate pravo da pristupite ovoj obavijesti.");
 
             if (!obavijest.JePogledana)
             {
