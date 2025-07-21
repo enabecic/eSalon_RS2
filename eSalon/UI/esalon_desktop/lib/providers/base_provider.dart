@@ -123,35 +123,39 @@ abstract class BaseProvider<T> with ChangeNotifier {
   }
 
   bool isValidResponse(Response response) {
-    //print("Status code: ${response.statusCode}");
-    //print("Response body: ${response.body}");
-
     if (response.statusCode < 299) {
       return true;
-    } else if (response.statusCode == 401) {
+    }
+
+    if (response.statusCode == 401) {
       throw UserException("Neautorizovan pristup.");
-    } 
-    else {
-      try {
-        final errorResponse = jsonDecode(response.body);
-        if (errorResponse is Map<String, dynamic> &&
-            errorResponse['errors'] != null &&
-            errorResponse['errors']['userError'] != null) {
-          throw UserException(errorResponse['errors']['userError'].join(', '));
-        } else {
-          throw UserException("Something bad happened, please try again.");
-        }
-      } catch (e) {
-        final body = response.body;
-        if (body.contains("UserException:")) {
-          final msg = body.split("UserException:").last.split("\n").first.trim();
-          throw UserException(msg); 
-        }
-        throw UserException("Something bad happened, please try again.");
+    }
+
+    final parsedJson = tryParseJson(response.body);
+    if (parsedJson != null &&
+        parsedJson['errors'] != null &&
+        parsedJson['errors']['userError'] != null) {
+      final errors = parsedJson['errors']['userError'];
+      if (errors is List) {
+        throw UserException(errors.join(', '));
       }
     }
-}
 
+    if (response.body.contains("UserException:")) {
+      final msg = response.body.split("UserException:").last.split("\n").first.trim();
+      throw UserException(msg);
+    }
+
+    throw UserException("Greška u komunikaciji sa serverom.");
+  }
+
+  Map<String, dynamic>? tryParseJson(String source) {
+    try {
+      return jsonDecode(source);
+    } catch (_) {
+      return null;
+    }
+  }
 
   Map<String, String> createHeaders() {
     String username = AuthProvider.username ?? "";

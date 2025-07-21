@@ -1,5 +1,9 @@
+import 'package:esalon_desktop/layouts/master_screen.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
+import 'package:esalon_desktop/providers/rezervacija_provider.dart';
+import 'package:esalon_desktop/providers/usluga_provider.dart';
+import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
 import 'package:esalon_desktop/screens/admin_home_screen.dart';
 import 'package:esalon_desktop/screens/frizer_home_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,14 +11,14 @@ import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-// void main() {
-//   runApp(const MyApp());
-// }
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => KorisnikProvider()),
+        ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
+        ChangeNotifierProvider(create: (_) => VrstaUslugeProvider()),
+        ChangeNotifierProvider(create: (_) => UslugaProvider()),
       ],
       child: const MyApp(),
     ),
@@ -204,19 +208,24 @@ class _LoginPageState extends State<LoginPage> {
                                       AuthProvider.isSignedIn = true;
 
                                       if (AuthProvider.uloge != null &&
-                                          AuthProvider.uloge!.contains("Admin")) {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => const AdminHomeScreen(),
-                                          ),
-                                        );
+                                          AuthProvider.uloge!.contains("Admin")) {                          
+                                        Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(
+                                                builder: (context) =>const MasterScreen(
+                                                  "Admin panel",
+                                                   AdminHomeScreen(),
+                                                ),
+                                              ),
+                                            );
 
                                       } else if (AuthProvider.uloge != null &&
-                                          AuthProvider.uloge!.contains("Frizer")) {
-                                        Navigator.of(context).push(
+                                          AuthProvider.uloge!.contains("Frizer")) {                     
+                                          Navigator.of(context).pushReplacement(
                                           MaterialPageRoute(
-                                            builder: (context) => const
-                                                FrizerHomeScreen(),
+                                            builder: (context) => const MasterScreen(
+                                              "Frizer panel",
+                                               FrizerHomeScreen(),
+                                            ),
                                           ),
                                         );
 

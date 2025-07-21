@@ -100,6 +100,7 @@ namespace eSalon.Services
                 .Include(r => r.NacinPlacanja)
                 .Include(r => r.StavkeRezervacijes)
                 .ThenInclude(sr => sr.Usluga)
+                .Include(r => r.AktiviranaPromocija).ThenInclude(ap => ap.Promocija)
                 .FirstOrDefaultAsync(k => k.RezervacijaId == id && !k.IsDeleted, cancellationToken);
 
 
@@ -116,6 +117,9 @@ namespace eSalon.Services
 
             if (rezervacija.NacinPlacanja != null)
                 dto.NacinPlacanjaNaziv = rezervacija.NacinPlacanja.Naziv;
+
+            if (rezervacija.AktiviranaPromocija != null)
+                dto.AktiviranaPromocijaNaziv = rezervacija.AktiviranaPromocija.Promocija.Naziv; 
 
             dto.StavkeRezervacijes = rezervacija.StavkeRezervacijes
            .Where(sr => !sr.IsDeleted && sr.Usluga != null && !sr.Usluga.IsDeleted)
@@ -141,6 +145,7 @@ namespace eSalon.Services
               .Include(n => n.Korisnik).Include(r => r.Frizer)
               .Include(n => n.NacinPlacanja)
               .Include(n => n.StavkeRezervacijes).ThenInclude(sr => sr.Usluga)
+              .Include(r => r.AktiviranaPromocija).ThenInclude(ap => ap.Promocija)
               .AsQueryable();
 
             query = AddFilter(search, query);
@@ -173,6 +178,9 @@ namespace eSalon.Services
 
                 if (rezervacija.NacinPlacanja != null)
                     result[i].NacinPlacanjaNaziv = rezervacija.NacinPlacanja.Naziv;
+
+                if (rezervacija.AktiviranaPromocija != null)
+                    result[i].AktiviranaPromocijaNaziv = rezervacija.AktiviranaPromocija.Promocija.Naziv; 
 
 
             }
@@ -220,6 +228,12 @@ namespace eSalon.Services
 
             if (string.IsNullOrEmpty(rezervacija.StateMachine))
                 throw new UserException("State nije definiran za ovu rezervaciju.");
+
+            var datumIVrijeme = rezervacija.DatumRezervacije.Date + rezervacija.VrijemePocetka;
+            var trenutnoVrijeme = DateTime.Now;
+
+            if (datumIVrijeme > trenutnoVrijeme)
+                throw new UserException("Rezervacija još nije završena. Može se označiti kao završena tek nakon završetka termina.");
 
             var state = _baseRezervacijaState.CreateState(rezervacija.StateMachine);
             return await state.Zavrsena(rezervacijaId, cancellationToken);

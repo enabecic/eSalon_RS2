@@ -32,6 +32,7 @@ namespace eSalon.Model
         public int NacinPlacanjaId { get; set; }
 
         public int? AktiviranaPromocijaId { get; set; }
+        public string? AktiviranaPromocijaNaziv { get; set; } 
 
         public string? FrizerImePrezime { get; set; }
         public string? KlijentImePrezime { get; set; }

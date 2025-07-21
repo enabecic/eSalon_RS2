@@ -6,19 +6,21 @@ part of 'korisnik.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Korisnik _$KorisnikFromJson(Map<String, dynamic> json) => Korisnik()
-  ..korisnikId = (json['korisnikId'] as num?)?.toInt()
-  ..ime = json['ime'] as String?
-  ..prezime = json['prezime'] as String?
-  ..korisnickoIme = json['korisnickoIme'] as String?
-  ..email = json['email'] as String?
-  ..telefon = json['telefon'] as String?
-  ..jeAktivan = json['jeAktivan'] as bool?
-  ..datumRegistracije = json['datumRegistracije'] == null
-      ? null
-      : DateTime.parse(json['datumRegistracije'] as String)
-  ..uloge = (json['uloge'] as List<dynamic>?)?.map((e) => e as String).toList()
-  ..slika = json['slika'] as String?;
+Korisnik _$KorisnikFromJson(Map<String, dynamic> json) => Korisnik(
+      korisnikId: (json['korisnikId'] as num?)?.toInt(),
+      ime: json['ime'] as String?,
+      prezime: json['prezime'] as String?,
+      korisnickoIme: json['korisnickoIme'] as String?,
+      email: json['email'] as String?,
+      telefon: json['telefon'] as String?,
+      jeAktivan: json['jeAktivan'] as bool?,
+      datumRegistracije: json['datumRegistracije'] == null
+          ? null
+          : DateTime.parse(json['datumRegistracije'] as String),
+      uloge:
+          (json['uloge'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      slika: json['slika'] as String?,
+    );
 
 Map<String, dynamic> _$KorisnikToJson(Korisnik instance) => <String, dynamic>{
       'korisnikId': instance.korisnikId,

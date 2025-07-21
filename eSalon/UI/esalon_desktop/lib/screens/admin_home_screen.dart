@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AdminHomeScreen extends StatelessWidget {
@@ -7,7 +6,7 @@ class AdminHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("Dobrodošli, Admin!"),
+      child: Text("Dobrodošli, admin!"),
     );
   }
 }
