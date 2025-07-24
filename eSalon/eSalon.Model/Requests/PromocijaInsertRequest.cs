@@ -12,11 +12,11 @@ namespace eSalon.Model.Requests
         [MinLength(1, ErrorMessage = "Naziv ne može biti prazan.")]
         public string Naziv { get; set; } = null!;
 
-        [MaxLength(200, ErrorMessage = "Opis može imati najviše 200 karaktera.")]
+        [MaxLength(1000, ErrorMessage = "Opis može imati najviše 1000 karaktera.")]
         public string? Opis { get; set; }
 
         [Required(ErrorMessage = "Popust je obavezan.")]
-        [Range(0.01, 100.0, ErrorMessage = "Popust mora biti između 0.01% i 100%.")]
+        [Range(1.0, 100.0, ErrorMessage = "Popust mora biti između 1% i 100%.")]
         public decimal Popust { get; set; }
 
         [Required(ErrorMessage = "Datum početka je obavezan.")]

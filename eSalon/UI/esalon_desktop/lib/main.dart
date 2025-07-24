@@ -1,6 +1,7 @@
 import 'package:esalon_desktop/layouts/master_screen.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
+import 'package:esalon_desktop/providers/promocija_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
 import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
@@ -19,6 +20,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
         ChangeNotifierProvider(create: (_) => VrstaUslugeProvider()),
         ChangeNotifierProvider(create: (_) => UslugaProvider()),
+        ChangeNotifierProvider(create: (_) => PromocijaProvider()),
+
       ],
       child: const MyApp(),
     ),

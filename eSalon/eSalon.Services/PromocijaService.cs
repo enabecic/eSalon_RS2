@@ -88,7 +88,7 @@ namespace eSalon.Services
         {
             var promocija = await Context.Promocijas
                 .Include(k => k.Usluga)
-                .FirstOrDefaultAsync(k => k.PromocijaId == id && !k.IsDeleted, cancellationToken);
+                .FirstOrDefaultAsync(k => k.PromocijaId == id && !k.IsDeleted && k.Usluga != null && !k.Usluga.IsDeleted, cancellationToken);
 
             if (promocija == null)
                 throw new UserException("Uneseni ID ne postoji.");
@@ -105,7 +105,7 @@ namespace eSalon.Services
         {
             var query = Context.Promocijas
               .Include(f => f.Usluga)
-              .Where(f => !f.IsDeleted);
+              .Where(f => !f.IsDeleted && f.Usluga != null && !f.Usluga.IsDeleted);
 
             query = AddFilter(search, query);
 

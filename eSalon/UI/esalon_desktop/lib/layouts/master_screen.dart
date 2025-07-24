@@ -1,3 +1,4 @@
+import 'package:esalon_desktop/screens/admin_promocija_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_uslugama_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_vrstama_usluga_screen.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +100,7 @@ class _MasterScreenState extends State<MasterScreen> {
                               _buildListTile(Icons.style, "Vrsta usluge", const AdminUpravljanjeVrstamaUslugaScreen()),
                               _buildListTile(Icons.people_outline, "Korisnici", const PlaceholderScreen("Korisnici")),
                               _buildListTile(Icons.reviews_outlined, "Recenzije", const PlaceholderScreen("Recenzije")),
-                              _buildListTile(Icons.local_offer_outlined, "Promocije", const PlaceholderScreen("Promocije")),
+                              _buildListTile(Icons.local_offer_outlined, "Promocije", const AdminPromocijaScreen()),
                             ],
 
                             if (AuthProvider.uloge?.contains("Frizer") ?? false) ...[
