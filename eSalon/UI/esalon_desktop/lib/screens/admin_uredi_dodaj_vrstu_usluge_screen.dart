@@ -8,6 +8,8 @@ import 'package:esalon_desktop/models/vrsta_usluge.dart';
 import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
 import 'package:esalon_desktop/models/search_result.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class AdminUrediDodajVrstuUslugeScreen extends StatefulWidget {
   final VrstaUsluge? vrstaUsluge;
@@ -324,13 +326,26 @@ class _AdminUrediDodajVrstuUslugeScreenState
                     final req = Map.from(_formKey.currentState!.value);
                     req['slika'] = _base64Image;
 
-                    if (widget.vrstaUsluge == null) {
-                      await _provider.insert(req);
-                    } else {
-                      await _provider.update(widget.vrstaUsluge!.vrstaId!, req);
-                    }
-                    Navigator.pop(context, true);
-                    clearInput();
+                     try {
+                      if (widget.vrstaUsluge == null) {
+                        await _provider.insert(req);
+                      } else {
+                        await _provider.update(widget.vrstaUsluge!.vrstaId!, req);
+                      }
+                      Navigator.pop(context, true);
+                      clearInput();
+                    } catch (e) {
+                        await QuickAlert.show(
+                          context: context,
+                          type: QuickAlertType.error,
+                          title: 'Greška!',
+                          text: e.toString(),
+                          confirmBtnText: 'OK',
+                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                          textColor: Colors.black,
+                          titleColor: Colors.black,
+                        );
+                      }
                   }
                 }
               },

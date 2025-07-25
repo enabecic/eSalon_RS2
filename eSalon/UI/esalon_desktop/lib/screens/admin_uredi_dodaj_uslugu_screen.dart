@@ -11,6 +11,8 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:esalon_desktop/models/search_result.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class AdminUrediDodajUsluguScreen extends StatefulWidget {
   final Usluga? usluga;
@@ -568,13 +570,26 @@ class _AdminUrediDodajUsluguScreenState
                     req['cijena'] = double.tryParse(req['cijena'] ?? '0'); 
                     req['trajanje'] = int.tryParse(req['trajanje'] ?? '0');
 
-                    if (widget.usluga == null) {
-                      await _provider.insert(req);
-                    } else {
-                      await _provider.update(widget.usluga!.uslugaId!, req);
-                    }
-                    Navigator.pop(context, true);
-                    clearInput();
+                    try {
+                      if (widget.usluga == null) {
+                        await _provider.insert(req);
+                      } else {
+                        await _provider.update(widget.usluga!.uslugaId!, req);
+                      }
+                      Navigator.pop(context, true);
+                      clearInput();
+                    }  catch (e) {
+                        await QuickAlert.show(
+                          context: context,
+                          type: QuickAlertType.error,
+                          title: 'Greška!',
+                          text: e.toString(),
+                          confirmBtnText: 'OK',
+                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                          textColor: Colors.black,
+                          titleColor: Colors.black,
+                        );
+                      }
                   }
                 }
               },
