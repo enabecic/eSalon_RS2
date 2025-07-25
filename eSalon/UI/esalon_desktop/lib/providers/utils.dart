@@ -21,3 +21,12 @@ String formatDate(String date) {
 String formatDateTime(String date) {
   return DateFormat('dd.MM.yyyy HH:mm').format(DateTime.parse(date).toLocal());
 }
+
+String formatirajDatum(DateTime? dt) {
+  if (dt == null) return "";
+  String dan = dt.day.toString().padLeft(2, '0');
+  String mjesec = dt.month.toString().padLeft(2, '0');
+  String godina = dt.year.toString();
+  return "$dan.$mjesec.$godina";
+}
+

@@ -10,5 +10,7 @@ namespace eSalon.Model.SearchObjects
         public int? PromocijaId { get; set; }
         public bool? Aktivirana { get; set; }
         public bool? Iskoristena { get; set; }
+        public string? KorisnikImePrezime { get; set; }
+        public string? PromocijaNaziv { get; set; } 
     }
 }

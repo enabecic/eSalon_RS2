@@ -40,7 +40,26 @@ namespace eSalon.Services
 
             if (search.Iskoristena.HasValue)
                 query = query.Where(x => x.Iskoristena == search.Iskoristena.Value);
-           
+
+            if (!string.IsNullOrWhiteSpace(search.KorisnikImePrezime))
+            {
+                var korisnikImePrezime = search.KorisnikImePrezime.ToLower();
+
+                query = query.Include(x => x.Korisnik)
+                             .Where(x =>
+                                 (x.Korisnik.Ime + " " + x.Korisnik.Prezime).ToLower().Contains(korisnikImePrezime) ||
+                                 x.Korisnik.Ime.ToLower().Contains(korisnikImePrezime) ||
+                                 x.Korisnik.Prezime.ToLower().Contains(korisnikImePrezime));
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.PromocijaNaziv))
+            {
+                var promocijaNaziv = search.PromocijaNaziv.ToLower();
+
+                query = query.Include(x => x.Promocija)
+                             .Where(x => x.Promocija.Naziv.ToLower().Contains(promocijaNaziv));
+            }
+
             if (search?.IsDeleted != null)
             {
                 query = query.Where(x => x.IsDeleted == search.IsDeleted);
