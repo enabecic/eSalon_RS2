@@ -74,6 +74,14 @@ namespace eSalon.Services
                 query = query.Where(x => x.BrojDislajkova <= search.BrojDislajkovaLTE);
             }
 
+            if (!string.IsNullOrWhiteSpace(search.KorisnickoIme))
+            {
+                var korisnickoImeLower = search.KorisnickoIme.ToLower();
+                query = query
+                    .Include(x => x.Korisnik)
+                    .Where(x => x.Korisnik.KorisnickoIme.ToLower().Contains(korisnickoImeLower));
+            }
+
             if (search.IsDeleted != null)
             {
                 query = query.Where(x => x.BrojDislajkova <= search.BrojDislajkovaLTE);

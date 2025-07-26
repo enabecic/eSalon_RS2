@@ -70,6 +70,14 @@ namespace eSalon.Services
                 query = query.Where(x => x.BrojDislajkova <= search.BrojDislajkovaLTE);
             }
 
+            if (!string.IsNullOrWhiteSpace(search.KorisnickoIme))
+            {
+                var korisnickoImeLower = search.KorisnickoIme.ToLower();
+                query = query
+                    .Include(x => x.Korisnik)
+                    .Where(x => x.Korisnik.KorisnickoIme.ToLower().Contains(korisnickoImeLower));
+            }
+
             if (search.IsDeleted != null)
             {
                 query = query.Where(x => x.BrojDislajkova <= search.BrojDislajkovaLTE);
@@ -81,7 +89,7 @@ namespace eSalon.Services
 
         public override async Task<Model.PagedResult<Model.RecenzijaOdgovor>> GetPagedAsync(RecenzijaOdgovorSearchObject search, CancellationToken cancellationToken = default)
         {
-            var query = Context.RecenzijaOdgovors.Include(o => o.Korisnik).Where(o => !o.IsDeleted);
+            var query = Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija).Where(o => !o.IsDeleted);
 
             query = AddFilter(search, query);
 
@@ -109,6 +117,10 @@ namespace eSalon.Services
                 if (korisnik is null) continue;
 
                 result[i].KorisnickoIme = korisnik.KorisnickoIme;
+
+                var recenzija = list[i].Recenzija;
+                if (recenzija is not null)
+                    result[i].KomentarRecenzije = recenzija.Komentar; 
             }
 
             return new Model.PagedResult<Model.RecenzijaOdgovor>
@@ -117,7 +129,22 @@ namespace eSalon.Services
                 Count = count
             };
         }
+   
+        public override async Task<Model.RecenzijaOdgovor> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var recenzija = await Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija)
+                .FirstOrDefaultAsync(o => o.RecenzijaOdgovorId == id && !o.IsDeleted && o.Recenzija != null && !o.Recenzija.IsDeleted, cancellationToken);
 
+            if (recenzija == null)
+                throw new UserException("Uneseni ID ne postoji.");
+
+            var dto = Mapper.Map<Model.RecenzijaOdgovor>(recenzija);
+
+            dto.KorisnickoIme = $"{recenzija.Korisnik.KorisnickoIme}";
+            dto.KomentarRecenzije = recenzija.Recenzija.Komentar;
+
+            return dto;
+        }
 
         public override async Task BeforeInsertAsync(RecenzijaOdgovorInsertRequest request, RecenzijaOdgovor entity, CancellationToken cancellationToken = default)
         {

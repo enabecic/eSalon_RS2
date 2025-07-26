@@ -3,6 +3,8 @@ import 'package:esalon_desktop/providers/aktivirana_promocija_provider.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/providers/promocija_provider.dart';
+import 'package:esalon_desktop/providers/recenzija_odgovor_provider.dart';
+import 'package:esalon_desktop/providers/recenzija_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
 import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
@@ -23,6 +25,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => UslugaProvider()),
         ChangeNotifierProvider(create: (_) => PromocijaProvider()),
         ChangeNotifierProvider(create: (_) => AktiviranaPromocijaProvider()),
+        ChangeNotifierProvider(create: (_) => RecenzijaProvider()),
+        ChangeNotifierProvider(create: (_) => RecenzijaOdgovorProvider()),
 
       ],
       child: const MyApp(),

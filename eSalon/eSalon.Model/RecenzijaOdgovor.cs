@@ -21,5 +21,6 @@ namespace eSalon.Model
         public int BrojDislajkova { get; set; }
 
         public string? KorisnickoIme { get; set; }
+        public string? KomentarRecenzije { get; set; }
     }
 }
