@@ -193,7 +193,7 @@ class _AdminUpravljanjeUslugamaScreenState
                       DataColumn(label: Text("Slika")),
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija opisa (30 karaktera).",
+                          message: "Prikazuje se skraćena verzija opisa (20 karaktera).",
                           child: Text("Opis"),
                         ),
                       ),
@@ -282,38 +282,58 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
         }
       },
       cells: [
-        DataCell(Text(item.naziv ?? '')),
-        DataCell(Text(item.cijena != null ? '${item.cijena!.toStringAsFixed(2)} KM' : '')),     
-        DataCell(Text('${item.trajanje ?? ''} min')), 
-        //DataCell(item.datumObjavljivanja != null ? Text(formatDateTime(item.datumObjavljivanja!)) : const Text(''),),    
         DataCell(
-          item.slika != null && item.slika!.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(
-                    base64Decode(item.slika!),
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image),
-                  ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    "assets/images/praznaUsluga.png",
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.naziv ?? ''),
+          ),
         ),
         DataCell(
-          Text(
-            (item.opis != null && item.opis!.length > 30)
-                ? '${item.opis!.substring(0, 30)}...'
-                : (item.opis ?? ''),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.cijena != null ? '${item.cijena!.toStringAsFixed(2)} KM' : ''),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text('${item.trajanje ?? ''} min'),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: item.slika != null && item.slika!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      base64Decode(item.slika!),
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      "assets/images/praznaUsluga.png",
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(
+              (item.opis != null && item.opis!.length > 20)
+                  ? '${item.opis!.substring(0, 20)}...'
+                  : (item.opis ?? ''),
+            ),
           ),
         ),
         DataCell(

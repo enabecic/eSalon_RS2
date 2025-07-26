@@ -347,10 +347,10 @@ Row(
                       DataColumn(label: Text("Popust")),
                       DataColumn(label: Text("Naziv usluge")),
                       //DataColumn(label: Text("Datum objavljivanja")),
-                      DataColumn(label: Text("Slika")),
+                      DataColumn(label: Text("Slika usluge")),
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija opisa (30 karaktera).",
+                          message: "Prikazuje se skraćena verzija opisa (20 karaktera).",
                           child: Text("Opis"),
                         ),
                       ),
@@ -378,12 +378,11 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
   double? popustGTE;
   double? popustLTE;
 
-
   int count = 0;
   int page = 1;
   final int pageSize = 5;
   List<Promocija> data = [];
-
+   
   PromocijaDataSource({
     required this.provider,
     required this.context,
@@ -446,37 +445,58 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
         }
       },
       cells: [
-        DataCell(Text(item.naziv ?? '')),
-        DataCell(Text('${item.popust?.toInt() ?? 0}%')),
-        DataCell(Text(item.uslugaNaziv ?? '')),    
         DataCell(
-          item.slikaUsluge != null && item.slikaUsluge!.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(
-                    base64Decode(item.slikaUsluge!),
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image),
-                  ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    "assets/images/praznaUsluga.png",
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.naziv ?? ''),
+          ),
         ),
         DataCell(
-          Text(
-            (item.opis != null && item.opis!.length > 30)
-                ? '${item.opis!.substring(0, 30)}...'
-                : (item.opis ?? ''),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text('${item.popust?.toInt() ?? 0}%'),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.uslugaNaziv ?? ''),
+          ),
+        ),  
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: item.slikaUsluge != null && item.slikaUsluge!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      base64Decode(item.slikaUsluge!),
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      "assets/images/praznaUsluga.png",
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(
+              (item.opis != null && item.opis!.length > 20)
+                  ? '${item.opis!.substring(0, 20)}...'
+                  : (item.opis ?? ''),
+            ),
           ),
         ),
         DataCell(
@@ -484,35 +504,32 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
             onPressed: () async {
               final confirm = await showDialog<bool>(
                 context: context,
-                builder: (_) => AlertDialog(
+                builder: (dialogContext) => AlertDialog(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   title: const Text("Potvrda brisanja"),
                   content: const Text("Da li želite obrisati uslugu?"),
                   actions: [
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () => Navigator.pop(dialogContext, false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text("Ne",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "Ne",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(context,true),
+                      onPressed: () => Navigator.pop(dialogContext, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text("Da",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "Da",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
@@ -521,11 +538,11 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
               if (confirm == true) {
                 try {
                   await provider.delete(item.promocijaId!);
-                  await reset(targetPage: page); 
+                  await reset(targetPage: page);
 
                   await showDialog(
                     context: context,
-                    builder: (BuildContext context) {
+                    builder: (context) {
                       return AlertDialog(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         title: const Text("Obrisano"),
@@ -535,16 +552,11 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
                             onPressed: () => Navigator.of(context).pop(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             child: const Text(
                               "OK",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],

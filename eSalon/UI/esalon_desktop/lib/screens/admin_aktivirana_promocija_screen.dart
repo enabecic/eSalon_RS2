@@ -204,7 +204,7 @@ class _AdminAktiviranaPromocijaScreenState
                       DataColumn(label: Text("Ime i prezime klijenta")),
                       DataColumn(label: Text('Iskorištena')),
                       DataColumn(label: Text("Slika usluge")),
-                      DataColumn(label: Text("Obriši")),
+                      DataColumn(label: Text("Detalji")),
                     ],
                   ),
                 ),
@@ -262,31 +262,49 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
         }
       },
       cells: [
-        DataCell(Text(item.promocijaNaziv ?? '')),
-        DataCell(Text(item.korisnikImePrezime ?? '')),    
-        DataCell(Text(item.iskoristena == true ? 'Da' : 'Ne')), 
         DataCell(
-          item.slikaUsluge != null && item.slikaUsluge!.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(
-                    base64Decode(item.slikaUsluge!),
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.promocijaNaziv ?? ''),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.korisnikImePrezime ?? ''),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.iskoristena == true ? 'Da' : 'Ne'),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: item.slikaUsluge != null && item.slikaUsluge!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      base64Decode(item.slikaUsluge!),
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      "assets/images/praznaUsluga.png",
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    "assets/images/praznaUsluga.png",
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          ),
         ),
         DataCell(
           ElevatedButton(

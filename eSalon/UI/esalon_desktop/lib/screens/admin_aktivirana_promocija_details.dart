@@ -11,11 +11,10 @@ class AdminAktiviranaPromocijaDetails extends StatefulWidget {
   @override
   State<AdminAktiviranaPromocijaDetails> createState() =>
       _AdminAktiviranaPromocijaDetailsState();
-  }
+}
 
 class _AdminAktiviranaPromocijaDetailsState
     extends State<AdminAktiviranaPromocijaDetails> {
-
   ImageProvider? _imageProvider;
 
   @override
@@ -32,78 +31,74 @@ class _AdminAktiviranaPromocijaDetailsState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 251, 240, 255),
-      body: SingleChildScrollView(   
-      child: Column(
-        children: [
-          Container(
-            height: 100,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("eSalon",
-                style:
-                  TextStyle(fontSize: 36, fontWeight: FontWeight.w500)),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 100,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("eSalon",
+                      style:
+                          TextStyle(fontSize: 36, fontWeight: FontWeight.w500)),
                   const SizedBox(width: 12),
                   Image.asset('assets/images/logo.png',
-                      height: 80, 
-                      width: 80, 
-                      fit: BoxFit.contain
+                      height: 80, width: 80, fit: BoxFit.contain),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 35.0, top: 30.0, bottom: 20.0),
+              child: Row(
+                children: [
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(Icons.arrow_back, size: 28),
                     ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 35.0, top: 30.0, bottom: 20.0),
-            child: Row(
-              children: [
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back, size: 28),
                   ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  "Detalji aktivirane promocije",
-                  style: TextStyle(fontSize: 22),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Detalji aktivirane promocije",
+                    style: TextStyle(fontSize: 22),
+                  ),
+                ],
+              ),
             ),
-          ),
-          _buildDetailsView(),
-        ],
+            _buildDetailsView(),
+          ],
+        ),
       ),
-    ),
     );
   }
 
-Widget _buildDetailsView() {
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(15.0, 50.0, 15.0, 15.0),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Column(
+  Widget _buildDetailsView() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(80.0, 50.0, 20.0, 15.0), 
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Slika
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 12.0, bottom: 8.0),
-                  child: Text(
-                    "Slika usluge sa promocije",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+            const Padding(
+                padding:  EdgeInsets.only(bottom: 26), 
+                child:  Text(
+                  "Slika usluge sa promocije",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.normal,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-              const SizedBox(height: 10),
+              ),
               Container(
-                width: 270,
-                height: 250,
+                width: 310,
+                height: 300,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   image: DecorationImage(
@@ -121,116 +116,89 @@ Widget _buildDetailsView() {
                   ],
                 ),
               ),
-              const SizedBox(height: 13),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    children: [
-                      _readonlyField(
-                        "Aktivirana:",
-                        (widget.aktiviranaPromocija?.aktivirana ?? false) ? "Da" : "Ne",
-                      ),
-                      _readonlyField(
-                        "Iskorištena:",
-                        (widget.aktiviranaPromocija?.iskoristena ?? false) ? "Da" : "Ne",
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 25.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _readonlyField(
-                  "Naziv promocije:",
-                  widget.aktiviranaPromocija?.promocijaNaziv ?? "",
-                ),
-                _readonlyField(
-                  "Ime i prezime klijenta:",
-                  widget.aktiviranaPromocija?.korisnikImePrezime ?? "",
-                ),
-                _readonlyField(
-                  "Ostvareni popust:",
-                  "${(widget.aktiviranaPromocija?.popust ?? 0).toInt()}%",
-                ),
-                _readonlyField(
-                  "Datum aktiviranja:",
-                  formatirajDatum(widget.aktiviranaPromocija?.datumAktiviranja),
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                padding: const EdgeInsets.only(top: 25),
-                child: Align(
-                  alignment: Alignment.centerRight, 
-                  child: SizedBox(
-                    width: 200, 
-                    height: 45, 
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-                        foregroundColor: Colors.black, 
-                        textStyle: const TextStyle(
-                          fontWeight: FontWeight.normal, 
-                          fontSize: 16,
+
+          const SizedBox(width: 70), 
+
+          // Polja
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 80.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow("Naziv promocije:", widget.aktiviranaPromocija?.promocijaNaziv ?? ""),
+                  _buildInfoRow("Ime i prezime klijenta:", widget.aktiviranaPromocija?.korisnikImePrezime ?? ""),
+                  _buildInfoRow("Ostvareni popust:", "${(widget.aktiviranaPromocija?.popust ?? 0).toInt()}%"),
+                  _buildInfoRow("Datum aktiviranja:", formatirajDatum(widget.aktiviranaPromocija?.datumAktiviranja)),
+                  _buildInfoRow("Aktivirana:", (widget.aktiviranaPromocija?.aktivirana ?? false) ? "Da" : "Ne"),
+                  _buildInfoRow("Iskorištena:", (widget.aktiviranaPromocija?.iskoristena ?? false) ? "Da" : "Ne"),
+                  const SizedBox(height: 25),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 200,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                          foregroundColor: Colors.black,
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8), 
-                        ),
+                        child: const Text("OK"),
                       ),
-                      child: const Text("OK"),
                     ),
                   ),
-                ),
+                ].expand((widget) => [widget, const SizedBox(height: 16)]).toList() 
+                  ..removeLast(), 
               ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-  Widget _readonlyField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.grey.shade300, width: 1.5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 25),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 250, 
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+              softWrap: true,   
+            ),
+          ),
+          const SizedBox(width: 30),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 

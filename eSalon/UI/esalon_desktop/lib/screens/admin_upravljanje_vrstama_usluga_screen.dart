@@ -273,29 +273,37 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
         }
       },
       cells: [
-        DataCell(Text(item.naziv ?? '')),
         DataCell(
-          item.slika != null && item.slika!.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(
-                    base64Decode(item.slika!),
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image),
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(item.naziv ?? ''),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: item.slika != null && item.slika!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      base64Decode(item.slika!),
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      "assets/images/praznaUsluga.png",
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    "assets/images/praznaUsluga.png",
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          ),
         ),
         DataCell(
           ElevatedButton(
