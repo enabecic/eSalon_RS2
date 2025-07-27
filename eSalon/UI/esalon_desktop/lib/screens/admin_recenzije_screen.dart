@@ -7,6 +7,8 @@ import 'package:esalon_desktop/providers/recenzija_odgovor_provider.dart';
 import 'package:esalon_desktop/screens/admin_recenzije_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 enum PrikazTipa { recenzije, odgovori }
 
@@ -364,28 +366,42 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
     page = (pageRequest.offset ~/ pageSize) + 1;
 
     final filter = {
-      'korisnickoIme': korisnickoImeFilter,
+      'KorisnickoIme': korisnickoImeFilter,
     };
 
-    if (tip == PrikazTipa.recenzije) {
-      final result = await recenzijaProvider.get(
-        filter: filter,
-        page: page,
-        pageSize: pageSize,
-      );
-      data = result.result;
-      count = result.count;
-    } else {
-      final result = await odgovorProvider.get(
-        filter: filter,
-        page: page,
-        pageSize: pageSize,
-      );
-      data = result.result;
-      count = result.count;
-    }
+    try{
+      if (tip == PrikazTipa.recenzije) {
+        final result = await recenzijaProvider.get(
+          filter: filter,
+          page: page,
+          pageSize: pageSize,
+        );
+        data = result.result;
+        count = result.count;
+      } else {
+        final result = await odgovorProvider.get(
+          filter: filter,
+          page: page,
+          pageSize: pageSize,
+        );
+        data = result.result;
+        count = result.count;
+      }
 
-    return RemoteDataSourceDetails(count, data);
+      return RemoteDataSourceDetails(count, data);
+    }  catch (e) {
+        QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+        );
+      return RemoteDataSourceDetails(0, []);
+    }
   }
 
   @override

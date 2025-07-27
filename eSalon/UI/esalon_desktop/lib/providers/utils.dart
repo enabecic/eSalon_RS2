@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -27,6 +28,7 @@ String formatirajDatum(DateTime? dt) {
   String dan = dt.day.toString().padLeft(2, '0');
   String mjesec = dt.month.toString().padLeft(2, '0');
   String godina = dt.year.toString();
-  return "$dan.$mjesec.$godina";
+  String sati = dt.hour.toString().padLeft(2, '0');
+  String minute = dt.minute.toString().padLeft(2, '0');
+  return "$dan.$mjesec.$godina $sati:$minute";
 }
-

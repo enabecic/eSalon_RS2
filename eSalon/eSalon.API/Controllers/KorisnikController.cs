@@ -18,6 +18,22 @@ namespace eSalon.API.Controllers
             _korisnikService = korisnikService;
         }
 
+        [Authorize]
+        [HttpPut("Aktiviraj/{korisnikId}")]
+        public async Task<ActionResult> AktivirajAsync(int korisnikId, CancellationToken cancellationToken)
+        {
+            await _korisnikService.AktivirajAsync(korisnikId, cancellationToken);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPut("Deaktiviraj/{korisnikId}")]
+        public async Task<ActionResult> DeaktivirajAsync(int korisnikId, CancellationToken cancellationToken)
+        {
+            await _korisnikService.DeaktivirajAsync(korisnikId, cancellationToken);
+            return Ok();
+        }
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<Model.Korisnik>> Login([FromBody] KorisnikLoginRequest request, CancellationToken cancellationToken)

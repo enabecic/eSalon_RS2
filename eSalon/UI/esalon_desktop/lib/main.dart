@@ -6,6 +6,7 @@ import 'package:esalon_desktop/providers/promocija_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_odgovor_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
+import 'package:esalon_desktop/providers/uloga_provider.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
 import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
 import 'package:esalon_desktop/screens/admin_home_screen.dart';
@@ -27,6 +28,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AktiviranaPromocijaProvider()),
         ChangeNotifierProvider(create: (_) => RecenzijaProvider()),
         ChangeNotifierProvider(create: (_) => RecenzijaOdgovorProvider()),
+        ChangeNotifierProvider(create: (_) => UlogaProvider()),
 
       ],
       child: const MyApp(),
@@ -208,8 +210,11 @@ class _LoginPageState extends State<LoginPage> {
                                           context: context,
                                           type: QuickAlertType.error,
                                           title: 'Račun deaktiviran',
-                                          text:
-                                              'Vaš korisnički račun je deaktiviran.',
+                                          text: 'Vaš korisnički račun je deaktiviran.',
+                                          confirmBtnText: 'OK',
+                                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                                          textColor: Colors.black,
+                                          titleColor: Colors.black,
                                         );
                                         return;
                                       }

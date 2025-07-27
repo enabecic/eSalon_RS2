@@ -172,11 +172,11 @@ namespace eSalon.Services
         public override async Task BeforeDeleteAsync(Promocija entity, CancellationToken cancellationToken)
         {
             bool uUpotrebi =
-               await Context.AktiviranaPromocijas.AnyAsync(x => x.PromocijaId == entity.PromocijaId && !x.IsDeleted, cancellationToken);
+               await Context.AktiviranaPromocijas.AnyAsync(x => x.PromocijaId == entity.PromocijaId && x.Iskoristena && !x.IsDeleted, cancellationToken);
 
             if (uUpotrebi)
             {
-                throw new UserException("Promocija je u upotrebi i ne može biti obrisana.");
+                throw new UserException("Promocija je iskorištena i ne može biti obrisana.");
             }
 
             //if (entity.DatumKraja > DateTime.Now)

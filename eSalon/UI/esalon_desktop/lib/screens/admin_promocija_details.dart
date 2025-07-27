@@ -152,9 +152,9 @@ class _AdminPromocijaDetailsState
                   child: Column(
                     children: [
                       const Text(
-                        "Slika usluge", 
+                        "Slika usluge:", 
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.normal,
                         ),
                       ),
@@ -466,8 +466,10 @@ class _AdminPromocijaDetailsState
                           name: 'datumKraja',
                           inputType: InputType.date,
                           format: DateFormat('dd.MM.yyyy'),
-                          initialEntryMode: DatePickerEntryMode.calendarOnly, 
-                          firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day), 
+                          initialEntryMode: DatePickerEntryMode.calendarOnly,  
+                          firstDate: widget.promocija != null
+                            ? DateTime(2000) 
+                            : DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
                           decoration: InputDecoration(
                             labelText: 'Datum kraja',
                             hintText: 'Odaberite datum kraja',

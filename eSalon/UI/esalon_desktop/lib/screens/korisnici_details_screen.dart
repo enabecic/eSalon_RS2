@@ -1,27 +1,27 @@
 import 'dart:convert';
-import 'package:esalon_desktop/models/aktivirana_promocija.dart';
+import 'package:esalon_desktop/models/korisnik.dart';
 import 'package:esalon_desktop/providers/utils.dart';
 import 'package:flutter/material.dart';
 
-class AdminAktiviranaPromocijaDetails extends StatefulWidget {
-  final AktiviranaPromocija? aktiviranaPromocija;
+class KorisniciDetailsScreen extends StatefulWidget {
+  final Korisnik? korisnik;
 
-  const AdminAktiviranaPromocijaDetails({super.key, this.aktiviranaPromocija});
+  const KorisniciDetailsScreen({super.key, this.korisnik});
 
   @override
-  State<AdminAktiviranaPromocijaDetails> createState() =>
-      _AdminAktiviranaPromocijaDetailsState();
+  State<KorisniciDetailsScreen> createState() =>
+      _KorisniciDetailsScreenState();
 }
 
-class _AdminAktiviranaPromocijaDetailsState
-    extends State<AdminAktiviranaPromocijaDetails> {
+class _KorisniciDetailsScreenState
+    extends State<KorisniciDetailsScreen> {
   ImageProvider? _imageProvider;
 
   @override
   void initState() {
     super.initState();
 
-    final base64Image = widget.aktiviranaPromocija?.slikaUsluge;
+    final base64Image = widget.korisnik?.slika;
     if (base64Image != null) {
       _imageProvider = MemoryImage(base64Decode(base64Image));
     }
@@ -62,7 +62,7 @@ class _AdminAktiviranaPromocijaDetailsState
                   ),
                   const SizedBox(width: 12),
                   const Text(
-                    "Detalji aktivirane promocije",
+                    "Detalji korisnika",
                     style: TextStyle(fontSize: 22),
                   ),
                 ],
@@ -76,6 +76,11 @@ class _AdminAktiviranaPromocijaDetailsState
   }
 
   Widget _buildDetailsView() {
+  final status = widget.korisnik?.jeAktivan == true ? "Aktivan" : "Deaktiviran";
+  final ulogeText = (widget.korisnik?.uloge?.isNotEmpty ?? false)
+    ? widget.korisnik!.uloge!.join(', ')
+    : "/";
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(80.0, 50.0, 20.0, 15.0), 
       child: Row(
@@ -88,7 +93,7 @@ class _AdminAktiviranaPromocijaDetailsState
             const Padding(
                 padding:  EdgeInsets.only(bottom: 26), 
                 child:  Text(
-                  "Slika usluge sa promocije:",
+                  "Slika korisnika:",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -103,7 +108,7 @@ class _AdminAktiviranaPromocijaDetailsState
                   borderRadius: BorderRadius.circular(20),
                   image: DecorationImage(
                     image: _imageProvider ??
-                        const AssetImage("assets/images/praznaUsluga.png"),
+                        const AssetImage("assets/images/prazanProfil.png"),
                     fit: BoxFit.cover,
                   ),
                   boxShadow: [
@@ -128,12 +133,14 @@ class _AdminAktiviranaPromocijaDetailsState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInfoRow("Naziv promocije:", widget.aktiviranaPromocija?.promocijaNaziv ?? ""),
-                  _buildInfoRow("Ime i prezime korisnika:", widget.aktiviranaPromocija?.korisnikImePrezime ?? ""),
-                  _buildInfoRow("Ostvareni popust:", "${(widget.aktiviranaPromocija?.popust ?? 0).toInt()}%"),
-                  _buildInfoRow("Datum aktiviranja:", formatirajDatum(widget.aktiviranaPromocija?.datumAktiviranja)),
-                  _buildInfoRow("Aktivirana:", (widget.aktiviranaPromocija?.aktivirana ?? false) ? "Da" : "Ne"),
-                  _buildInfoRow("Iskorištena:", (widget.aktiviranaPromocija?.iskoristena ?? false) ? "Da" : "Ne"),
+                  _buildInfoRow("Ime:", widget.korisnik?.ime ?? ""),
+                  _buildInfoRow("Prezime:", widget.korisnik?.ime ?? ""),
+                  _buildInfoRow("Korisničko ime:", widget.korisnik?.ime ?? ""),
+                  _buildInfoRow("Email:", widget.korisnik?.email ?? ""),
+                  _buildInfoRow("Telefon:", widget.korisnik?.telefon ?? ""),
+                  _buildInfoRow("Datum registracije:", formatirajDatum(widget.korisnik?.datumRegistracije)),
+                  _buildInfoRow("Status:", status),
+                  _buildInfoRow("Uloge:", ulogeText),
                   const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.centerRight,
@@ -171,7 +178,7 @@ class _AdminAktiviranaPromocijaDetailsState
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 25),
+      padding: const EdgeInsets.only(bottom: 15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -186,7 +193,7 @@ class _AdminAktiviranaPromocijaDetailsState
               softWrap: true,   
             ),
           ),
-          const SizedBox(width: 30),
+          const SizedBox(width: 20),
           Expanded(
             child: Text(
               value,

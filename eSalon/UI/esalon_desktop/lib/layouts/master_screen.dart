@@ -1,4 +1,5 @@
 import 'package:esalon_desktop/screens/admin_aktivirana_promocija_screen.dart';
+import 'package:esalon_desktop/screens/admin_korisnici_screen.dart';
 import 'package:esalon_desktop/screens/admin_promocija_screen.dart';
 import 'package:esalon_desktop/screens/admin_recenzije_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_uslugama_screen.dart';
@@ -100,7 +101,7 @@ class _MasterScreenState extends State<MasterScreen> {
                               _buildListTile(Icons.bar_chart_outlined, "Statistika", const AdminHomeScreen()),
                               _buildListTile(Icons.content_cut, "Usluge", const AdminUpravljanjeUslugamaScreen()),
                               _buildListTile(Icons.style, "Vrsta usluge", const AdminUpravljanjeVrstamaUslugaScreen()),
-                              _buildListTile(Icons.people_outline, "Korisnici", const PlaceholderScreen("Korisnici")),
+                              _buildListTile(Icons.people_outline, "Korisnici", const AdminKorisniciScreen()),
                               _buildListTile(Icons.reviews_outlined, "Recenzije", const AdminRecenzijaScreen()),
                               _buildListTile(Icons.local_offer_outlined, "Promocije", const AdminPromocijaScreen()),
                               _buildListTile(Icons.verified_outlined, "Aktivirane promocije", const AdminAktiviranaPromocijaScreen()),

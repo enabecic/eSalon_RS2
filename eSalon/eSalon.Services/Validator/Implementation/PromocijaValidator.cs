@@ -56,8 +56,8 @@ namespace eSalon.Services.Validator.Implementation
             if (promocija.DatumKraja.Date <= promocija.DatumPocetka.Date)
                 throw new UserException("Datum kraja mora biti nakon datuma početka.");
 
-            if (promocija.DatumKraja.Date < DateTime.Now.Date)
-                throw new UserException("Datum kraja ne može biti u prošlosti.");
+            //if (promocija.DatumKraja.Date < DateTime.Now.Date)
+            //    throw new UserException("Datum kraja ne može biti u prošlosti.");
         }
     }
 }

@@ -472,22 +472,35 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     await Future.delayed(const Duration(milliseconds: 100)); 
     notifyListeners();
   }
-
-  @override
-  Future<RemoteDataSourceDetails<Usluga>> getNextPage(
+  
+      @override
+    Future<RemoteDataSourceDetails<Usluga>> getNextPage(
       NextPageRequest pageRequest) async {
     page = (pageRequest.offset ~/ pageSize) + 1;
 
-    final result = await provider.get(
-      filter: {'nazivOpisFTS': nazivFilter},
-      page: page,
-      pageSize: pageSize,
-    );
+    final filter = {
+      'NazivOpisFTS': nazivFilter
+    };
 
-    data = result.result;
-    count = result.count;
-
-    return RemoteDataSourceDetails(count, data);
+    try {
+      final result =
+          await provider.get(filter: filter, page: page, pageSize: pageSize);
+      data = result.result;
+      count = result.count;
+      return RemoteDataSourceDetails(count, data);
+    } catch (e) {
+        QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+        );
+      return RemoteDataSourceDetails(0, []);
+    }
   }
 
   @override

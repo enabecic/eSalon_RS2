@@ -14,6 +14,8 @@ namespace eSalon.Services
     {
         Task<Korisnik> LoginAsync(KorisnikLoginRequest request, CancellationToken cancellationToken = default);
         Task<Korisnik> GetInfoAsync(CancellationToken cancellationToken = default);
+        Task AktivirajAsync(int korisnikId, CancellationToken cancellationToken = default);
+        Task DeaktivirajAsync(int korisnikId, CancellationToken cancellationToken = default);
 
     }
 }

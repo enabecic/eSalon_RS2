@@ -6,6 +6,8 @@ import 'package:esalon_desktop/providers/aktivirana_promocija_provider.dart';
 import 'package:esalon_desktop/screens/admin_aktivirana_promocija_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class AdminAktiviranaPromocijaScreen extends StatefulWidget {
   const AdminAktiviranaPromocijaScreen({super.key});
@@ -122,29 +124,39 @@ class _AdminAktiviranaPromocijaScreenState
               const Text("Iskorištena: "),
               const SizedBox(width: 5),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), 
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: DropdownButton<bool?>(
-                  value: _source.iskoristenaFilter,
-                  hint: const Text("Sve"),
-                  underline: const SizedBox(),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text("Sve")),
-                    DropdownMenuItem(value: true, child: Text("Da")),
-                    DropdownMenuItem(value: false, child: Text("Ne")),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _source.iskoristenaFilter = value;
-                      _source.filterServerSide();
-                    });
-                  },
-                  dropdownColor: Colors.white,
-                  style: const TextStyle(color: Colors.black),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    hoverColor: const Color(0xFFE0D7F5), 
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  ),
+                  child: DropdownButton<bool?>(
+                    isDense: false,
+                    itemHeight: 48, 
+                    iconSize: 24,
+                    value: _source.iskoristenaFilter,
+                    hint: const Text("Sve"),
+                    underline: const SizedBox(),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black),
+                    onChanged: (value) {
+                      setState(() {
+                        _source.iskoristenaFilter = value;
+                        _source.filterServerSide();
+                      });
+                    },
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text("Sve")),
+                      DropdownMenuItem(value: true, child: Text("Da")),
+                      DropdownMenuItem(value: false, child: Text("Ne")),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -201,7 +213,7 @@ class _AdminAktiviranaPromocijaScreenState
                     dataRowHeight: 80,
                     columns: const [
                       DataColumn(label: Text("Naziv promocije")),
-                      DataColumn(label: Text("Ime i prezime klijenta")),
+                      DataColumn(label: Text("Ime i prezime korisnika")),
                       DataColumn(label: Text('Iskorištena')),
                       DataColumn(label: Text("Slika usluge")),
                       DataColumn(label: Text("Detalji")),
@@ -389,20 +401,31 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
       NextPageRequest pageRequest) async {
     page = (pageRequest.offset ~/ pageSize) + 1;
 
-    final result = await provider.get(
-      filter: {
-        'korisnikImePrezime': korisnikImePrezimeFilter,
-        'iskoristena': iskoristenaFilter,
-        'promocijaNaziv': promocijaNazivFilter,
-      },
-      page: page,
-      pageSize: pageSize,
-    );
+    final filter = {
+      'KorisnikImePrezime': korisnikImePrezimeFilter,
+      'Iskoristena': iskoristenaFilter,
+      'PromocijaNaziv': promocijaNazivFilter,
+    };
 
-    data = result.result;
-    count = result.count;
-
-    return RemoteDataSourceDetails(count, data);
+    try {
+      final result =
+          await provider.get(filter: filter, page: page, pageSize: pageSize);
+      data = result.result;
+      count = result.count;
+      return RemoteDataSourceDetails(count, data);
+    } catch (e) {
+        QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+        );
+      return RemoteDataSourceDetails(0, []);
+    }
   }
 
   @override
