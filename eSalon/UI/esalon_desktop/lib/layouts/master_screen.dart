@@ -4,6 +4,7 @@ import 'package:esalon_desktop/screens/admin_promocija_screen.dart';
 import 'package:esalon_desktop/screens/admin_recenzije_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_uslugama_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_vrstama_usluga_screen.dart';
+import 'package:esalon_desktop/screens/korisnik_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_desktop/main.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
@@ -127,7 +128,7 @@ class _MasterScreenState extends State<MasterScreen> {
                         children: [
                           const Divider(color: Colors.black, thickness: 0.5),
                           const SizedBox(height: 10),
-                          _buildListTile(Icons.edit_outlined, "Uredi profil", const PlaceholderScreen("Uredi profil")),
+                          _buildListTile(Icons.edit_outlined, "Uredi profil", const KorisnikProfileScreen()),
                           _buildListTile(Icons.logout, "Odjava", null, logout: true),
                           const SizedBox(height: 40),
                         ],

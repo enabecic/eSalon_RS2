@@ -223,6 +223,10 @@ namespace eSalon.Services
                 _logger.LogInformation("Korisnik {Username} je uspješno promijenio lozinku.", entity.KorisnickoIme);
 
             }
+            if (request.JeAktivan == null)
+            {
+                entity.JeAktivan = true;
+            }
         }
 
         public async Task<Model.Korisnik> LoginAsync(KorisnikLoginRequest request, CancellationToken cancellationToken = default)
