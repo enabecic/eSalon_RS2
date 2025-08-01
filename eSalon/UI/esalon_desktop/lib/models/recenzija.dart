@@ -12,6 +12,7 @@ class Recenzija {
   int brojLajkova;
   int brojDislajkova;
   String? korisnickoIme;
+  String? nazivUsluge;
 
   Recenzija(
     this.recenzijaId,
@@ -22,6 +23,7 @@ class Recenzija {
     this.brojLajkova,
     this.brojDislajkova,
     this.korisnickoIme,
+    this.nazivUsluge,
   );
   
   factory Recenzija.fromJson(Map<String, dynamic> json) => _$RecenzijaFromJson(json);

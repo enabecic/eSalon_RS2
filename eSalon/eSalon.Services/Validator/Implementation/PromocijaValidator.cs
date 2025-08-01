@@ -27,8 +27,9 @@ namespace eSalon.Services.Validator.Implementation
             x.UslugaId == promocija.UslugaId && x.DatumPocetka.Date==promocija.DatumPocetka.Date && x.DatumKraja.Date==promocija.DatumKraja.Date && !x.IsDeleted, cancellationToken);
 
             if (postoji)
-                throw new UserException($"Promocija „{promocija.Naziv}“ usluge #{promocija.UslugaId} sa datumom početka {promocija.DatumPocetka} i datumom kraja {promocija.DatumKraja} već postoji!");
-            
+                throw new UserException($"Promocija „{promocija.Naziv}“ odabrane usluge i sa odabranim datumom početka {promocija.DatumPocetka:dd.MM.yyyy} i datumom kraja {promocija.DatumKraja:dd.MM.yyyy} već postoji!");
+
+
             if (promocija.DatumPocetka.Date < DateTime.Now.Date)
                 throw new UserException("Datum početka ne može biti u prošlosti.");
 
@@ -56,8 +57,6 @@ namespace eSalon.Services.Validator.Implementation
             if (promocija.DatumKraja.Date <= promocija.DatumPocetka.Date)
                 throw new UserException("Datum kraja mora biti nakon datuma početka.");
 
-            //if (promocija.DatumKraja.Date < DateTime.Now.Date)
-            //    throw new UserException("Datum kraja ne može biti u prošlosti.");
         }
     }
 }

@@ -89,7 +89,7 @@ namespace eSalon.Services
 
         public override async Task<Model.PagedResult<Model.RecenzijaOdgovor>> GetPagedAsync(RecenzijaOdgovorSearchObject search, CancellationToken cancellationToken = default)
         {
-            var query = Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija).Where(o => !o.IsDeleted);
+            var query = Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija).ThenInclude(o=>o.Usluga).Where(o => !o.IsDeleted);
 
             query = AddFilter(search, query);
 
@@ -120,7 +120,12 @@ namespace eSalon.Services
 
                 var recenzija = list[i].Recenzija;
                 if (recenzija is not null)
-                    result[i].KomentarRecenzije = recenzija.Komentar; 
+                    result[i].KomentarRecenzije = recenzija.Komentar;
+
+                var usluga = list[i].Recenzija.Usluga;
+                if (usluga is null) continue;
+
+                result[i].NazivUsluge = usluga.Naziv;
             }
 
             return new Model.PagedResult<Model.RecenzijaOdgovor>
@@ -132,7 +137,7 @@ namespace eSalon.Services
    
         public override async Task<Model.RecenzijaOdgovor> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            var recenzija = await Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija)
+            var recenzija = await Context.RecenzijaOdgovors.Include(o => o.Korisnik).Include(o => o.Recenzija).ThenInclude(o => o.Usluga)
                 .FirstOrDefaultAsync(o => o.RecenzijaOdgovorId == id && !o.IsDeleted && o.Recenzija != null && !o.Recenzija.IsDeleted, cancellationToken);
 
             if (recenzija == null)
@@ -142,6 +147,8 @@ namespace eSalon.Services
 
             dto.KorisnickoIme = $"{recenzija.Korisnik.KorisnickoIme}";
             dto.KomentarRecenzije = recenzija.Recenzija.Komentar;
+            dto.NazivUsluge = recenzija.Recenzija.Usluga.Naziv;
+
 
             return dto;
         }

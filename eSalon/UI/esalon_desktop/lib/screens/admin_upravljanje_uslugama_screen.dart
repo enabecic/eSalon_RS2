@@ -116,6 +116,9 @@ class _AdminUpravljanjeUslugamaScreenState
                 int lastPage = (refreshed.count / _source.pageSize).ceil();
                 await _source.reset(targetPage: lastPage);
 
+                await Future.delayed(const Duration(milliseconds: 10)); 
+
+                if (!mounted) return;
                 await showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -247,9 +250,9 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
           var result = await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => AdminUrediDodajUsluguScreen(usluga: item),
           ));
+          
           if (result == true) {
             await reset(targetPage: page); 
-
             await showDialog(
               context: context,
               builder: (BuildContext context) {

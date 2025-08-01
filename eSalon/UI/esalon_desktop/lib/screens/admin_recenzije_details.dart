@@ -76,6 +76,8 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                 _buildInfoRow("Broj dislajkova:", brojDislajkova.toString()),
                 const SizedBox(height: 16),
                 _buildInfoRow("Datum dodavanja:", DateFormat('dd.MM.yyyy HH:mm').format(item.datumDodavanja)),
+                const SizedBox(height: 16),
+                _buildInfoRow("Naziv usluge:", item.nazivUsluge ?? ''),
                 const SizedBox(height: 24),
                 const Text(
                   "Komentar:",

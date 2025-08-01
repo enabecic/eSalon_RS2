@@ -28,7 +28,7 @@ class _AdminPromocijaDetailsState
   SearchResult<Usluga>? uslugaResult;
   final _formKey = GlobalKey<FormBuilderState>();
   Map<String, dynamic> _initialValue = {};
-  SearchResult<Promocija>? _promocijaResult;
+  //SearchResult<Promocija>? _promocijaResult;
   String? promocijaError;
   bool _isTextFieldHovered = false;
   bool _isOpisFieldHovered = false;
@@ -61,13 +61,13 @@ class _AdminPromocijaDetailsState
         uslugaProvider = context.read<UslugaProvider>();
     _loadUsluga();
     _provider = context.read<PromocijaProvider>();
-    _loadPromocije();
+   // _loadPromocije();
   }
 
-  Future<void> _loadPromocije() async {
-    _promocijaResult = await _provider.get();
-    setState(() {}); 
-  }
+  // Future<void> _loadPromocije() async {
+  //   _promocijaResult = await _provider.get();
+  //   setState(() {}); 
+  // }
 
   Future<void> _loadUsluga() async {
     uslugaResult = await uslugaProvider.get();
@@ -273,22 +273,22 @@ class _AdminPromocijaDetailsState
                             FormBuilderValidators.minLength(1, errorText: "Minimalna dužina je 1 znak."),
                             FormBuilderValidators.maxLength(100, errorText: "Maksimalna dozvoljena dužina je 100 znakova."),
                           ]),
-                          onChanged: (value) async {
-                            _formKey.currentState?.fields['naziv']?.validate();
-                            if (value != null && _promocijaResult?.result != null) {
-                              final postoji = _promocijaResult!.result.any(
-                                (e) =>
-                                    (e.naziv?.toLowerCase() ?? '') == value.toLowerCase() &&
-                                    (widget.promocija == null || e.promocijaId != widget.promocija!.promocijaId),
-                              );
-                              final newError = postoji ? "Promocija sa tim imenom već postoji." : null;
-                              if (promocijaError != newError) {
-                                setState(() {
-                                  promocijaError = newError;
-                                });
-                              }
-                            }
-                          },
+                          // onChanged: (value) async {
+                          //   _formKey.currentState?.fields['naziv']?.validate();
+                          //   if (value != null && _promocijaResult?.result != null) {
+                          //     final postoji = _promocijaResult!.result.any(
+                          //       (e) =>
+                          //           (e.naziv?.toLowerCase() ?? '') == value.toLowerCase() &&
+                          //           (widget.promocija == null || e.promocijaId != widget.promocija!.promocijaId),
+                          //     );
+                          //     final newError = postoji ? "Promocija sa tim imenom već postoji." : null;
+                          //     if (promocijaError != newError) {
+                          //       setState(() {
+                          //         promocijaError = newError;
+                          //       });
+                          //     }
+                          //   }
+                          // },
                         ),
                       ),
                     ),

@@ -92,7 +92,7 @@ namespace eSalon.Services
 
         public override async Task<Model.PagedResult<Model.Recenzija>> GetPagedAsync(RecenzijaSearchObject search, CancellationToken cancellationToken = default)
         {
-            var query = Context.Recenzijas.Include(r => r.Korisnik).Where(r => !r.IsDeleted);
+            var query = Context.Recenzijas.Include(r => r.Korisnik).Include(r => r.Usluga).Where(r => !r.IsDeleted);
 
             query = AddFilter(search, query);
 
@@ -119,6 +119,12 @@ namespace eSalon.Services
                 if (korisnik is null) continue;
 
                 result[i].KorisnickoIme = korisnik.KorisnickoIme;
+
+                var usluga = list[i].Usluga;
+                if (usluga is null) continue;
+
+                result[i].NazivUsluge = usluga.Naziv;
+
             }
 
             return new Model.PagedResult<Model.Recenzija>
@@ -127,6 +133,25 @@ namespace eSalon.Services
                 Count = count
             };
         }
+
+        public override async Task<Model.Recenzija> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var recenzija = await Context.Recenzijas
+          .Include(r => r.Korisnik)
+          .Include(r => r.Usluga)
+          .FirstOrDefaultAsync(r => r.RecenzijaId == id && !r.IsDeleted, cancellationToken);
+
+            if (recenzija == null)
+                throw new UserException("Uneseni ID ne postoji.");
+
+            var dto = Mapper.Map<Model.Recenzija>(recenzija);
+
+            dto.KorisnickoIme = recenzija.Korisnik?.KorisnickoIme;
+            dto.NazivUsluge = recenzija.Usluga?.Naziv;
+
+            return dto;
+        }
+
 
         public override async Task BeforeInsertAsync(RecenzijaInsertRequest request, Recenzija entity, CancellationToken cancellationToken = default)
         {

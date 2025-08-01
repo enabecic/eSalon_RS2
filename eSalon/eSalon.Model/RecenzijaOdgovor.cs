@@ -22,5 +22,6 @@ namespace eSalon.Model
 
         public string? KorisnickoIme { get; set; }
         public string? KomentarRecenzije { get; set; }
+        public string? NazivUsluge { get; set; }
     }
 }
