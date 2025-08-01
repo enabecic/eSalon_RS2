@@ -61,13 +61,7 @@ class _AdminPromocijaDetailsState
         uslugaProvider = context.read<UslugaProvider>();
     _loadUsluga();
     _provider = context.read<PromocijaProvider>();
-   // _loadPromocije();
   }
-
-  // Future<void> _loadPromocije() async {
-  //   _promocijaResult = await _provider.get();
-  //   setState(() {}); 
-  // }
 
   Future<void> _loadUsluga() async {
     uslugaResult = await uslugaProvider.get();
@@ -138,7 +132,7 @@ class _AdminPromocijaDetailsState
   return FormBuilder(
     key: _formKey,
     initialValue: _initialValue,
-    autovalidateMode: AutovalidateMode.onUserInteraction,
+    autovalidateMode: AutovalidateMode.disabled,
     child: Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
@@ -273,22 +267,6 @@ class _AdminPromocijaDetailsState
                             FormBuilderValidators.minLength(1, errorText: "Minimalna dužina je 1 znak."),
                             FormBuilderValidators.maxLength(100, errorText: "Maksimalna dozvoljena dužina je 100 znakova."),
                           ]),
-                          // onChanged: (value) async {
-                          //   _formKey.currentState?.fields['naziv']?.validate();
-                          //   if (value != null && _promocijaResult?.result != null) {
-                          //     final postoji = _promocijaResult!.result.any(
-                          //       (e) =>
-                          //           (e.naziv?.toLowerCase() ?? '') == value.toLowerCase() &&
-                          //           (widget.promocija == null || e.promocijaId != widget.promocija!.promocijaId),
-                          //     );
-                          //     final newError = postoji ? "Promocija sa tim imenom već postoji." : null;
-                          //     if (promocijaError != newError) {
-                          //       setState(() {
-                          //         promocijaError = newError;
-                          //       });
-                          //     }
-                          //   }
-                          // },
                         ),
                       ),
                     ),
@@ -384,115 +362,91 @@ class _AdminPromocijaDetailsState
                     ),
 
                     // Datum početka
-                    SizedBox(
-                      height: 80,
-                      child: MouseRegion(
-                        onEnter: (_) => setState(() => _isDatumPocetkaFieldHovered = true),
-                        onExit: (_) => setState(() => _isDatumPocetkaFieldHovered = false),
-                        child: FormBuilderDateTimePicker(
-                          name: 'datumPocetka',
-                          enabled: widget.promocija == null, 
-                          inputType: InputType.date,
-                          format: DateFormat('dd.MM.yyyy'),
-                          style: widget.promocija == null
-                            ? null
-                            : const TextStyle(
-                                color: Colors.black87, 
-                              ),
-                          initialEntryMode: DatePickerEntryMode.calendarOnly,
-                          firstDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day), 
-                          decoration: InputDecoration(
-                            labelText: 'Datum početka',
-                            floatingLabelStyle: widget.promocija == null
-                              ? const TextStyle(
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.w500,
-                                )
-                              : const TextStyle(
-                                  color: Colors.black54, 
-                                  fontWeight: FontWeight.w500,
+                    FormBuilderField<DateTime>(
+                      name: 'datumPocetka',
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(errorText: "Obavezno polje."),
+                        (val) {
+                          if (val == null) return null;
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          if (widget.promocija == null && val.isBefore(today)) {
+                            return 'Datum početka ne može biti u prošlosti';
+                          }
+                          return null;
+                        },
+                      ]),
+                      builder: (FormFieldState<DateTime?> field) {
+                        return MouseRegion(
+                          onEnter: (_) => setState(() => _isDatumPocetkaFieldHovered = true),
+                          onExit: (_) => setState(() => _isDatumPocetkaFieldHovered = false),
+                          child: GestureDetector(
+                            onTap: widget.promocija != null
+                                ? null
+                                : () async {
+                                    final pickedDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: field.value ?? DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (pickedDate != null) {
+                                      field.didChange(pickedDate);
+                                    }
+                                  },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Datum početka',
+                                hintText: 'Odaberite datum početka',
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                errorText: field.errorText,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7),
                                 ),
-                            hintText: 'Odaberite datum početka',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.grey.shade600, width: 2.0),
+                                ),
+                                errorBorder: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderSide: BorderSide(color: Colors.red, width: 1.7),
+                                ),
+                                focusedErrorBorder: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderSide: BorderSide(color: Colors.red, width: 2.0),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7),
+                                ),
+                                filled: true,
+                                fillColor: widget.promocija == null
+                                    ? (_isDatumPocetkaFieldHovered ? const Color(0xFFE0D7F5) : Colors.white)
+                                    : const Color(0xFFE0D7F5),
+                              ),
+                              child: Text(
+                                field.value != null
+                                    ? DateFormat('dd.MM.yyyy').format(field.value!)
+                                    : '',
+                                style: widget.promocija == null
+                                    ? null
+                                    : const TextStyle(color: Colors.black87),
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade600, width: 2.0),
-                            ),
-                            errorBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(color: Colors.red, width: 1.7),
-                            ),
-                            focusedErrorBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(color: Colors.red, width: 2.0),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7), 
-                            ),  
-                            filled: true,
-                            fillColor: widget.promocija == null
-                              ? (_isDatumPocetkaFieldHovered ? const Color(0xFFE0D7F5) : Colors.white)
-                              : const Color(0xFFE0D7F5),  
-                            ),
-                            validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: "Obavezno polje."),
-                            (val) {
-                              if (val == null) return null;
-                              final now = DateTime.now();
-                              final today = DateTime(now.year, now.month, now.day);
-                              
-                              if (widget.promocija == null && val.isBefore(today)) {
-                                return 'Datum početka ne može biti u prošlosti';
-                              }
-                              return null;
-                            },
-                          ]),
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
-
-                    // Datum kraja
+                    const SizedBox(height: 20),
+                    //Datum kraja
                     SizedBox(
                       height: 80,
                       child: MouseRegion(
                         onEnter: (_) => setState(() => _isDatumKrajaFieldHovered = true),
                         onExit: (_) => setState(() => _isDatumKrajaFieldHovered = false),
-                        child: FormBuilderDateTimePicker(
+                        child: FormBuilderField<DateTime>(
                           name: 'datumKraja',
-                          inputType: InputType.date,
-                          format: DateFormat('dd.MM.yyyy'),
-                          initialEntryMode: DatePickerEntryMode.calendarOnly,  
-                          firstDate: widget.promocija != null
-                            ? DateTime(2000) 
-                            : DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
-                          decoration: InputDecoration(
-                            labelText: 'Datum kraja',
-                            hintText: 'Odaberite datum kraja',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade600, width: 2.0),
-                            ),
-                            errorBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(color: Colors.red, width: 1.7),
-                            ),
-                            focusedErrorBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(color: Colors.red, width: 2.0),
-                            ),
-                            filled: true,
-                            fillColor: _isDatumKrajaFieldHovered ? const Color(0xFFE0D7F5) : Colors.white,
-                          ),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.required(errorText: "Obavezno polje."),
                             (val) {
@@ -515,10 +469,58 @@ class _AdminPromocijaDetailsState
                               return null;
                             }
                           ]),
+                          builder: (FormFieldState<DateTime?> field) {
+                            return GestureDetector(
+                              onTap: () async {
+                                final pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: field.value ?? DateTime.now(),
+                                  firstDate: widget.promocija != null
+                                      ? DateTime(2000)
+                                      : DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (pickedDate != null) {
+                                  field.didChange(pickedDate);
+                                }
+                              },
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: 'Datum kraja',
+                                  hintText: 'Odaberite datum kraja',
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                  errorText: field.errorText,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Colors.grey.shade400, width: 1.7),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Colors.grey.shade600, width: 2.0),
+                                  ),
+                                  errorBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(color: Colors.red, width: 1.7),
+                                  ),
+                                  focusedErrorBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    borderSide: BorderSide(color: Colors.red, width: 2.0),
+                                  ),
+                                  filled: true,
+                                  fillColor: _isDatumKrajaFieldHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                                ),
+                                child: Text(
+                                  field.value != null
+                                      ? DateFormat('dd.MM.yyyy').format(field.value!)
+                                      : '',
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
-
                     // Usluga
                     MouseRegion(
                       onEnter: (_) => setState(() => _isDropdownHovered = true),
