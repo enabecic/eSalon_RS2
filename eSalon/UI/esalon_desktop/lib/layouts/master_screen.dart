@@ -4,6 +4,7 @@ import 'package:esalon_desktop/screens/admin_promocija_screen.dart';
 import 'package:esalon_desktop/screens/admin_recenzije_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_uslugama_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_vrstama_usluga_screen.dart';
+import 'package:esalon_desktop/screens/frizer_korisnici_screen.dart';
 import 'package:esalon_desktop/screens/korisnik_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_desktop/main.dart';
@@ -114,6 +115,7 @@ class _MasterScreenState extends State<MasterScreen> {
                               _buildListTile(Icons.calendar_today, "Rezervacije", const PlaceholderScreen("Rezervacije")),
                               _buildListTile(Icons.reviews_outlined, "Recenzije", const PlaceholderScreen("Recenzije")),
                               _buildListTile(Icons.content_cut, "Usluge", const PlaceholderScreen("Usluge")),
+                              _buildListTile(Icons.people_outline, "Korisnici", const FrizerKorisniciScreen()),
                             ],
                           ],
                         ),
