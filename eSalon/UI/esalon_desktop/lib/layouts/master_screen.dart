@@ -5,6 +5,7 @@ import 'package:esalon_desktop/screens/admin_recenzije_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_uslugama_screen.dart';
 import 'package:esalon_desktop/screens/admin_upravljanje_vrstama_usluga_screen.dart';
 import 'package:esalon_desktop/screens/frizer_korisnici_screen.dart';
+import 'package:esalon_desktop/screens/frizer_recenzije_screen.dart';
 import 'package:esalon_desktop/screens/frizer_usluge_screen.dart';
 import 'package:esalon_desktop/screens/korisnik_profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,7 @@ class _MasterScreenState extends State<MasterScreen> {
                             if (AuthProvider.uloge?.contains("Frizer") ?? false) ...[
                               _buildListTile(Icons.bar_chart_outlined, "Statistika", const FrizerHomeScreen()),
                               _buildListTile(Icons.calendar_today, "Rezervacije", const PlaceholderScreen("Rezervacije")),
-                              _buildListTile(Icons.reviews_outlined, "Recenzije", const PlaceholderScreen("Recenzije")),
+                              _buildListTile(Icons.reviews_outlined, "Recenzije", const FrizerRecenzijaScreen()),
                               _buildListTile(Icons.content_cut, "Usluge", const FrizerUslugeScreen()),
                               _buildListTile(Icons.people_outline, "Korisnici", const FrizerKorisniciScreen()),
                             ],
