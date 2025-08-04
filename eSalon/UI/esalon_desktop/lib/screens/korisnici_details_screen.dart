@@ -134,8 +134,8 @@ class _KorisniciDetailsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildInfoRow("Ime:", widget.korisnik?.ime ?? ""),
-                  _buildInfoRow("Prezime:", widget.korisnik?.ime ?? ""),
-                  _buildInfoRow("Korisničko ime:", widget.korisnik?.ime ?? ""),
+                  _buildInfoRow("Prezime:", widget.korisnik?.prezime ?? ""),
+                  _buildInfoRow("Korisničko ime:", widget.korisnik?.korisnickoIme ?? ""),
                   _buildInfoRow("Email:", widget.korisnik?.email ?? ""),
                   _buildInfoRow("Telefon:", widget.korisnik?.telefon ?? ""),
                   _buildInfoRow("Datum registracije:", formatirajDatum(widget.korisnik?.datumRegistracije)),

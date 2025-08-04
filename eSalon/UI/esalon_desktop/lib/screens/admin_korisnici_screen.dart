@@ -5,6 +5,7 @@ import 'package:esalon_desktop/models/uloga.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/providers/uloga_provider.dart';
+import 'package:esalon_desktop/screens/admin_dodaj_frizera_screen.dart';
 import 'package:esalon_desktop/screens/korisnici_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -149,8 +150,57 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
           ),
           const SizedBox(width: 10),
           ElevatedButton(
-            onPressed: () {
-              // TODO: implementacija kasnije
+            onPressed: () async {
+              var result = await Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>  const AdminDodajFrizeraScreen(),
+              ));
+              if (result == true) {
+                final refreshed = await _korisnikProvider.get(
+                  filter: {'KorisnickoIme': _source.korisnickoImeFilter},
+                  page: 1,
+                  pageSize: _source.pageSize,
+                );
+                int lastPage = (refreshed.count / _source.pageSize).ceil();
+                await _source.reset(targetPage: lastPage);
+
+                await Future.delayed(const Duration(milliseconds: 10)); 
+
+                if (!mounted) return;
+                await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    Future.delayed(const Duration(seconds: 3), () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    });
+
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: const Text("Dodano"),
+                      content: const Text("Frizer je uspješno dodan."),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "OK",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
