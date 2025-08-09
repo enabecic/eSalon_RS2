@@ -29,7 +29,7 @@ namespace eSalon.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Klijent")]
+        [Authorize(Roles = "Klijent,Admin")]
         public override Task<PagedResult<Arhiva>> GetList([FromQuery] ArhivaSearchObject searchObject, CancellationToken cancellationToken = default)
         {
             return base.GetList(searchObject, cancellationToken);

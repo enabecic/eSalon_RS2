@@ -1,5 +1,6 @@
 import 'package:esalon_desktop/layouts/master_screen.dart';
 import 'package:esalon_desktop/providers/aktivirana_promocija_provider.dart';
+import 'package:esalon_desktop/providers/arhiva_provider.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/providers/promocija_provider.dart';
@@ -17,6 +18,7 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 void main() {
+  //WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
@@ -29,6 +31,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => RecenzijaProvider()),
         ChangeNotifierProvider(create: (_) => RecenzijaOdgovorProvider()),
         ChangeNotifierProvider(create: (_) => UlogaProvider()),
+        ChangeNotifierProvider(create: (_) => ArhivaProvider()),
 
       ],
       child: const MyApp(),

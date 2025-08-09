@@ -145,8 +145,7 @@ namespace eSalon.Services
               .Include(n => n.Korisnik).Include(r => r.Frizer)
               .Include(n => n.NacinPlacanja)
               .Include(n => n.StavkeRezervacijes).ThenInclude(sr => sr.Usluga)
-              .Include(r => r.AktiviranaPromocija).ThenInclude(ap => ap.Promocija)
-              .AsQueryable();
+              .Include(r => r.AktiviranaPromocija).ThenInclude(ap => ap.Promocija).Where(r => !r.IsDeleted); 
 
             query = AddFilter(search, query);
 
@@ -180,7 +179,25 @@ namespace eSalon.Services
                     result[i].NacinPlacanjaNaziv = rezervacija.NacinPlacanja.Naziv;
 
                 if (rezervacija.AktiviranaPromocija != null)
-                    result[i].AktiviranaPromocijaNaziv = rezervacija.AktiviranaPromocija.Promocija.Naziv; 
+                    result[i].AktiviranaPromocijaNaziv = rezervacija.AktiviranaPromocija.Promocija.Naziv;
+
+
+
+    // result[i].StavkeRezervacijes = list[i].StavkeRezervacijes
+    //.Where(sr => !sr.IsDeleted && sr.Usluga != null && !sr.Usluga.IsDeleted)
+    //.Select(sr => new Model.StavkeRezervacije
+    //{
+    //    StavkeRezervacijeId = sr.StavkeRezervacijeId,
+    //    RezervacijaId = sr.RezervacijaId,
+    //    UslugaId = sr.UslugaId,
+    //    Cijena = sr.Cijena,
+    //    UslugaNaziv = sr.Usluga.Naziv,
+    //    Trajanje = sr.Usluga.Trajanje,
+    //    OriginalnaCijena = sr.Usluga.Cijena,
+    //    Slika = sr.Usluga.Slika,
+    //   // ImaPopust = sr.Cijena.HasValue && sr.Cijena < sr.Usluga.Cijena
+    //}).ToList();
+
 
 
             }

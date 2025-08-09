@@ -502,9 +502,11 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                               );
 
                               if (!context.mounted) return;
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) => const MyApp()),
+                               Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (_) => const LoginPage()),
+                                (route) => false,
                               );
+                          
                             } catch (e) {
                               if (!mounted) return;
                               if (context.mounted) {

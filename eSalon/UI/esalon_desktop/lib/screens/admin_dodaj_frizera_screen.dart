@@ -430,7 +430,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                       borderRadius: BorderRadius.circular(20),
                       image: DecorationImage(
                         image: _imageProvider ??
-                            const AssetImage("assets/images/praznaUsluga.png"),
+                            const AssetImage("assets/images/prazanProfil.png"),
                         fit: BoxFit.cover,
                       ),
                       boxShadow: [

@@ -67,7 +67,7 @@ class _MasterScreenState extends State<MasterScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 30),
 
                             if (AuthProvider.uloge?.contains("Admin") ?? false)
                               const Padding(
@@ -95,7 +95,7 @@ class _MasterScreenState extends State<MasterScreen> {
                                 ),
                               ),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 5),
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                               child: Divider(color: Colors.black, thickness: 0.5),
@@ -130,11 +130,12 @@ class _MasterScreenState extends State<MasterScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Divider(color: Colors.black, thickness: 0.5),
                           const SizedBox(height: 10),
+                          const Divider(color: Colors.black, thickness: 0.5),
+                          //const SizedBox(height: 10),
                           _buildListTile(Icons.edit_outlined, "Uredi profil", const KorisnikProfileScreen()),
                           _buildListTile(Icons.logout, "Odjava", null, logout: true),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 30),
                         ],
                       ),
                     ),
@@ -250,14 +251,17 @@ class _MasterScreenState extends State<MasterScreen> {
                           AuthProvider.ime = null;
                           AuthProvider.prezime = null;
                           AuthProvider.slika = null;
-                          //AuthProvider.jeAktivan =false;
+                          AuthProvider.jeAktivan =false;
                           AuthProvider.telefon = null;
                           AuthProvider.datumRegistracije = null;
                           AuthProvider.uloge = [];
+                          AuthProvider.isSignedIn =false;
 
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const MyApp()),
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const LoginPage()),
+                            (route) => false,  
                           );
+
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,

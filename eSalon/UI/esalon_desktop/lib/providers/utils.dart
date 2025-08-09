@@ -32,3 +32,7 @@ String formatirajDatum(DateTime? dt) {
   String minute = dt.minute.toString().padLeft(2, '0');
   return "$dan.$mjesec.$godina $sati:$minute";
 }
+
+String formatDateTimeForFilename(String date) {
+  return DateFormat('dd.MM.yyyy_HH-mm-ss').format(DateTime.parse(date).toLocal());
+}

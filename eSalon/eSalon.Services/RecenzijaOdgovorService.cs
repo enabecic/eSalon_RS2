@@ -78,9 +78,9 @@ namespace eSalon.Services
                     .Where(x => x.Korisnik.KorisnickoIme.ToLower().Contains(korisnickoImeLower));
             }
 
-            if (search.IsDeleted != null)
+            if (search?.IsDeleted != null)
             {
-                query = query.Where(x => x.BrojDislajkova <= search.BrojDislajkovaLTE);
+                query = query.Where(x => x.IsDeleted == search.IsDeleted);
             }
 
             return query;
