@@ -49,7 +49,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
     final korisniciResult = await korisnikProvider.get();
     final rezervacijaResult = await rezervacijaProvider.get();
     rezervacije = rezervacijaResult;
-
+    if (!mounted) return;
     setState(() {
       brojKorisnika = korisniciResult.count;
 
