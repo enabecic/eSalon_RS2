@@ -146,6 +146,7 @@ class _AdminAktiviranaPromocijaScreenState
                     dropdownColor: Colors.white,
                     style: const TextStyle(color: Colors.black),
                     onChanged: (value) {
+                      if (!mounted) return;
                       setState(() {
                         _source.iskoristenaFilter = value;
                         _source.filterServerSide();
@@ -170,6 +171,7 @@ class _AdminAktiviranaPromocijaScreenState
               _source.promocijaNazivFilter = '';
               _source.iskoristenaFilter = null;
               _source.filterServerSide();
+              if (!mounted) return;
               setState(() {}); 
             },
             style: ElevatedButton.styleFrom(
@@ -414,6 +416,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

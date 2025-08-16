@@ -136,6 +136,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                                 )),
                           ],
                           onChanged: (value) {
+                            if (!mounted) return;
                             setState(() {
                               _selectedState = value;
                             });
@@ -147,6 +148,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                       if (_selectedState != null)
                         TextButton(
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _selectedState = null;
                             });
@@ -421,7 +423,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      print("Greška kod konvertovanja grafa u sliku: $e");
+      debugPrint("Greška kod konvertovanja grafa u sliku: $e");
       return null;
     }
   }

@@ -211,6 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                                           AuthProvider.username!, AuthProvider.password!);
 
                                       if (korisnik.jeAktivan == false) {
+                                        if (!context.mounted) return;
                                         QuickAlert.show(
                                           context: context,
                                           type: QuickAlertType.error,
@@ -227,7 +228,8 @@ class _LoginPageState extends State<LoginPage> {
                                       AuthProvider.isSignedIn = true;
 
                                       if (AuthProvider.uloge != null &&
-                                          AuthProvider.uloge!.contains("Admin")) {                          
+                                          AuthProvider.uloge!.contains("Admin")) {  
+                                            if (!context.mounted) return;                        
                                         Navigator.of(context).pushReplacement(
                                               MaterialPageRoute(
                                                 builder: (context) =>const MasterScreen(
@@ -238,7 +240,8 @@ class _LoginPageState extends State<LoginPage> {
                                             );
 
                                       } else if (AuthProvider.uloge != null &&
-                                          AuthProvider.uloge!.contains("Frizer")) {                     
+                                          AuthProvider.uloge!.contains("Frizer")) {     
+                                            if (!context.mounted) return;                
                                           Navigator.of(context).pushReplacement(
                                           MaterialPageRoute(
                                             builder: (context) => const MasterScreen(
@@ -249,6 +252,7 @@ class _LoginPageState extends State<LoginPage> {
                                         );
 
                                       } else {
+                                        if (!context.mounted) return;
                                         QuickAlert.show(
                                           context: context,
                                           type: QuickAlertType.error,
@@ -261,6 +265,7 @@ class _LoginPageState extends State<LoginPage> {
                                         );
                                       }
                                     } on Exception catch (e) {
+                                      if (!context.mounted) return;
                                       QuickAlert.show(
                                         context: context,
                                         type: QuickAlertType.error,

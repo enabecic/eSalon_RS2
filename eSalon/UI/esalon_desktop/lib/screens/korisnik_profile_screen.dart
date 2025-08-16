@@ -212,6 +212,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                         builder: (context) => const KorisnikProfilEditScreen()),
                   ).then((value) {
                     if (value == true) {
+                      if (!mounted) return;
                       setState(() {});
                     }
                   });

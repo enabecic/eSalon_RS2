@@ -326,6 +326,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

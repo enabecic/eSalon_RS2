@@ -103,6 +103,7 @@ class _AdminRecenzijaScreenState extends State<AdminRecenzijaScreen> {
               const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () {
+                  if (!mounted) return;
                   setState(() {
                     _korisnickoImeController.clear();
                     _source.korisnickoImeFilter = '';
@@ -128,6 +129,7 @@ class _AdminRecenzijaScreenState extends State<AdminRecenzijaScreen> {
                 groupValue: _prikazTipa,
                 onChanged: (value) {
                   if (value != null) {
+                    if (!mounted) return;
                     setState(() {
                       _prikazTipa = value;
                       _source.tip = _prikazTipa;
@@ -143,6 +145,7 @@ class _AdminRecenzijaScreenState extends State<AdminRecenzijaScreen> {
                 groupValue: _prikazTipa,
                 onChanged: (value) {
                   if (value != null) {
+                    if (!mounted) return;
                     setState(() {
                       _prikazTipa = value;
                       _source.tip = _prikazTipa;
@@ -390,6 +393,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
 
       return RemoteDataSourceDetails(count, data);
     }  catch (e) {
+         if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

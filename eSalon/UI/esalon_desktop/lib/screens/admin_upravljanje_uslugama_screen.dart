@@ -253,6 +253,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
           
           if (result == true) {
             await reset(targetPage: page); 
+            if (!context.mounted) return;
             await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -382,7 +383,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
                 try {
                   await provider.delete(item.uslugaId!);
                   await reset(targetPage: page); 
-
+                  if (!context.mounted) return;
                   await showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -412,6 +413,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
                     },
                   );
                 } on UserException catch (e) {
+                  if (!context.mounted) return;
                   QuickAlert.show(
                     context: context,
                     type: QuickAlertType.error,
@@ -492,6 +494,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

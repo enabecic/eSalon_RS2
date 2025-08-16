@@ -68,11 +68,13 @@ class _AdminUrediDodajUsluguScreenState
 
   Future<void> _loadUsluge() async {
     _uslugaResult = await _provider.get();
+    if (!mounted) return;
     setState(() {}); 
   }
 
   Future<void> _loadVrsteUsluga() async {
     vrstaUslugeResult = await vrstaUslugeProvider.get();
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -268,6 +270,7 @@ class _AdminUrediDodajUsluguScreenState
                               );
                               final newError = postoji ? "Usluga sa tim imenom već postoji." : null;
                               if (uslugaError != newError) {
+                                if (!mounted) return;
                                 setState(() {
                                   uslugaError = newError;
                                 });
@@ -537,7 +540,7 @@ class _AdminUrediDodajUsluguScreenState
                             ),
                           ),
                           child: const Text(
-                            "NE",
+                            "Ne",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -553,7 +556,7 @@ class _AdminUrediDodajUsluguScreenState
                             ),
                           ),
                           child: const Text(
-                            "DA",
+                            "Da",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -576,9 +579,11 @@ class _AdminUrediDodajUsluguScreenState
                       } else {
                         await _provider.update(widget.usluga!.uslugaId!, req);
                       }
+                      if (!mounted) return;
                       Navigator.pop(context, true);
                       clearInput();
                     }  catch (e) {
+                      if (!mounted) return;
                         await QuickAlert.show(
                           context: context,
                           type: QuickAlertType.error,
@@ -618,6 +623,7 @@ class _AdminUrediDodajUsluguScreenState
       final bytes = await _image!.readAsBytes();
       _base64Image = base64Encode(bytes);
       _imageProvider = MemoryImage(bytes);
+      if (!mounted) return;
       setState(() {});
     }
   }

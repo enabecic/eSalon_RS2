@@ -237,7 +237,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                       } else {
                         nazivError = null;
                       }
-
+                      if (!mounted) return;
                       setState(() {});
                     }
                   },
@@ -295,7 +295,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                             ),
                           ),
                           child: const Text(
-                            "NE",
+                            "Ne",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -311,7 +311,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                             ),
                           ),
                           child: const Text(
-                            "DA",
+                            "Da",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -332,9 +332,11 @@ class _AdminUrediDodajVrstuUslugeScreenState
                       } else {
                         await _provider.update(widget.vrstaUsluge!.vrstaId!, req);
                       }
+                      if (!mounted) return;
                       Navigator.pop(context, true);
                       clearInput();
                     } catch (e) {
+                      if (!mounted) return;
                         await QuickAlert.show(
                           context: context,
                           type: QuickAlertType.error,
@@ -374,6 +376,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
       final bytes = await _image!.readAsBytes();
       _base64Image = base64Encode(bytes);
       _imageProvider = MemoryImage(bytes);
+      if (!mounted) return;
       setState(() {});
     }
   }

@@ -52,6 +52,7 @@ class _FrizerUslugeDetailsScreenState
 
   Future<void> _loadVrsteUsluga() async {
     vrstaUslugeResult = await vrstaUslugeProvider.get();
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -305,6 +306,7 @@ class _FrizerUslugeDetailsScreenState
       final bytes = await _image!.readAsBytes();
       _base64Image = base64Encode(bytes);
       _imageProvider = MemoryImage(bytes);
+      if (!mounted) return;
       setState(() {});
     }
   }

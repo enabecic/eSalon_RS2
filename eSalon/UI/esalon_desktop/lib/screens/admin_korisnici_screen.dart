@@ -41,6 +41,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
 
   Future<void> _loadUloge() async {
     final result = await _ulogaProvider.get();
+    if (!mounted) return;
     setState(() {
       _ulogeList = result.result;
     });
@@ -115,6 +116,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
                 value: _selectedUloga,
                 hint: const Text("Odaberi ulogu"),
                 onChanged: (value) {
+                  if (!mounted) return;
                   setState(() {
                     _selectedUloga = value;
                   });
@@ -134,6 +136,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
           ElevatedButton(
             onPressed: () {
               _korisnickoImeController.clear();
+              if (!mounted) return;
               setState(() {
                 _selectedUloga = null;
               });
@@ -416,7 +419,9 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                       AuthProvider.telefon = null;
                       AuthProvider.uloge = null;
                       AuthProvider.isSignedIn = false;
-
+                      AuthProvider.slika = null;
+                      AuthProvider.datumRegistracije = null;
+                      if (!context.mounted) return;
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) => const MyApp()),
                       );
@@ -425,7 +430,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                   } else {
                     await provider.aktiviraj(item.korisnikId!);
                   }
-
+                  if (!context.mounted) return;
                   await showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -450,6 +455,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
 
                   await reset();
                 } catch (e) {
+                  if (!context.mounted) return;
                   await showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -523,6 +529,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

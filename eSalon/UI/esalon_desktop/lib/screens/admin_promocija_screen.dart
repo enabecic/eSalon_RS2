@@ -97,6 +97,7 @@ class _AdminUpravljanjeUslugamaScreenState
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () {
+                if (!mounted) return;
                 setState(() {
                   _nazivController.clear();
                   _source.nazivFilter = '';
@@ -142,7 +143,7 @@ class _AdminUpravljanjeUslugamaScreenState
                   );
                   int lastPage = (refreshed.count / _source.pageSize).ceil();
                   await _source.reset(targetPage: lastPage);
-
+                  if (!mounted) return;
                   await showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -202,6 +203,7 @@ Row(
                 _source.samoBuduce == null &&
                 _source.samoProsle == null,
             onSelected: (_) {
+              if (!mounted) return;
               setState(() {
                 _source.samoAktivne = null;
                 _source.samoBuduce = null;
@@ -220,6 +222,7 @@ Row(
             label: const Text("Aktivne"),
             selected: _source.samoAktivne == true,
             onSelected: (_) {
+              if (!mounted) return;
               setState(() {
                 _source.samoAktivne = true;
                 _source.samoBuduce = null;
@@ -238,6 +241,7 @@ Row(
             label: const Text("Buduće"),
             selected: _source.samoBuduce == true,
             onSelected: (_) {
+              if (!mounted) return;
               setState(() {
                 _source.samoAktivne = null;
                 _source.samoBuduce = true;
@@ -256,6 +260,7 @@ Row(
             label: const Text("Prošle"),
             selected: _source.samoProsle == true,
             onSelected: (_) {
+              if (!mounted) return;
               setState(() {
                 _source.samoAktivne = null;
                 _source.samoBuduce = null;
@@ -290,6 +295,7 @@ Row(
               '${_popustRange.end.round()}%',
             ),
             onChanged: (values) {
+              if (!mounted) return;
               setState(() {
                 _popustRange = values;
                 _source.popustGTE = values.start;
@@ -411,7 +417,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
           ));
           if (result == true) {
             await reset(targetPage: page); 
-
+            if (!context.mounted) return;
             await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -538,7 +544,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
                 try {
                   await provider.delete(item.promocijaId!);
                   await reset(targetPage: page);
-
+                  if (!context.mounted) return;
                   await showDialog(
                     context: context,
                     builder: (context) {
@@ -563,6 +569,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
                     },
                   );
                 } on UserException catch (e) {
+                  if (!context.mounted) return;
                   QuickAlert.show(
                     context: context,
                     type: QuickAlertType.error,
@@ -662,6 +669,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

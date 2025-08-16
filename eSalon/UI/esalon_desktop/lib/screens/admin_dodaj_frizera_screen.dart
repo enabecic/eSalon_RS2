@@ -60,11 +60,13 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
 
   Future _initForm() async {
     korisniciResult = await korisnikProvider.get();
+    if (!mounted) return;
     setState(() {});
   }
 
    Future<void> _loadUloga() async {
     ulogeResult = await ulogeProvider.get();
+    if (!mounted) return;
     setState(() {});
   }
   
@@ -161,18 +163,20 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                       ]),
                       onChanged: (value) async {
                         if (value != null && korisniciResult != null) {
-                          var username = await korisniciResult!.result
+                          var username =  korisniciResult!.result
                               .map((e) => e.korisnickoIme == value)
                               .toList();
 
                           if (username.contains(true)) {
                             usernameError =
                                 "Korisnik s tim imenom već postoji.";
+                                if (!mounted) return;
                             setState(() {});
                           } else {
                             usernameError = null;
                           }
                         }
+                        if (!mounted) return;
                         setState(() {});
                       },
                     ),
@@ -205,6 +209,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                             _obscureLozinka ? Icons.visibility_off : Icons.visibility,
                           ),
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _obscureLozinka = !_obscureLozinka;
                             });
@@ -242,6 +247,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                             _obscureLozinkaPotvrda ? Icons.visibility_off : Icons.visibility,
                           ),
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _obscureLozinkaPotvrda = !_obscureLozinkaPotvrda;
                             });
@@ -261,6 +267,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                         } else {
                           confirmPasswordError = null;
                         }
+                        if (!mounted) return;
                         setState(() {});
                       },
                     ),
@@ -578,6 +585,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
       _base64Image = base64Encode(_image!.readAsBytesSync());
       final bytes = await _image!.readAsBytes();
       _imageProvider = MemoryImage(bytes);
+      if (!mounted) return;
       setState(() {});
     }
   }
@@ -647,7 +655,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   req['uloge'] = [_formKey.currentState!.fields['uloge']?.value];
 
                   await korisnikProvider.insert(req);
-
+                  if (!mounted) return;
                   bool shouldPrint = await showDialog(
                     context: context,
                     barrierDismissible: false,
@@ -688,11 +696,12 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   if (shouldPrint == true) {
                     createPdfFile(req);
                   }
-
+                  if (!mounted) return;
                   Navigator.pop(context, true);
                   clearinput();
 
                 } catch (e) {
+                  if (!mounted) return;
                   await QuickAlert.show(
                     context: context,
                     type: QuickAlertType.error,

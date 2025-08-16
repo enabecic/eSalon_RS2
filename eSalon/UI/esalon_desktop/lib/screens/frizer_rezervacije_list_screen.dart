@@ -122,7 +122,10 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     var result = await korisnikProvider.get(); 
 
     frizeri = result.result
-        .where((k) => k.uloge?.contains('Frizer') ?? false)
+        .where((k) => 
+            (k.uloge?.contains('Frizer') ?? false) && 
+            (k.jeAktivan ?? false) 
+        )
         .toList();
 
     if (mounted) setState(() {});
@@ -181,9 +184,12 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     bool isLoadMoreRunning = isAktivneTab ? isLoadMoreRunningAktivne : isLoadMoreRunningHistorija;
 
     if (hasNextPage && !isFirstLoadRunning && !isLoadMoreRunning && controller.position.extentAfter < 300) {
+       if (!mounted) return; 
       if (isAktivneTab) {
+        if (!mounted) return;
         setState(() => isLoadMoreRunningAktivne = true);
       } else {
+        if (!mounted) return;
         setState(() => isLoadMoreRunningHistorija = true);
       }
 
@@ -201,27 +207,32 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
           orderBy: 'DatumRezervacije',
           sortDirection: 'desc',
         );
-
+        if (!mounted) return; 
         if (result.result.isNotEmpty) {
           if (isAktivneTab) {
+            if (!mounted) return; 
             setState(() => rezervacijeAktivne.addAll(result.result));
             pageAktivne = page;
             hasNextPageAktivne = result.result.length >= 10;
           } else {
+            if (!mounted) return; 
             setState(() => rezervacijeHistorija.addAll(result.result));
             pageHistorija = page;
             hasNextPageHistorija = result.result.length >= 10;
           }
         } else {
           if (isAktivneTab) {
+            if (!mounted) return; 
             setState(() => hasNextPageAktivne = false);
           } else {
+            if (!mounted) return; 
             setState(() => hasNextPageHistorija = false);
           }
         }
       } catch (e) {
-        print('Greška prilikom učitavanja: $e');
+        debugPrint('Greška prilikom učitavanja: $e');
       } finally {
+        if (!mounted) return; 
         if (isAktivneTab) {
           setState(() => isLoadMoreRunningAktivne = false);
         } else {
@@ -362,6 +373,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
               child: TextField(
                 controller: _brojRezervacijeController,
                 onChanged: (value) async {
+                  if (!mounted) return; 
                   setState(() {
                     searchRequest['Sifra'] = _brojRezervacijeController.text;
                     _loadFiltered();
@@ -410,6 +422,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                       );
 
                       if (pickedDate != null) {
+                        if (!mounted) return; 
                         setState(() {
                           datumRezervacijeTab1 = pickedDate;
                           searchRequest['DatumRezervacije'] =
@@ -472,6 +485,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                           );
                         }).toList(),
                         onChanged: (selectedFrizer) {
+                          if (!mounted) return; 
                           setState(() {
                             odabraniFrizer = selectedFrizer;
                             searchRequest['FrizerId'] = selectedFrizer?.korisnikId;
@@ -486,17 +500,18 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
               const SizedBox(width: 10),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                  foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                   textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   minimumSize: const Size(150, 59),
                 ),
                 onPressed: () {
+                  if (!mounted) return; 
                   setState(() {
                     datumRezervacijeTab1 = null;
                     _brojRezervacijeController.clear();
@@ -560,7 +575,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
               },
               child: InkWell(
                 onTap: () {
-                  print("Radi onTap za prikaz detalja rezervacije!");
+                  debugPrint("Radi onTap za prikaz detalja rezervacije!");
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -776,7 +791,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
               },
               child: InkWell(
                 onTap: () {
-                  print("Radi onTap klik za detalje!");
+                  debugPrint("Radi onTap klik za detalje!");
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -925,6 +940,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
       lastDate: DateTime(2101),
     );
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         datumGTE = picked;
       });
@@ -942,11 +958,13 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
               Expanded(
                 child: MouseRegion(
                   onEnter: (_) {
+                    if (!mounted) return;
                     setState(() {
                       isHoveredDatumGTE = true;
                     });
                   },
                   onExit: (_) {
+                    if (!mounted) return;
                     setState(() {
                       isHoveredDatumGTE = false;
                     });
@@ -1008,14 +1026,15 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 width: 250,
                 height: 50,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color.fromARGB(255, 180, 140, 218),
                 ),
                 child: InkWell(
                   onTap: () async {
                     datumGTE = null;
                     searchRequest['DatumRezervacijeGTE'] = null;
                     _firstLoad();
+                    if (!mounted) return;
                     setState(() {});
                   },
                   child:const Center(
@@ -1023,7 +1042,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                       "Očisti filter",
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white,
+                        color:  Color.fromARGB(199, 0, 0, 0),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

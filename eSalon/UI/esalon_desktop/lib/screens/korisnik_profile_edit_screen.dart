@@ -265,6 +265,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
               title: const Text('Promijeni lozinku',
                   style: TextStyle(fontSize: 16)),
               onChanged: (val) {
+                if (!mounted) return;
                 setState(() {
                   _promijeniLozinku = val ?? false;
                 });
@@ -284,6 +285,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                               ? Icons.visibility_off
                               : Icons.visibility),
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _isOldPasswordHidden = !_isOldPasswordHidden;
                             });
@@ -305,6 +307,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                               ? Icons.visibility_off
                               : Icons.visibility),
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _isNewPasswordHidden = !_isNewPasswordHidden;
                             });
@@ -340,6 +343,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                               ? Icons.visibility_off
                               : Icons.visibility),
                           onPressed: () {
+                            if (!mounted) return;
                             setState(() {
                               _isConfirmPasswordHidden =
                                   !_isConfirmPasswordHidden;
@@ -501,7 +505,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                                 ),
                               );
 
-                              if (!context.mounted) return;
+                              if (!mounted) return;
                                Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(builder: (_) => const LoginPage()),
                                 (route) => false,
@@ -666,7 +670,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
         ),
       );
       AuthProvider.slika = request['slika'];
-
+      if (!mounted) return;
       Navigator.pop(context, true);
     } 
     catch (e) {
@@ -690,6 +694,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
     if (result != null && result.files.single.path != null) {
       _image = File(result.files.single.path!);
       _base64Image = base64Encode(_image!.readAsBytesSync());
+      if (!mounted) return;
       setState(() {
         _profileImageWidget = _buildProfileImage(); 
       });

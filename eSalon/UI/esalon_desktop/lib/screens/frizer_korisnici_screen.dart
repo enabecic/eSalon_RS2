@@ -38,6 +38,7 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
 
   Future<void> _loadUloge() async {
     final result = await _ulogaProvider.get();
+    if (!mounted) return;
     setState(() {
       _ulogeList = result.result;
     });
@@ -112,6 +113,7 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
                 value: _selectedUloga,
                 hint: const Text("Odaberi ulogu"),
                 onChanged: (value) {
+                  if (!mounted) return;
                   setState(() {
                     _selectedUloga = value;
                   });
@@ -131,6 +133,7 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
           ElevatedButton(
             onPressed: () {
               _korisnickoImeController.clear();
+              if (!mounted) return;
               setState(() {
                 _selectedUloga = null;
               });
@@ -340,6 +343,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

@@ -115,7 +115,7 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
                 );
                 int lastPage = (refreshed.count / _source.pageSize).ceil();
                 await _source.reset(targetPage: lastPage);
-
+                if (!mounted) return;
                 await showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -240,7 +240,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
           ));
           if (result == true) {
             await reset(targetPage: page); 
-
+            if (!context.mounted) return;
             await showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -348,7 +348,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
                 try {
                   await provider.delete(item.vrstaId!);
                   await reset(targetPage: page); 
-
+                  if (!context.mounted) return;
                   await showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -378,6 +378,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
                     },
                   );
                 } on UserException catch (e) {
+                  if (!context.mounted) return;
                   QuickAlert.show(
                     context: context,
                     type: QuickAlertType.error,
@@ -458,6 +459,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
       count = result.count;
       return RemoteDataSourceDetails(count, data);
     } catch (e) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         QuickAlert.show(
         context: context,
         type: QuickAlertType.error,

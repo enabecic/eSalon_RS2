@@ -65,6 +65,7 @@ class _AdminPromocijaDetailsState
 
   Future<void> _loadUsluga() async {
     uslugaResult = await uslugaProvider.get();
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -205,6 +206,7 @@ class _AdminPromocijaDetailsState
                                 color: Colors.grey.shade700,
                               ),
                               onPressed: () {
+                                if (!mounted) return;
                                 setState(() {
                                   _obscureKod = !_obscureKod;
                                 });
@@ -620,7 +622,7 @@ class _AdminPromocijaDetailsState
                             ),
                           ),
                           child: const Text(
-                            "NE",
+                            "Ne",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -636,7 +638,7 @@ class _AdminPromocijaDetailsState
                             ),
                           ),
                           child: const Text(
-                            "DA",
+                            "Da",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -670,9 +672,11 @@ class _AdminPromocijaDetailsState
                         } else {
                           await _provider.update(widget.promocija!.promocijaId!, req);
                         }
+                        if (!mounted) return;
                         Navigator.pop(context, true);
                         clearInput();
                       } catch (e) {
+                        if (!mounted) return;
                         await QuickAlert.show(
                           context: context,
                           type: QuickAlertType.error,

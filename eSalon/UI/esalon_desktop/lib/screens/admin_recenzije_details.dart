@@ -181,7 +181,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                                       ),
                                     ),
                                     child: const Text(
-                                      "NE",
+                                      "Ne",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                                       ),
                                     ),
                                     child: const Text(
-                                      "DA",
+                                      "Da",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -217,7 +217,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                                   final provider = RecenzijaOdgovorProvider();
                                   await provider.delete(item.recenzijaOdgovorId!);
                                 }
-
+                                if (!context.mounted) return;
                                 await showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -245,9 +245,11 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                                     );
                                   },
                                 );
+                                if (!context.mounted) return;
                                 Navigator.pop(context, true); 
 
                               } catch (e) {
+                                if (!context.mounted) return;
                                 await showDialog(
                                   context: context,
                                   builder: (BuildContext context) => AlertDialog(
