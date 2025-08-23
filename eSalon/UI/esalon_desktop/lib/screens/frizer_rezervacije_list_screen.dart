@@ -1,5 +1,6 @@
 import 'package:esalon_desktop/models/korisnik.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
+import 'package:esalon_desktop/screens/detalji_rezervacije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_desktop/models/rezervacija.dart';
 import 'package:esalon_desktop/models/search_result.dart';
@@ -55,6 +56,11 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
   bool isHoveredDatumGTE = false; 
   bool isHoveredFrizer = false;
   Korisnik? odabraniFrizer;
+
+int _lastActiveTab = 0;
+double _lastScrollOffsetAktivne = 0;
+double _lastScrollOffsetHistorija = 0;
+
 
   @override
   void dispose() {
@@ -301,6 +307,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                               bottom: 20,
                               right: 20,
                               child: FloatingActionButton(
+                                heroTag: "fab_rezervacije",
                                 onPressed: () {
                                   if (scrollControllerRezervacije.hasClients) {
                                     scrollControllerRezervacije.animateTo(
@@ -324,6 +331,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                               bottom: 20,
                               right: 20,
                               child: FloatingActionButton(
+                                heroTag: "fab_historija",
                                 onPressed: () {
                                   if (scrollControllerHistorija.hasClients) {
                                     scrollControllerHistorija.animateTo(
@@ -574,8 +582,29 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 });
               },
               child: InkWell(
-                onTap: () {
-                  debugPrint("Radi onTap za prikaz detalja rezervacije!");
+                  onTap: () async {
+                  _lastActiveTab = _tabController.index;
+
+                  if (_tabController.index == 0) {
+                    _lastScrollOffsetAktivne = scrollControllerRezervacije.offset;
+                  } else {
+                    _lastScrollOffsetHistorija = scrollControllerHistorija.offset;
+                  }
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+
+                  if (result == true) {
+                    _tabController.index = _lastActiveTab;      
+                    await _reloadCurrentTab();                  
+                    if (_lastActiveTab == 0) {
+                      scrollControllerRezervacije.jumpTo(_lastScrollOffsetAktivne); 
+                    } else {
+                      scrollControllerHistorija.jumpTo(_lastScrollOffsetHistorija);
+                    }
+                  }
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -691,7 +720,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 ),
               ),
             );
-          }).toList(),
+          }),
           if (hasNextPageAktivne) const CircularProgressIndicator(),
           if (!hasNextPageAktivne)
             Container(
@@ -734,6 +763,8 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         filter: searchRequest,
         pageSize: limit,
         page: 1,
+        orderBy: 'DatumRezervacije', 
+        sortDirection: 'desc',
       );
       if (result.result.isNotEmpty) {
         rezervacijeAktivne = result.result;
@@ -747,6 +778,37 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         isLoadMoreRunningAktivne = false;
       });
     }
+
+  Future<void> _reloadCurrentTab() async {
+
+    if (!mounted) return;
+    bool isAktivneTab = _tabController.index == 0;
+
+    searchRequest['stateMachine'] = isAktivneTab
+        ? ['kreirana', 'odobrena']
+        : ['zavrsena', 'ponistena'];
+
+    var result = await rezervacijaProvider.get(
+      filter: searchRequest,
+      page: 1,
+      pageSize: limit,
+      orderBy: 'DatumRezervacije',
+      sortDirection: isAktivneTab ? 'desc' : 'asc',
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      if (isAktivneTab) {
+        rezervacijeAktivne = result.result;
+        hasNextPageAktivne = result.result.length >= limit;
+      } else {
+        rezervacijeHistorija = result.result;
+        hasNextPageHistorija = result.result.length >= limit;
+      }
+    });
+  }
+
 
   Widget _buildHistorijaRezervacija() {
     return SingleChildScrollView(
@@ -790,9 +852,14 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 });
               },
               child: InkWell(
-                onTap: () {
-                  debugPrint("Radi onTap klik za detalje!");
-                },
+                    onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetaljiRezervacijeScreen(rezervacija: e),
+                      ),
+                    );
+                  },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(15),
@@ -898,7 +965,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 ),
               ),
             );
-          }).toList(),
+          }),
           if (hasNextPageHistorija) const CircularProgressIndicator(),
           if (!hasNextPageHistorija)
             Container(
@@ -1069,8 +1136,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     DateTime datumGte = datumGTE ?? DateTime.now();
     searchRequest['DatumRezervacijeGTE'] =
         datumGte.toIso8601String().split('T')[0];
-    // if (!mounted) return;
-    // setState(() {});
+
     scrollControllerHistorija.jumpTo(0); 
 
     var result = await rezervacijaProvider.get(

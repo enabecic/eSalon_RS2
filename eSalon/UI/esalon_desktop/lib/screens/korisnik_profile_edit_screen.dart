@@ -415,8 +415,8 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
       child: Row(
         children: [
           SizedBox(
-            width: 220,
-            height: 45,
+            width: 190,
+            height: 50,
             child: ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -547,8 +547,8 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
           const Spacer(),
           const SizedBox(width: 20),
           SizedBox(
-            width: 120,
-            height: 45,
+            width: 190,
+            height: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 180, 140, 218),

@@ -508,7 +508,7 @@ class _AdminUrediDodajUsluguScreenState
             onEnter: (_) => setState(() => _isSaveHovered = true),
             onExit: (_) => setState(() => _isSaveHovered = false),
             child: Container(
-              width: 250,
+              width: 190,
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),

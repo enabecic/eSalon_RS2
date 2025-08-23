@@ -148,6 +148,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(130, 63),
             ),
             child: const Text("Očisti"),
           ),
@@ -209,6 +210,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(150, 63),
             ),
             child: const Text("Dodaj frizera"),
           ),
@@ -245,9 +247,24 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Korisničko ime")),
-                      DataColumn(label: Text("Email")),
-                      DataColumn(label: Text("Uloge")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija korisničkog imena (20 karaktera).",
+                          child: Text("Korisničko ime"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija email-a (20 karaktera).",
+                          child: Text("Email"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija uloga (25 karaktera).",
+                          child: Text("Uloge"),
+                        ),
+                      ),
                       DataColumn(label: Text("Opcije")),
                     ],
                   ),
@@ -349,20 +366,32 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
       cells: [
         DataCell(
           Tooltip(
-            message: "Klikni za detalje",
-            child: Text(item.korisnickoIme ?? ''),
+            message: 'Klik za detalje',
+            child: Text(
+              (item.korisnickoIme != null && item.korisnickoIme!.length > 20)
+                  ? '${item.korisnickoIme!.substring(0, 20)}...'
+                  : item.korisnickoIme ?? '',
+            ),
+          ),
+        ),
+        DataCell(
+          Tooltip(
+            message: 'Klik za detalje',
+            child: Text(
+              (item.email != null && item.email!.length > 20)
+                  ? '${item.email!.substring(0, 20)}...'
+                  : item.email ?? '',
+            ),
           ),
         ),
         DataCell(
           Tooltip(
             message: "Klikni za detalje",
-            child: Text(item.email ?? ''),
-          ),
-        ),
-        DataCell(
-          Tooltip(
-            message: "Klikni za detalje",
-            child: Text(ulogeText),
+            child: Text(
+              (ulogeText.length > 25) 
+                  ? '${ulogeText.substring(0, 25)}...' 
+                  : ulogeText,
+            ),
           ),
         ),
         DataCell(Row(
@@ -485,6 +514,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                 foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                minimumSize: const Size(120, 50),
               ),
               child: Text(item.jeAktivan == true ? "Deaktiviraj" : "Aktiviraj"),
             ),
@@ -503,6 +533,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                 foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                minimumSize: const Size(120, 50),
               ),
               child: const Text("Detalji"),
             ),

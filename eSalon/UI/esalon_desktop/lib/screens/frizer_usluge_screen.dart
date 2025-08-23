@@ -86,7 +86,7 @@ class _FrizerUslugeScreenState
               },
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 20),
           ElevatedButton(
             onPressed: () {
               _nazivController.clear();
@@ -97,6 +97,7 @@ class _FrizerUslugeScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(150, 63),
             ),
             child: const Text("Očisti"),
           ),
@@ -133,7 +134,12 @@ class _FrizerUslugeScreenState
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Naziv")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva (25 karaktera).",
+                          child: Text("Naziv"),
+                        ),
+                      ),
                       DataColumn(label: Text("Cijena")),
                       DataColumn(label: Text("Trajanje")),
                       DataColumn(label: Text("Slika")),
@@ -199,7 +205,11 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.naziv ?? ''),
+            child: Text(
+              (item.naziv != null && item.naziv!.length > 25)
+                  ? '${item.naziv!.substring(0, 25)}...'
+                  : (item.naziv ?? ''),
+            ),
           ),
         ),
         DataCell(
@@ -264,6 +274,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(120, 50),
             ),
             child: const Text("Detalji"),
           ),

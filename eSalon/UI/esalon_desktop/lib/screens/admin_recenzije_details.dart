@@ -69,22 +69,28 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow("Korisničko ime:", item.korisnickoIme ?? ''),
+                _buildInfoRowWithIcon("Korisničko ime:", item.korisnickoIme ?? '', Icons.person),
                 const SizedBox(height: 16),
-                _buildInfoRow("Broj lajkova:", brojLajkova.toString()),
+                _buildInfoRowWithIcon("Broj lajkova:", brojLajkova.toString(), Icons.thumb_up),
                 const SizedBox(height: 16),
-                _buildInfoRow("Broj dislajkova:", brojDislajkova.toString()),
+                _buildInfoRowWithIcon("Broj dislajkova:", brojDislajkova.toString(), Icons.thumb_down),
                 const SizedBox(height: 16),
-                _buildInfoRow("Datum dodavanja:", DateFormat('dd.MM.yyyy HH:mm').format(item.datumDodavanja)),
+                _buildInfoRowWithIcon("Datum dodavanja:", DateFormat('dd.MM.yyyy HH:mm').format(item.datumDodavanja), Icons.calendar_today, ),
                 const SizedBox(height: 16),
-                _buildInfoRow("Naziv usluge:", item.nazivUsluge ?? ''),
+                _buildInfoRowWithIcon("Naziv usluge:", item.nazivUsluge ?? '', Icons.content_cut, ),
                 const SizedBox(height: 24),
-                const Text(
-                  "Komentar:",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                const Row(
+                  children: [
+                    Icon(Icons.comment, color: Colors.black87, size: 23),
+                    SizedBox(width: 15),
+                    Text(
+                      "Komentar:",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -105,12 +111,18 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
 
                 if (isOdgovor && komentarRecenzije != null && komentarRecenzije.isNotEmpty) ...[
                   const SizedBox(height: 32),
-                  const Text(
-                    "Komentar na koji je odgovoreno:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                  const Row(
+                    children: [
+                      Icon(Icons.chat_bubble, color: Colors.black87, size: 23),
+                      SizedBox(width: 15),
+                      Text(
+                        "Komentar na koji je odgovoreno:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -137,7 +149,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                     children: [
                       SizedBox(
                         height: 50,
-                        width: 140,
+                        width: 190,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
@@ -148,6 +160,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            minimumSize: const Size(190, 50),
                           ),
                           child: const Text(
                             "OK",
@@ -160,7 +173,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                       const SizedBox(width: 20),
                       SizedBox(
                         height: 50,
-                        width: 140,
+                        width: 190,
                         child: ElevatedButton(
                           onPressed: () async {
                             final confirm = await showDialog<bool>(
@@ -282,6 +295,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            minimumSize: const Size(190, 50),
                           ),
                           child: const Text(
                             "Obriši",
@@ -303,12 +317,18 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRowWithIcon(String label, String value, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Icon(
+            icon,
+            size: 23,
+            color: Colors.black87, 
+          ),
+          const SizedBox(width: 15),
           SizedBox(
             width: 200,
             child: Text(
@@ -329,4 +349,5 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
       ),
     );
   }
+
 }

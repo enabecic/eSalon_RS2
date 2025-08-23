@@ -98,6 +98,7 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(130, 63),
             ),
             child: const Text("Očisti"),
           ),
@@ -150,6 +151,7 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(150, 63),
             ),
             child: const Text("Dodaj novu"),
           ),
@@ -186,7 +188,12 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Naziv")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva (40 karaktera).",
+                          child: Text("Naziv"),
+                        ),
+                      ),
                       DataColumn(label: Text("Slika")),
                       DataColumn(label: Text("Obriši")),
                     ],
@@ -276,7 +283,11 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.naziv ?? ''),
+            child: Text(
+              (item.naziv != null && item.naziv!.length > 40)
+                  ? '${item.naziv!.substring(0, 40)}...'
+                  : (item.naziv ?? ''),
+            ),
           ),
         ),
         DataCell(
@@ -397,6 +408,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(120, 50),
             ),
             child: const Text("Obriši"),
           ),

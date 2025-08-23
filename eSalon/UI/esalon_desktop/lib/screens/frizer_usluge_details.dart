@@ -167,20 +167,33 @@ class _FrizerUslugeDetailsScreenState
                 child: Column(
                   children: [
                     //Naziv
-                    _buildInfoRow("Naziv:", widget.usluga?.naziv ?? ""),
+                    _buildInfoRow(
+                      label: "Naziv:",
+                      value: widget.usluga?.naziv ?? "",
+                      icon: Icons.content_cut, 
+                    ),
                     const SizedBox(height: 15),
                     // Cijena
-                    _buildInfoRow("Cijena:", "${(widget.usluga?.cijena ?? 0).toStringAsFixed(2)} KM"),
+                    _buildInfoRow(
+                      label: "Cijena:",
+                      value: "${(widget.usluga?.cijena ?? 0).toStringAsFixed(2)} KM",
+                      icon: Icons.attach_money,
+                    ),
                     const SizedBox(height: 15),
                     // Trajanje
-                    _buildInfoRow("Trajanje:", "${(widget.usluga?.trajanje ?? 0).toInt()} min"),
+                    _buildInfoRow(
+                      label: "Trajanje:",
+                      value: "${(widget.usluga?.trajanje ?? 0).toInt()} min",
+                      icon: Icons.timer,
+                    ),
                     const SizedBox(height: 15),
                     // Datum objavljivanja
                     _buildInfoRow(
-                      "Datum objavljivanja:",
-                      widget.usluga?.datumObjavljivanja != null
+                      label: "Datum objavljivanja:",
+                      value: widget.usluga?.datumObjavljivanja != null
                           ? formatDateTime(widget.usluga!.datumObjavljivanja!)
-                          : ""
+                          : "",
+                      icon: Icons.calendar_today,
                     ),
                     const SizedBox(height: 15),
                     // Vrsta usluge
@@ -189,15 +202,22 @@ class _FrizerUslugeDetailsScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(left: 0), 
-                            child: Text(
-                              "Vrsta usluge:",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.style, 
+                                size: 23,
+                                color: Colors.black87,
                               ),
-                            ),
+                              SizedBox(width: 15),
+                              Text(
+                                "Vrsta usluge:",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           Padding(
@@ -226,12 +246,23 @@ class _FrizerUslugeDetailsScreenState
                         alignment: Alignment.centerLeft,
                         child: Padding(
                           padding:  EdgeInsets.only(left: 0 ), 
-                          child:  Text(
-                            "Opis:",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                          child:  
+                            Row(
+                            children: [
+                              Icon(
+                                Icons.text_snippet, 
+                                size: 23,
+                                color: Colors.black87,
+                              ),
+                              SizedBox(width: 15),
+                              Text(
+                                "Opis:",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -273,8 +304,8 @@ class _FrizerUslugeDetailsScreenState
               Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
-                    width: 200,
-                    height: 45,
+                    width: 190,
+                    height: 50,
                     child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -317,21 +348,25 @@ class _FrizerUslugeDetailsScreenState
     _base64Image = null;
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow({required String label, required String value, IconData? icon, }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center, 
         children: [
+          if (icon != null) ...[
+            Icon(icon, size: 23, color: Colors.black87),
+            const SizedBox(width: 15),
+          ],
           SizedBox(
-            width: 190, 
+            width: 190,
             child: Text(
               label,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
-              softWrap: true,   
+              softWrap: true,
             ),
           ),
           const SizedBox(width: 30),

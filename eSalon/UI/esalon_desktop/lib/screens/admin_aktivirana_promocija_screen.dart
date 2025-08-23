@@ -178,6 +178,7 @@ class _AdminAktiviranaPromocijaScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(150, 63),
             ),
             child: const Text("Očisti"),
           ),
@@ -214,8 +215,18 @@ class _AdminAktiviranaPromocijaScreenState
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Naziv promocije")),
-                      DataColumn(label: Text("Ime i prezime korisnika")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva promocije (40 karaktera).",
+                          child: Text("Naziv promocije"),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija imena i prezimena korisnika (25 karaktera).",
+                          child: Text("Ime i prezime korisnika"),
+                        ),
+                      ),
                       DataColumn(label: Text('Iskorištena')),
                       DataColumn(label: Text("Slika usluge")),
                       DataColumn(label: Text("Detalji")),
@@ -279,13 +290,21 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.promocijaNaziv ?? ''),
+            child: Text(
+              (item.promocijaNaziv != null && item.promocijaNaziv!.length > 40)
+                  ? '${item.promocijaNaziv!.substring(0, 40)}...'
+                  : item.promocijaNaziv ?? '',
+            ),
           ),
         ),
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.korisnikImePrezime ?? ''),
+            child: Text(
+              (item.korisnikImePrezime != null && item.korisnikImePrezime!.length > 25)
+                  ? '${item.korisnikImePrezime!.substring(0, 25)}...'
+                  : item.korisnikImePrezime ?? '',
+            ),
           ),
         ),
         DataCell(
@@ -335,6 +354,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0), 
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
+              minimumSize: const Size(120, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

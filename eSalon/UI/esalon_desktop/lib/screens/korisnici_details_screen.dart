@@ -133,20 +133,20 @@ class _KorisniciDetailsScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInfoRow("Ime:", widget.korisnik?.ime ?? ""),
-                  _buildInfoRow("Prezime:", widget.korisnik?.prezime ?? ""),
-                  _buildInfoRow("Korisničko ime:", widget.korisnik?.korisnickoIme ?? ""),
-                  _buildInfoRow("Email:", widget.korisnik?.email ?? ""),
-                  _buildInfoRow("Telefon:", widget.korisnik?.telefon ?? ""),
-                  _buildInfoRow("Datum registracije:", formatirajDatum(widget.korisnik?.datumRegistracije)),
-                  _buildInfoRow("Status:", status),
-                  _buildInfoRow("Uloge:", ulogeText),
+                  _buildInfoRow("Ime:", widget.korisnik?.ime ?? "", icon: Icons.person),
+                  _buildInfoRow("Prezime:", widget.korisnik?.prezime ?? "", icon: Icons.person_outlined),
+                  _buildInfoRow("Korisničko ime:", widget.korisnik?.korisnickoIme ?? "", icon: Icons.account_circle),
+                  _buildInfoRow("Email:", widget.korisnik?.email ?? "", icon: Icons.email),
+                  _buildInfoRow("Telefon:", widget.korisnik?.telefon ?? "", icon: Icons.phone),
+                  _buildInfoRow("Datum registracije:", formatirajDatum(widget.korisnik?.datumRegistracije), icon: Icons.calendar_today),
+                  _buildInfoRow("Status:", status, icon: Icons.check_circle_outline),
+                  _buildInfoRow("Uloge:", ulogeText, icon: Icons.group),
                   const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.centerRight,
                     child: SizedBox(
-                      width: 200,
-                      height: 45,
+                      width: 190,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -176,21 +176,28 @@ class _KorisniciDetailsScreenState
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {IconData? icon}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (icon != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 3), 
+              child: Icon(icon, size: 23, color: Colors.black87),
+            ),
+            const SizedBox(width: 15),
+          ],
           SizedBox(
-            width: 250, 
+            width: 250,
             child: Text(
               label,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
-              softWrap: true,   
+              softWrap: true,
             ),
           ),
           const SizedBox(width: 20),

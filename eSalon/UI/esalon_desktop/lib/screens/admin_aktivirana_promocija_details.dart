@@ -128,18 +128,18 @@ class _AdminAktiviranaPromocijaDetailsState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInfoRow("Naziv promocije:", widget.aktiviranaPromocija?.promocijaNaziv ?? ""),
-                  _buildInfoRow("Ime i prezime korisnika:", widget.aktiviranaPromocija?.korisnikImePrezime ?? ""),
-                  _buildInfoRow("Ostvareni popust:", "${(widget.aktiviranaPromocija?.popust ?? 0).toInt()}%"),
-                  _buildInfoRow("Datum aktiviranja:", formatirajDatum(widget.aktiviranaPromocija?.datumAktiviranja)),
-                  _buildInfoRow("Aktivirana:", (widget.aktiviranaPromocija?.aktivirana ?? false) ? "Da" : "Ne"),
-                  _buildInfoRow("Iskorištena:", (widget.aktiviranaPromocija?.iskoristena ?? false) ? "Da" : "Ne"),
+                  _buildInfoRow(label: "Naziv promocije:", value: widget.aktiviranaPromocija?.promocijaNaziv ?? "", icon: Icons.local_offer_outlined,),
+                  _buildInfoRow(label: "Ime i prezime korisnika:", value: widget.aktiviranaPromocija?.korisnikImePrezime ?? "", icon: Icons.person, ),
+                  _buildInfoRow(label: "Ostvareni popust:", value: "${(widget.aktiviranaPromocija?.popust ?? 0).toInt()}%", icon: Icons.percent, ),
+                  _buildInfoRow(label: "Datum aktiviranja:", value: formatirajDatum(widget.aktiviranaPromocija?.datumAktiviranja), icon: Icons.calendar_today,),
+                  _buildInfoRow(label: "Aktivirana:", value: (widget.aktiviranaPromocija?.aktivirana ?? false) ? "Da" : "Ne", icon: Icons.check_circle,),
+                  _buildInfoRow(label: "Iskorištena:", value: (widget.aktiviranaPromocija?.iskoristena ?? false) ? "Da" : "Ne", icon: Icons.done_all,),
                   const SizedBox(height: 25),
                   Align(
                     alignment: Alignment.centerRight,
                     child: SizedBox(
-                      width: 200,
-                      height: 45,
+                      width: 190,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -169,21 +169,25 @@ class _AdminAktiviranaPromocijaDetailsState
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow({required String label, required String value, IconData? icon}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          if (icon != null) ...[
+            Icon(icon, size: 23, color: Colors.black87),
+            const SizedBox(width: 15),
+          ],
           SizedBox(
-            width: 250, 
+            width: 250,
             child: Text(
               label,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
-              softWrap: true,   
+              softWrap: true,
             ),
           ),
           const SizedBox(width: 30),

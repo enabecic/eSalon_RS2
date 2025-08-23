@@ -98,6 +98,7 @@ class _AdminUpravljanjeUslugamaScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(130, 63),
             ),
             child: const Text("Očisti"),
           ),
@@ -153,6 +154,7 @@ class _AdminUpravljanjeUslugamaScreenState
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(150, 63),
             ),
             child: const Text("Dodaj novu"),
           ),
@@ -189,10 +191,14 @@ class _AdminUpravljanjeUslugamaScreenState
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Naziv")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva (25 karaktera).",
+                          child: Text("Naziv"),
+                        ),
+                      ),
                       DataColumn(label: Text("Cijena")),
                       DataColumn(label: Text("Trajanje")),
-                      //DataColumn(label: Text("Datum objavljivanja")),
                       DataColumn(label: Text("Slika")),
                       DataColumn(
                         label: Tooltip(
@@ -289,7 +295,11 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.naziv ?? ''),
+            child: Text(
+              (item.naziv != null && item.naziv!.length > 25)
+                  ? '${item.naziv!.substring(0, 25)}...'
+                  : (item.naziv ?? ''),
+            ),
           ),
         ),
         DataCell(
@@ -431,6 +441,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
+              minimumSize: const Size(120, 50),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text("Obriši"),

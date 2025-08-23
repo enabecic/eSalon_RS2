@@ -192,7 +192,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  minimumSize: const Size(150, 50), 
+                  minimumSize: const Size(190, 53), 
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
                 icon: const Icon(

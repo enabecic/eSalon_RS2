@@ -250,7 +250,7 @@ namespace eSalon.Services
             var trenutnoVrijeme = DateTime.Now;
 
             if (datumIVrijeme > trenutnoVrijeme)
-                throw new UserException("Rezervacija još nije završena. Može se označiti kao završena tek nakon završetka termina.");
+                throw new UserException("Rezervacija još nije izvršena. Može se označiti kao završena tek nakon završetka termina.");
 
             var state = _baseRezervacijaState.CreateState(rezervacija.StateMachine);
             return await state.Zavrsena(rezervacijaId, cancellationToken);

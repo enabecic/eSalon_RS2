@@ -116,6 +116,7 @@ class _AdminRecenzijaScreenState extends State<AdminRecenzijaScreen> {
                   backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                   foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size(150, 63),
                 ),
                 child: const Text("Očisti"),
               ),
@@ -190,7 +191,12 @@ class _AdminRecenzijaScreenState extends State<AdminRecenzijaScreen> {
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Korisničko ime")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija korisničkog imena (20 karaktera).",
+                          child: Text("Korisničko ime"),
+                        ),
+                      ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija komentara (30 karaktera).",
@@ -314,7 +320,11 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.korisnickoIme ?? ''),
+            child: Text(
+              (item.korisnickoIme != null && item.korisnickoIme!.length > 20)
+                  ? '${item.korisnickoIme!.substring(0, 20)}...'
+                  : item.korisnickoIme ?? '',
+            ),
           ),
         ),
         DataCell(
@@ -343,10 +353,11 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
           TextButton(
             style: TextButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-                      foregroundColor: const Color.fromARGB(199, 0, 0, 0),
+              foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
+              minimumSize: const Size(120, 50),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
             onPressed: () async {

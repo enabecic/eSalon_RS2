@@ -55,271 +55,280 @@ class _AdminUpravljanjeUslugamaScreenState
   }
 
   Widget _buildSearch() {
-  return Padding(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _nazivController,
-                decoration: InputDecoration(
-                  labelText: 'Naziv ili opis promocije',
-                  filled: true,
-                  fillColor: MaterialStateColor.resolveWith((states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return const Color(0xFFE0D7F5);
-                    }
-                    if (states.contains(MaterialState.focused)) {
-                      return const Color(0xFFF5F5F5);
-                    }
-                    return Colors.white;
-                  }),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        BorderSide(color: Colors.grey.shade500, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        BorderSide(color: Colors.grey.shade600, width: 2.0),
-                  ),
-                ),
-                onChanged: (value) {
-                  _source.nazivFilter = value;
-                  _source.filterServerSide();
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                if (!mounted) return;
-                setState(() {
-                  _nazivController.clear();
-                  _source.nazivFilter = '';
-                  _source.samoAktivne = null;
-                  _source.samoBuduce = null;
-                  _source.samoProsle = null;
-                  _popustRange = const RangeValues(0, 100);
-                  _source.popustGTE = 0;
-                  _source.popustLTE = 100;
-                });
-                _source.filterServerSide();
-              },
-
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-                foregroundColor: const Color.fromARGB(199, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text("Očisti"),
-            ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () async {
-                var result = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const AdminPromocijaDetails(),
-                  ),
-                );
-                if (result == true) {
-                  final refreshed = await _promocijaProvider.get(
-                    filter: {
-                      'nazivOpisFTS': _source.nazivFilter,
-                      if (_source.samoAktivne != null)
-                        'samoAktivne': _source.samoAktivne,
-                      if (_source.samoBuduce != null)
-                        'samoBuduce': _source.samoBuduce,
-                      if (_source.samoProsle != null)
-                        'samoProsle': _source.samoProsle,
-                    },
-                    page: 1,
-                    pageSize: _source.pageSize,
-                  );
-                  int lastPage = (refreshed.count / _source.pageSize).ceil();
-                  await _source.reset(targetPage: lastPage);
-                  if (!mounted) return;
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        title: const Text("Dodano"),
-                        content:
-                            const Text("Promocija je uspješno dodana."),
-                        actions: [
-                          ElevatedButton(
-                            onPressed: () =>
-                                Navigator.of(context).pop(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "OK",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-                foregroundColor: const Color.fromARGB(199, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text("Dodaj novu"),
-            ),
-          ],
-        ),
-const SizedBox(height: 20),
-
-Row(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-    Expanded(
-      flex: 2,
-      child: Wrap(
-        spacing: 10,
-        children: [
-          FilterChip(
-            label: const Text("Sve"),
-            selected: _source.samoAktivne == null &&
-                _source.samoBuduce == null &&
-                _source.samoProsle == null,
-            onSelected: (_) {
-              if (!mounted) return;
-              setState(() {
-                _source.samoAktivne = null;
-                _source.samoBuduce = null;
-                _source.samoProsle = null;
-              });
-              _source.filterServerSide();
-            },
-            selectedColor: const Color(0xFFE0D7F5),
-            labelStyle: const TextStyle(color: Colors.black),
-            side: const BorderSide(color: Colors.transparent),
-            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
-          FilterChip(
-            label: const Text("Aktivne"),
-            selected: _source.samoAktivne == true,
-            onSelected: (_) {
-              if (!mounted) return;
-              setState(() {
-                _source.samoAktivne = true;
-                _source.samoBuduce = null;
-                _source.samoProsle = null;
-              });
-              _source.filterServerSide();
-            },
-            selectedColor: const Color(0xFFE0D7F5),
-            labelStyle: const TextStyle(color: Colors.black),
-            side: const BorderSide(color: Colors.transparent),
-            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
-          FilterChip(
-            label: const Text("Buduće"),
-            selected: _source.samoBuduce == true,
-            onSelected: (_) {
-              if (!mounted) return;
-              setState(() {
-                _source.samoAktivne = null;
-                _source.samoBuduce = true;
-                _source.samoProsle = null;
-              });
-              _source.filterServerSide();
-            },
-            selectedColor: const Color(0xFFE0D7F5),
-            labelStyle: const TextStyle(color: Colors.black),
-            side: const BorderSide(color: Colors.transparent),
-            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
-          FilterChip(
-            label: const Text("Prošle"),
-            selected: _source.samoProsle == true,
-            onSelected: (_) {
-              if (!mounted) return;
-              setState(() {
-                _source.samoAktivne = null;
-                _source.samoBuduce = null;
-                _source.samoProsle = true;
-              });
-              _source.filterServerSide();
-            },
-            selectedColor: const Color(0xFFE0D7F5),
-            labelStyle: const TextStyle(color: Colors.black),
-            side: const BorderSide(color: Colors.transparent),
-            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
-        ],
-      ),
-    ),
-    const SizedBox(width: 20),
-    Expanded(
-      flex: 3,
+    return Padding(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Popust od - do (%)', style: TextStyle(fontWeight: FontWeight.normal)),
-          RangeSlider(
-            values: _popustRange,
-            min: 0,
-            max: 100,
-            divisions: 20,
-            labels: RangeLabels(
-              '${_popustRange.start.round()}%',
-              '${_popustRange.end.round()}%',
-            ),
-            onChanged: (values) {
-              if (!mounted) return;
-              setState(() {
-                _popustRange = values;
-                _source.popustGTE = values.start;
-                _source.popustLTE = values.end;
-              });
-              _source.filterServerSide();
-            },
-          ),
-              Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${_popustRange.start.round()}%'),
-                      Text('${_popustRange.end.round()}%'),
-                    ],
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _nazivController,
+                  decoration: InputDecoration(
+                    labelText: 'Naziv ili opis promocije',
+                    filled: true,
+                    fillColor: MaterialStateColor.resolveWith((states) {
+                      if (states.contains(MaterialState.hovered)) {
+                        return const Color(0xFFE0D7F5);
+                      }
+                      if (states.contains(MaterialState.focused)) {
+                        return const Color(0xFFF5F5F5);
+                      }
+                      return Colors.white;
+                    }),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade500, width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade600, width: 2.0),
+                    ),
                   ),
-                  ],
+                  onChanged: (value) {
+                    _source.nazivFilter = value;
+                    _source.filterServerSide();
+                  },
                 ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  if (!mounted) return;
+                  setState(() {
+                    _nazivController.clear();
+                    _source.nazivFilter = '';
+                    _source.samoAktivne = null;
+                    _source.samoBuduce = null;
+                    _source.samoProsle = null;
+                    _popustRange = const RangeValues(0, 100);
+                    _source.popustGTE = 0;
+                    _source.popustLTE = 100;
+                  });
+                  _source.filterServerSide();
+                },
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                  foregroundColor: const Color.fromARGB(199, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(130, 63),
+                ),    
+                child: const Text("Očisti"),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () async {
+                  var result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AdminPromocijaDetails(),
+                    ),
+                  );
+                  if (result == true) {
+                    final refreshed = await _promocijaProvider.get(
+                      filter: {
+                        'NazivOpisFTS': _source.nazivFilter,
+                        if (_source.samoAktivne != null)
+                          'SamoAktivne': _source.samoAktivne,
+                        if (_source.samoBuduce != null)
+                          'SamoBuduce': _source.samoBuduce,
+                        if (_source.samoProsle != null)
+                          'SamoProsle': _source.samoProsle,
+                      },
+                      page: 1,
+                      pageSize: _source.pageSize,
+                    );
+                    int lastPage = (refreshed.count / _source.pageSize).ceil();
+                    await _source.reset(targetPage: lastPage);
+                    if (!mounted) return;
+                    await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          title: const Text("Dodano"),
+                          content:
+                              const Text("Promocija je uspješno dodana."),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                "OK",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                  foregroundColor: const Color.fromARGB(199, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size(150, 63),
+                ),
+                child: const Text("Dodaj novu"),
               ),
             ],
           ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Wrap(
+                  spacing: 10,
+                  children: [
+                    FilterChip(
+                      label: const Text("Sve"),
+                      selected: _source.samoAktivne == null &&
+                          _source.samoBuduce == null &&
+                          _source.samoProsle == null,
+                      onSelected: (_) {
+                        if (!mounted) return;
+                        setState(() {
+                          _source.samoAktivne = null;
+                          _source.samoBuduce = null;
+                          _source.samoProsle = null;
+                        });
+                        _source.filterServerSide();
+                      },
+                      selectedColor: const Color(0xFFE0D7F5),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      side: const BorderSide(color: Colors.transparent),
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10), 
+                      visualDensity: const VisualDensity(vertical: 0), 
+                    ),
+                    FilterChip(
+                      label: const Text("Aktivne"),
+                      selected: _source.samoAktivne == true,
+                      onSelected: (_) {
+                        if (!mounted) return;
+                        setState(() {
+                          _source.samoAktivne = true;
+                          _source.samoBuduce = null;
+                          _source.samoProsle = null;
+                        });
+                        _source.filterServerSide();
+                      },
+                      selectedColor: const Color(0xFFE0D7F5),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      side: const BorderSide(color: Colors.transparent),
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10), 
+                      visualDensity: const VisualDensity(vertical: 0), 
+                    ),
+                    FilterChip(
+                      label: const Text("Buduće"),
+                      selected: _source.samoBuduce == true,
+                      onSelected: (_) {
+                        if (!mounted) return;
+                        setState(() {
+                          _source.samoAktivne = null;
+                          _source.samoBuduce = true;
+                          _source.samoProsle = null;
+                        });
+                        _source.filterServerSide();
+                      },
+                      selectedColor: const Color(0xFFE0D7F5),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      side: const BorderSide(color: Colors.transparent),
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10), 
+                      visualDensity: const VisualDensity(vertical: 0), 
+                    ),
+                    FilterChip(
+                      label: const Text("Prošle"),
+                      selected: _source.samoProsle == true,
+                      onSelected: (_) {
+                        if (!mounted) return;
+                        setState(() {
+                          _source.samoAktivne = null;
+                          _source.samoBuduce = null;
+                          _source.samoProsle = true;
+                        });
+                        _source.filterServerSide();
+                      },
+                      selectedColor: const Color(0xFFE0D7F5),
+                      labelStyle: const TextStyle(color: Colors.black),
+                      side: const BorderSide(color: Colors.transparent),
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), 
+                      visualDensity: const VisualDensity(vertical: 0), 
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Popust od - do (%)', style: TextStyle(fontWeight: FontWeight.normal)),
+                    RangeSlider(
+                      values: _popustRange,
+                      min: 0,
+                      max: 100,
+                      divisions: 20,
+                      labels: RangeLabels(
+                        '${_popustRange.start.round()}%',
+                        '${_popustRange.end.round()}%',
+                      ),
+                      onChanged: (values) {
+                        if (!mounted) return;
+                        setState(() {
+                          _popustRange = values;
+                          _source.popustGTE = values.start;
+                          _source.popustLTE = values.end;
+                        });
+                        _source.filterServerSide();
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${_popustRange.start.round()}%'),
+                        Text('${_popustRange.end.round()}%'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTable() {
     return Flexible(
@@ -349,9 +358,19 @@ Row(
                     showCheckboxColumn: false,
                     dataRowHeight: 80,
                     columns: const [
-                      DataColumn(label: Text("Naziv promocije")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva promocije (30 karaktera).",
+                          child: Text("Naziv promocije"),
+                        ),
+                      ),
                       DataColumn(label: Text("Popust")),
-                      DataColumn(label: Text("Naziv usluge")),
+                      DataColumn(
+                        label: Tooltip(
+                          message: "Prikazuje se skraćena verzija naziva usluge (20 karaktera).",
+                          child: Text("Naziv usluge"),
+                        ),
+                      ),
                       DataColumn(label: Text("Slika usluge")),
                       DataColumn(
                         label: Tooltip(
@@ -453,7 +472,11 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.naziv ?? ''),
+            child: Text(
+              (item.naziv != null && item.naziv!.length > 30)
+                  ? '${item.naziv!.substring(0, 30)}...'
+                  : (item.naziv ?? ''),
+            ),
           ),
         ),
         DataCell(
@@ -465,7 +488,11 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
-            child: Text(item.uslugaNaziv ?? ''),
+            child: Text(
+              (item.uslugaNaziv != null && item.uslugaNaziv!.length > 20)
+                  ? '${item.uslugaNaziv!.substring(0, 20)}...'
+                  : (item.uslugaNaziv ?? ''),
+            ),
           ),
         ),  
         DataCell(
@@ -512,7 +539,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
                 builder: (dialogContext) => AlertDialog(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   title: const Text("Potvrda brisanja"),
-                  content: const Text("Da li želite obrisati uslugu?"),
+                  content: const Text("Da li želite obrisati promociju?"),
                   actions: [
                     ElevatedButton(
                       onPressed: () => Navigator.pop(dialogContext, false),
@@ -588,6 +615,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
               foregroundColor: const Color.fromARGB(199, 0, 0, 0),
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(120, 50),
             ),
             child: const Text("Obriši"),
           ),
@@ -605,12 +633,12 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
 
     final result = await provider.get(
       filter: {
-        'nazivOpisFTS': nazivFilter,
-        'samoAktivne': samoAktivne,
-        'samoBuduce': samoBuduce,
-        'samoProsle': samoProsle, 
-        if (popustGTE != null) 'popustGTE': popustGTE,
-        if (popustLTE != null) 'popustLTE': popustLTE,
+        'NazivOpisFTS': nazivFilter,
+        'SamoAktivne': samoAktivne,
+        'SamoBuduce': samoBuduce,
+        'SamoProsle': samoProsle, 
+        if (popustGTE != null) 'PopustGTE': popustGTE,
+        if (popustLTE != null) 'PopustLTE': popustLTE,
       },
       page: newPage,
       pageSize: pageSize,
@@ -623,12 +651,12 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
       final fallbackPage = newPage - 1;
       final fallbackResult = await provider.get(
         filter: {
-          'nazivOpisFTS': nazivFilter,
-          'samoAktivne': samoAktivne,
-          'samoBuduce': samoBuduce,
-          'samoProsle': samoProsle,
-          if (popustGTE != null) 'popustGTE': popustGTE,
-          if (popustLTE != null) 'popustLTE': popustLTE,
+          'NazivOpisFTS': nazivFilter,
+          'SamoAktivne': samoAktivne,
+          'SamoBuduce': samoBuduce,
+          'SamoProsle': samoProsle,
+          if (popustGTE != null) 'PopustGTE': popustGTE,
+          if (popustLTE != null) 'PopustLTE': popustLTE,
         },
         page: fallbackPage,
         pageSize: pageSize,

@@ -158,6 +158,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            minimumSize: const Size(100, 52), 
                           ),
                           child: const Text(
                             'Očisti filter',
@@ -181,7 +182,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                       foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(160, 50), 
+                      minimumSize: const Size(160, 53), 
                     ),
                     child: const Text(
                       "Sačuvaj izvještaj",

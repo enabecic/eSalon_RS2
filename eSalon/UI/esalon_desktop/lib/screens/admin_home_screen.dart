@@ -196,6 +196,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            minimumSize: const Size(160, 53),
                           ),
                           child: const Text(
                             'Očisti filter',
@@ -219,7 +220,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                      minimumSize: const Size(160, 50), 
+                      minimumSize: const Size(160, 53), 
                     ),
                     child: const Text(
                       "Sačuvaj izvještaj",
