@@ -405,6 +405,13 @@ class _AdminUrediDodajUsluguScreenState
                             FormBuilderValidators.integer(errorText: "Unesite cijeli broj."),
                             FormBuilderValidators.min(10, errorText: "Trajanje mora biti najmanje 10 minuta."),
                             FormBuilderValidators.max(300, errorText: "Trajanje ne može biti veće od 300 minuta."),
+                            (val) {
+                              if (val == null || val.isEmpty) return null;
+                              final num = int.tryParse(val);
+                              if (num == null) return "Neispravan broj";
+                              if (num % 5 != 0) return "Unesite trajanje u periodima od 5 minuta, npr. 10, 15, 20 …";
+                              return null;
+                            },
                           ]),
                         ),
                       ),

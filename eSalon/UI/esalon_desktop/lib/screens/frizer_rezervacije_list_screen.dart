@@ -1,4 +1,5 @@
 import 'package:esalon_desktop/models/korisnik.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/screens/detalji_rezervacije_screen.dart';
 import 'package:flutter/material.dart';
@@ -582,7 +583,7 @@ double _lastScrollOffsetHistorija = 0;
                 });
               },
               child: InkWell(
-                  onTap: () async {
+                onTap: () async {
                   _lastActiveTab = _tabController.index;
 
                   if (_tabController.index == 0) {
@@ -606,117 +607,165 @@ double _lastScrollOffsetHistorija = 0;
                     }
                   }
                 },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(15),
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: isHovered ? const Color(0xFFE0D7F5) : Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Rezervacija #${e.sifra}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      if (e.stateMachine == "kreirana")
-                        Text(
-                          "Rezervacija #${e.sifra} još uvijek nije odobrena od strane frizera.",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      if (e.stateMachine == "odobrena")
-                        Text(
-                          "Rezervacija #${e.sifra} je odobrena od strane frizera.",
-                          style:  TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      Text(
-                        "Datum rezervacije: ${formatDate(e.datumRezervacije.toString())}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      Text(
-                        "Frizer: ${e.frizerImePrezime}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        stavkeRezervacijeResult?.result
-                                .where((stavka) => stavka.rezervacijaId == e.rezervacijaId)
-                                .map((stavka) => stavka.uslugaNaziv ?? 'Nepoznato')
-                                .join(", ") ??
-                            'Nema stavki',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Divider(
-                        color: Colors.deepPurple,
-                        thickness: 1,
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              "${stavkeRezervacijeResult?.result.where((stavka) => stavka.rezervacijaId == e.rezervacijaId).length ?? 0} usluga/e",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              "Ukupan iznos: ${formatNumber(e.ukupnaCijena)} KM",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                child: Stack(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(15),
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: isHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                    ],
-                  ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                e.stateMachine == "kreirana"
+                                    ? Icons.calendar_today_outlined
+                                    : Icons.event_available_outlined,
+                                color: Colors.black,
+                                size: e.stateMachine == "kreirana" ? 22 : 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Rezervacija #${e.sifra}",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (e.stateMachine == "kreirana")
+                            Text(
+                              "Rezervacija #${e.sifra} još uvijek nije odobrena od strane frizera.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          if (e.stateMachine == "odobrena")
+                            Text(
+                              "Rezervacija #${e.sifra} je odobrena od strane frizera.",
+                              style:  TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          Text(
+                            "Datum rezervacije: ${formatDate(e.datumRezervacije.toString())}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            "Frizer: ${e.frizerImePrezime}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            stavkeRezervacijeResult?.result
+                                    .where((stavka) => stavka.rezervacijaId == e.rezervacijaId)
+                                    .map((stavka) => stavka.uslugaNaziv ?? 'Nepoznato')
+                                    .join(", ") ?? 'Nema stavki',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Divider(
+                            color: Colors.deepPurple,
+                            thickness: 1,
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  "${stavkeRezervacijeResult?.result.where((stavka) => stavka.rezervacijaId == e.rezervacijaId).length ?? 0} usluga/e",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  "Ukupan iznos: ${formatNumber(e.ukupnaCijena)} KM",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+
+                    if (isHovered) Positioned(
+                      bottom: 8,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            () {
+                              if (AuthProvider.korisnikId == e.frizerId) {
+                                if (e.stateMachine == "kreirana") {
+                                  return "Klikni za detalje i da odobriš rezervaciju.";
+                                } else if (e.stateMachine == "odobrena") {
+                                  return "Klikni za detalje i da završiš rezervaciju.";
+                                }
+                              }
+                              return "Klikni za detalje";
+                            }(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -751,7 +800,8 @@ double _lastScrollOffsetHistorija = 0;
         ],
       ),
     );
-  }
+}
+
 
   void _loadFiltered() async {
     if (!mounted) return;
@@ -809,7 +859,6 @@ double _lastScrollOffsetHistorija = 0;
     });
   }
 
-
   Widget _buildHistorijaRezervacija() {
     return SingleChildScrollView(
       controller: scrollControllerHistorija,
@@ -840,6 +889,7 @@ double _lastScrollOffsetHistorija = 0;
             int index = entry.key;
             var e = entry.value;
             bool isHovered = hoverMap[index] ?? false;
+
             return MouseRegion(
               onEnter: (_) {
                 setState(() {
@@ -852,116 +902,156 @@ double _lastScrollOffsetHistorija = 0;
                 });
               },
               child: InkWell(
-                    onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DetaljiRezervacijeScreen(rezervacija: e),
-                      ),
-                    );
-                  },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(15),
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: isHovered ? const Color(0xFFE0D7F5) : Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Rezervacija #${e.sifra}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      Text(
-                        "Status rezervacije: ${e.stateMachine}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      Text(
-                        "Datum rezervacije: ${formatDate(e.datumRezervacije.toString())}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      Text(
-                        "Frizer: ${e.frizerImePrezime}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        stavkeRezervacijeResult != null && stavkeRezervacijeResult!.result.isNotEmpty
-                            ? stavkeRezervacijeResult!.result
-                                .where((stavka) => stavka.rezervacijaId == e.rezervacijaId)
-                                .map((stavka) => stavka.uslugaNaziv ?? "Nepoznata usluga")
-                                .join(", ")
-                            : "Nema stavki",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Divider(
-                        color: Colors.deepPurple,
-                        thickness: 1,
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              "${stavkeRezervacijeResult?.result.where((stavka) => stavka.rezervacijaId == e.rezervacijaId).length ?? 0} usluga/e",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              "Ukupan iznos: ${formatNumber(e.ukupnaCijena)} KM",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+                },
+                child: Stack(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(15),
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: isHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                    ],
-                  ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                e.stateMachine == "zavrsena"
+                                    ? Icons.check_circle_outline
+                                    : Icons.cancel_outlined,
+                                color: Colors.black,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Rezervacija #${e.sifra}",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "Status rezervacije: ${e.stateMachine}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            "Datum rezervacije: ${formatDate(e.datumRezervacije.toString())}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            "Frizer: ${e.frizerImePrezime}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            stavkeRezervacijeResult != null && stavkeRezervacijeResult!.result.isNotEmpty
+                                ? stavkeRezervacijeResult!.result
+                                    .where((stavka) => stavka.rezervacijaId == e.rezervacijaId)
+                                    .map((stavka) => stavka.uslugaNaziv ?? "Nepoznata usluga")
+                                    .join(", ")
+                                : "Nema stavki",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Divider(
+                            color: Colors.deepPurple,
+                            thickness: 1,
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  "${stavkeRezervacijeResult?.result.where((stavka) => stavka.rezervacijaId == e.rezervacijaId).length ?? 0} usluga/e",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  "Ukupan iznos: ${formatNumber(e.ukupnaCijena)} KM",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+
+                    if (isHovered)
+                      Positioned(
+                        bottom: 8,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              "Klikni za detalje",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );

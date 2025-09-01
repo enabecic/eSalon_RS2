@@ -332,7 +332,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                           getTooltipItems: (touchedSpots) {
                             return touchedSpots.map((spot) {
                               return LineTooltipItem(
-                                '${spot.y.toInt()} rezervacija',
+                                '${spot.y.toInt()} rezervacija/e',
                                 const TextStyle(
                                   color: Colors.black,
                                   fontSize: 12,

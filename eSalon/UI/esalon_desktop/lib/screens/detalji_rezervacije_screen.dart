@@ -469,7 +469,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Text("Odobri"),
+                    child: const Text("Odobri rezervaciju"),
                   ),
                 if (widget.rezervacija?.stateMachine == "odobrena") 
                 ElevatedButton(
@@ -598,7 +598,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: const Text("Završi"),
+                  child: const Text("Završi rezervaciju"),
                 ),
               ],
               const Spacer(),

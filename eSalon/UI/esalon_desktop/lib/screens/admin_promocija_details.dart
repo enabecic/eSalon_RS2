@@ -331,7 +331,7 @@ class _AdminPromocijaDetailsState
                           name: 'popust',
                           decoration: InputDecoration(
                             labelText: 'Popust (%)',
-                            hintText: 'Unesite popust (1 - 100)',
+                            hintText: 'Unesite popust (5 - 100)',
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -356,8 +356,15 @@ class _AdminPromocijaDetailsState
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.required(errorText: "Obavezno polje."),
                             FormBuilderValidators.integer(errorText: "Unesite cijeli broj."),
-                            FormBuilderValidators.min(1, errorText: "Minimalni popust je 1%"),
+                            FormBuilderValidators.min(5, errorText: "Minimalni popust je 5%"),
                             FormBuilderValidators.max(100, errorText: "Maksimalni popust je 100%"),
+                            (val) {
+                              if (val == null || val.isEmpty) return null;
+                              final num = int.tryParse(val);
+                              if (num == null) return "Neispravan broj";
+                              if (num % 5 != 0) return "Unesite popust u periodima od 5%, npr. 5, 10, 15 …";
+                              return null;
+                            },
                           ]),
                         ),
                       ),

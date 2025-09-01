@@ -72,9 +72,9 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   
   @override
   Widget build(BuildContext context) {
-    if (ulogeResult == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    // if (ulogeResult == null) {
+    //   return const Center(child: CircularProgressIndicator());
+    // }
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 251, 240, 255),
       body: Column(
@@ -125,6 +125,9 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   }
 
   Widget _buildForm() {
+    if (ulogeResult == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return SingleChildScrollView(
       child: FormBuilder(
         key: _formKey,
