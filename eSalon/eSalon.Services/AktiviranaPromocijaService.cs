@@ -192,7 +192,8 @@ namespace eSalon.Services
          .FirstOrDefaultAsync(x => x.KorisnikId == korisnikId && x.PromocijaId == promocijaId && !x.IsDeleted, cancellationToken);
 
             if (aktiviranaPromocija == null)
-                throw new KeyNotFoundException("Aktivirana promocija nije pronađena.");
+               // throw new KeyNotFoundException("Aktivirana promocija nije pronađena.");
+                throw new UserException("Aktivirana promocija nije pronađena.");
 
             if (aktiviranaPromocija.Iskoristena)
                 throw new UserException("Promocija je već označena kao iskorištena.");
