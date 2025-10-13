@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                                           AuthProvider.uloge!.contains("Klijent")) {  
                                             if (!context.mounted) return;     
                                               Navigator.of(context).push(MaterialPageRoute(
-                                              builder: (context) => MasterScreen()));                   
+                                              builder: (context) => const MasterScreen()));                   
                                       }                             
                                       else {
                                         if (!context.mounted) return;
@@ -264,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () {
                                           Navigator.of(context).push(MaterialPageRoute(
-                                            builder: (context) => RegistracijaScreen(),
+                                            builder: (context) => const RegistracijaScreen(),
                                           ));
                                         },
                                     ),
@@ -298,7 +298,7 @@ class _LoginPageState extends State<LoginPage> {
                                           AuthProvider.jeAktivan = false;
                                           AuthProvider.uloge = null;
                                           Navigator.of(context).push(
-                                            MaterialPageRoute(builder: (context) => MasterScreen()),
+                                            MaterialPageRoute(builder: (context) => const MasterScreen()),
                                           );
                                         },
                                     ),
