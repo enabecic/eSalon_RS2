@@ -1,72 +1,74 @@
 import 'dart:convert';
-import 'package:esalon_desktop/screens/korisnik_profile_edit_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:esalon_desktop/providers/auth_provider.dart';
+import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/providers/auth_provider.dart';
 
 class KorisnikProfileScreen extends StatefulWidget {
- const KorisnikProfileScreen({super.key});
+  const KorisnikProfileScreen({super.key});
 
   @override
   State<KorisnikProfileScreen> createState() => _KorisnikProfileScreenState();
 }
 
 class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
-
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 251, 240, 255),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 251, 240, 255),
-                    padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
-                    child: const Text(
-                      "Profil",
-                      style: TextStyle(
-                        fontSize: 26,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  _buildHeader(),
-                  const SizedBox(height: 30),
-                  _buildPage(),
-                ],
+      backgroundColor: Colors.white, 
+      body: SafeArea( 
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(0),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    _buildPage(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            // Positioned(
+            //   top: 20,
+            //   left: 10,
+            //   child: IconButton(
+            //     icon: const Icon(
+            //       Icons.arrow_back,
+            //       color: Colors.white,
+            //     ),
+            //     onPressed: () {
+            //       Navigator.pop(context, true);
+            //     },
+            //   ),
+            // ),
+            _buildFooter(),
+          ],
+        ),
       ),
     );
   }
-
 
   Widget _buildHeader() {
     return Column(
       children: [
         Container(
-          color: const Color.fromARGB(255, 251, 240, 255),
-          height: 100,
+          //color: const Color.fromARGB(255, 255, 251, 255),
+          color: const Color.fromARGB(255, 247, 244, 247),
+          //height: 100,
+          height: MediaQuery.of(context).size.height * 0.12,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Positioned(
-                top: 20,
+                top: 40,
                 left: 0,
                 right: 0,
                 child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                    width: 200,
-                    height: 200,
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(20),
@@ -104,10 +106,11 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
+        // color: Colors.white,
         width: double.infinity,
-        margin: const EdgeInsets.only(top: 150),
+        //margin: const EdgeInsets.only(top: 100),
+        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               decoration: BoxDecoration(
@@ -144,7 +147,6 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 ),
               ),
             ),
-
             Container(
               margin: const EdgeInsets.only(top: 20),
               decoration: BoxDecoration(
@@ -181,52 +183,93 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 ),
               ),
             ),
-
-            const SizedBox(height: 50),
-            Align(
-              alignment: Alignment.centerRight,  
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 180, 140, 218), 
-                  foregroundColor: const Color.fromARGB(199, 0, 0, 0), 
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  minimumSize: const Size(190, 53), 
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-                icon: const Icon(
-                  Icons.edit,
-                ),
-                label: const Text(
-                  "Uredi profil",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const KorisnikProfilEditScreen()),
-                  ).then((value) {
-                    if (value == true) {
-                      if (!mounted) return;
-                      setState(() {});
-                    }
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 40), 
           ],
         ),
       ),
     );
   }
 
+  Widget _buildFooter() {
+    return Align(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              bottom: 0,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 173, 178, 178),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  fixedSize: const Size(double.infinity, 40),
+                ),
+                icon: const Icon(
+                  Icons.edit,
+                  color: Colors.black,
+                ),
+                label: const Center(
+                  child: Text(
+                    "Uredi profil",
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                onPressed: () {
+                  print("Kliknuto na Uredi profil!");
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (context) => KorisnikProfileEditScreen()),
+                  // ).then((value) {
+                  //   if (value == true) {
+                  //     setState(() {});
+                  //   }
+                  // });
+                },
+              ),
+            ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 210, 193, 214),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  fixedSize: const Size(double.infinity, 40),
+                ),
+                icon: const Icon(Icons.logout, color: Colors.black),
+                label: const Center(
+                  child: Text(
+                    "Odjavi se",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                onPressed: () {
+                  AuthProvider.datumRegistracije = null;
+                  AuthProvider.email = null;
+                  AuthProvider.ime = null;
+                  AuthProvider.korisnikId = null;
+                  AuthProvider.prezime = null;
+                  AuthProvider.slika = null;
+                  AuthProvider.telefon = null;
+                  AuthProvider.username = null;
+                  AuthProvider.password = null;
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const MyApp()));
+
+                  setState(() {});
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
-
-
-

@@ -1,3 +1,4 @@
+import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class _MasterScreenState extends State<MasterScreen> {
   final List<Widget> _pages = [
     const Center(child: Text("Početna stranica")),
     const Center(child: Text("Moje usluge (Korpa)")),
-    const Center(child: Text("Moj profil")),
+    const KorisnikProfileScreen(),
     const Center(child: Text("Favoriti")),
     const Center(child: Text("Sve usluge")),
     const Center(child: Text("Moje rezervacije")),
@@ -44,6 +45,7 @@ class _MasterScreenState extends State<MasterScreen> {
           child: AppBar(
             elevation: 0,
             //backgroundColor: Colors.white,
+            backgroundColor: const Color.fromARGB(255, 247, 244, 247),
             automaticallyImplyLeading: false,
             centerTitle: false,
             toolbarHeight: kToolbarHeight + 25,
