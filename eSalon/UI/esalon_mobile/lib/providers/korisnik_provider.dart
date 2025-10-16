@@ -61,6 +61,25 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
     } 
   }
 
+  Future<void> deaktiviraj(int korisnikId) async {
+    var url = "${BaseProvider.baseUrl}Korisnik/Deaktiviraj/$korisnikId";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    try {
+      var response = await http.put(uri, headers: headers);
+
+      if (!isValidResponse(response)) {
+        throw UserException("Greška prilikom deaktivacije korisnika.");
+      }
+    } catch (e) {
+      if (e is UserException) {
+        rethrow;
+      }
+      throw UserException("Greška prilikom deaktivacije korisnika: ${e.toString()}");
+    }
+  }
+  
 }
 
 
