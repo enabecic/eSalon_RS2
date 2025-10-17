@@ -19,7 +19,7 @@ namespace eSalon.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Klijent,Admin,Frizer")]
+        [AllowAnonymous]
         public override Task<PagedResult<Uloga>> GetList([FromQuery] UlogaSearchObject searchObject, CancellationToken cancellationToken = default)
         {
             return base.GetList(searchObject, cancellationToken);

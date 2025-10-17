@@ -292,8 +292,17 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                           },
                         ),
                       ),
-                      validator: FormBuilderValidators.required(
-                          errorText: 'Stara lozinka je obavezna.'),
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return 'Stara lozinka je obavezna.';
+                        }
+
+                        if (val != AuthProvider.password) {
+                          return 'Unesite ispravnu lozinku.';
+                        }
+
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 15),

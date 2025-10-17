@@ -509,7 +509,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Text(
-                  "Napomena: Printanje podataka će biti omogućeno nakon dodavanja frizera.",
+                  "Napomena: Generisanje PDF-a sa podacima će biti omogućeno nakon dodavanja frizera.",
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,
@@ -665,7 +665,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text("Uspješno dodan frizer!"),
-                        content: const Text("Da li želite isprintati podatke o frizeru?"),
+                        content: const Text("Želite li generisati PDF sa podacima o frizeru?"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),

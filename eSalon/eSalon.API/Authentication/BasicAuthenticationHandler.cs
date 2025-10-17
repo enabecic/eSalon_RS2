@@ -1,6 +1,7 @@
 ﻿using eSalon.Model.Requests;
 using eSalon.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -27,6 +28,11 @@ namespace eSalon.API.Authentication
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            if (Context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+            {
+                return AuthenticateResult.NoResult();
+            }
+
             if (!Request.Headers.ContainsKey("Authorization"))
                 return AuthenticateResult.NoResult();
 

@@ -42,8 +42,8 @@ class KorisnikProvider extends BaseProvider<Korisnik> {
       var data = jsonDecode(response.body);
       var korisnik=fromJson(data);
 
-      //AuthProvider.username = korisnik.korisnickoIme;
-      //AuthProvider.password = password;
+      AuthProvider.username = korisnik.korisnickoIme;
+      AuthProvider.password = password;
       AuthProvider.korisnikId = korisnik.korisnikId;
       AuthProvider.ime = korisnik.ime;
       AuthProvider.prezime = korisnik.prezime;

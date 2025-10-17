@@ -35,17 +35,6 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
     _loadKorisnik();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _provider = context.read<KorisnikProvider>();
-
-  //   // Poziv _loadKorisnik nakon što se build završi
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     _loadKorisnik();
-  //   });
-  // }
-
   Future<void> _loadKorisnik() async {
     try {
       if (AuthProvider.korisnikId == null) {
@@ -118,7 +107,15 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const SizedBox(height: 10),
+                                        const Text(
+                                          "Korisnički podaci",
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 30),
                                         Container(
                                           margin: const EdgeInsets.only(bottom: 12),
                                           decoration: BoxDecoration(
@@ -571,7 +568,17 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                       },
                     ),
                   ),
-                  validator: FormBuilderValidators.required(errorText: 'Stara lozinka je obavezna.'),
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
+                      return 'Stara lozinka je obavezna.';
+                    }
+
+                    if (val != AuthProvider.password) {
+                      return 'Unesite ispravnu lozinku.';
+                    }
+
+                    return null;
+                  },
                 ),
               ),
               // Nova lozinka

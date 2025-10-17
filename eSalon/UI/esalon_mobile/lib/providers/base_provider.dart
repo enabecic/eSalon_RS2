@@ -172,6 +172,19 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
   }
 
+  // Map<String, String> createHeaders() {
+  //   final headers = {"Content-Type": "application/json"};
+
+  //   if (AuthProvider.username != null && AuthProvider.username!.isNotEmpty &&
+  //       AuthProvider.password != null && AuthProvider.password!.isNotEmpty) {
+  //     final basicAuth =
+  //         "Basic ${base64Encode(utf8.encode('${AuthProvider.username}:${AuthProvider.password}'))}";
+  //     headers["Authorization"] = basicAuth;
+  //   }
+
+  //   return headers;
+  // }
+
   Map<String, String> createHeaders() {
     String username = AuthProvider.username ?? "";
     String password = AuthProvider.password ?? "";
