@@ -16,6 +16,9 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 
 class AdminHomeScreen extends StatefulWidget {
@@ -65,25 +68,46 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final korisniciResult = await korisnikProvider.get();
-    final rezervacijaResult = await rezervacijaProvider.get();
-    final arhivaResult = await arhivaProvider.get();
-    final recenzijaResult = await recenzijaProvider.get();
-    final usluge = await uslugaProvider.get();
-    final recenzijaOdgovorResult = await recenzijaOdgovorProvider.get();
+    if (!mounted) return;                 
+    if (AuthProvider.korisnikId == null) return;
 
-    rezervacije = rezervacijaResult;
-    uslugeResult = usluge;
-    _izracunajNajtrazenijuUslugu();
-    if (!mounted) return;
-    setState(() {
-      brojKorisnika = korisniciResult.count;
-      brojArhiviranih = arhivaResult.count;
-      brojRecenzija = recenzijaResult.count;
-      brojRecenzijaOdgovor = recenzijaOdgovorResult.count;
+    try {
+      final korisniciResult = await korisnikProvider.get();
+      final rezervacijaResult = await rezervacijaProvider.get();
+      final arhivaResult = await arhivaProvider.get();
+      final recenzijaResult = await recenzijaProvider.get();
+      final usluge = await uslugaProvider.get();
+      final recenzijaOdgovorResult = await recenzijaOdgovorProvider.get();
 
-      isLoading = false; 
-    });
+      rezervacije = rezervacijaResult;
+      uslugeResult = usluge;
+      _izracunajNajtrazenijuUslugu();
+
+      if (!mounted) return;
+      setState(() {
+        brojKorisnika = korisniciResult.count;
+        brojArhiviranih = arhivaResult.count;
+        brojRecenzija = recenzijaResult.count;
+        brojRecenzijaOdgovor = recenzijaOdgovorResult.count;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
 import 'package:esalon_desktop/models/usluga.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/base_provider.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
 import 'package:esalon_desktop/screens/admin_uredi_dodaj_uslugu_screen.dart';
@@ -110,7 +111,7 @@ class _AdminUpravljanjeUslugamaScreenState
               ));
               if (result == true) {
                 final refreshed = await _uslugaProvider.get(
-                  filter: {'nazivOpisFTS': _source.nazivFilter},
+                  filter: {'NazivOpisFTS': _source.nazivFilter},
                   page: 1,
                   pageSize: _source.pageSize,
                 );
@@ -233,9 +234,25 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     required this.provider,
     required this.context,
   });
-
+  
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
+    if (AuthProvider.korisnikId == null) return; 
+    if (!context.mounted) return; 
+    try {
+      await reset(targetPage: page);
+    } catch (e) {
+      if (!context.mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   @override
@@ -459,7 +476,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     final newPage = targetPage ?? page;
 
     final result = await provider.get(
-      filter: {'nazivOpisFTS': nazivFilter},
+      filter: {'NazivOpisFTS': nazivFilter},
       page: newPage,
       pageSize: pageSize,
     );
@@ -470,7 +487,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
       final fallbackResult = await provider.get(
-        filter: {'nazivOpisFTS': nazivFilter},
+        filter: {'NazivOpisFTS': nazivFilter},
         page: fallbackPage,
         pageSize: pageSize,
       );

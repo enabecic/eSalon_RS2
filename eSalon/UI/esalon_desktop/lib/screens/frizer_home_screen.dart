@@ -1,3 +1,4 @@
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/models/search_result.dart';
@@ -11,6 +12,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 
 class FrizerHomeScreen extends StatefulWidget {
@@ -44,17 +47,37 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
     });
   }
 
-
   Future<void> _loadData() async {
-    final korisniciResult = await korisnikProvider.get();
-    final rezervacijaResult = await rezervacijaProvider.get();
-    rezervacije = rezervacijaResult;
     if (!mounted) return;
-    setState(() {
-      brojKorisnika = korisniciResult.count;
+    if (AuthProvider.korisnikId == null) return; 
 
-      isLoading = false; 
-    });
+    try {
+      final korisniciResult = await korisnikProvider.get();
+      final rezervacijaResult = await rezervacijaProvider.get();
+      rezervacije = rezervacijaResult;
+
+      if (!mounted) return;
+      setState(() {
+        brojKorisnika = korisniciResult.count;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   @override

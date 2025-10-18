@@ -3,6 +3,7 @@ import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
 import 'package:esalon_desktop/models/aktivirana_promocija.dart';
 import 'package:esalon_desktop/providers/aktivirana_promocija_provider.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/screens/admin_aktivirana_promocija_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -262,9 +263,26 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
   });
 
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
-  }
+    if (AuthProvider.korisnikId == null) return;
+    if (!context.mounted) return;
 
+    try {
+      await reset(targetPage: page);
+    } catch (e) {
+      if (!context.mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
+  }
+  
   @override
   DataRow? getRow(int index) {
     if (index >= data.length) return null;
@@ -381,9 +399,9 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
 
     final result = await provider.get(
       filter: {
-        'korisnikImePrezime': korisnikImePrezimeFilter,
-        'iskoristena': iskoristenaFilter,
-        'promocijaNaziv': promocijaNazivFilter,
+        'KorisnikImePrezime': korisnikImePrezimeFilter,
+        'Iskoristena': iskoristenaFilter,
+        'PromocijaNaziv': promocijaNazivFilter,
       },
       page: newPage,
       pageSize: pageSize,
@@ -396,9 +414,9 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
       final fallbackPage = newPage - 1;
       final fallbackResult = await provider.get(
         filter: {
-          'korisnikImePrezime': korisnikImePrezimeFilter,
-          'iskoristena': iskoristenaFilter,
-          'promocijaNaziv': promocijaNazivFilter,
+          'KorisnikImePrezime': korisnikImePrezimeFilter,
+          'Iskoristena': iskoristenaFilter,
+          'PromocijaNaziv': promocijaNazivFilter,
         },
         page: fallbackPage,
         pageSize: pageSize,

@@ -10,6 +10,8 @@ import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/providers/stavke_rezervacije_provider.dart';
 import 'package:esalon_desktop/providers/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class FrizerRezervacijeListScreen extends StatefulWidget {
  const FrizerRezervacijeListScreen({super.key});
@@ -58,10 +60,9 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
   bool isHoveredFrizer = false;
   Korisnik? odabraniFrizer;
 
-int _lastActiveTab = 0;
-double _lastScrollOffsetAktivne = 0;
-double _lastScrollOffsetHistorija = 0;
-
+  int _lastActiveTab = 0;
+  double _lastScrollOffsetAktivne = 0;
+  double _lastScrollOffsetHistorija = 0;
 
   @override
   void dispose() {
@@ -119,69 +120,116 @@ double _lastScrollOffsetHistorija = 0;
     _initForm();
   }
 
-  Future _initForm() async {
-     stavkeRezervacijeResult = await stavkeRezervacijeProvider.get();
-     if (!mounted) return;
-    setState(() {});
+  Future<void> _initForm() async {
+    if (!mounted) return;
+    if (AuthProvider.korisnikId == null) return; 
+
+    try {
+      stavkeRezervacijeResult = await stavkeRezervacijeProvider.get();
+      if (!mounted) return;
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   Future<void> _loadFrizere() async {
-    var result = await korisnikProvider.get(); 
+    if (!mounted) return;
+    if (AuthProvider.korisnikId == null) return; 
+    try {
+      var result = await korisnikProvider.get();
 
-    frizeri = result.result
-        .where((k) => 
-            (k.uloge?.contains('Frizer') ?? false) && 
-            (k.jeAktivan ?? false) 
-        )
-        .toList();
+      frizeri = result.result
+          .where((k) => 
+              (k.uloge?.contains('Frizer') ?? false) && 
+              (k.jeAktivan ?? false))
+          .toList();
 
-    if (mounted) setState(() {});
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   Future<void> _firstLoad() async {
     if (!mounted) return;
+    if (AuthProvider.korisnikId == null) return; 
 
-    bool isAktivneTab = _tabController.index == 0;
+    try {
+      bool isAktivneTab = _tabController.index == 0;
 
-    setState(() {
-      if (isAktivneTab) {
-        rezervacijeAktivne = [];
-        pageAktivne = 1;
-        hasNextPageAktivne = true;
-        isLoadMoreRunningAktivne = true;
-      } else {
-        rezervacijeHistorija = [];
-        pageHistorija = 1;
-        hasNextPageHistorija = true;
-        isLoadMoreRunningHistorija = true;
-      }
-    });
+      setState(() {
+        if (isAktivneTab) {
+          rezervacijeAktivne = [];
+          pageAktivne = 1;
+          hasNextPageAktivne = true;
+          isLoadMoreRunningAktivne = true;
+        } else {
+          rezervacijeHistorija = [];
+          pageHistorija = 1;
+          hasNextPageHistorija = true;
+          isLoadMoreRunningHistorija = true;
+        }
+      });
 
-    searchRequest['stateMachine'] = isAktivneTab
-        ? ['kreirana', 'odobrena']
-        : ['zavrsena', 'ponistena'];
+      searchRequest['stateMachine'] = isAktivneTab
+          ? ['kreirana', 'odobrena']
+          : ['zavrsena', 'ponistena'];
 
-    var rezervacijaResult = await rezervacijaProvider.get(
-      filter: searchRequest,
-      page: 1,
-      pageSize: 10,
-      orderBy: 'DatumRezervacije',
-      sortDirection: 'desc',
-    );
+      var rezervacijaResult = await rezervacijaProvider.get(
+        filter: searchRequest,
+        page: 1,
+        pageSize: 10,
+        orderBy: 'DatumRezervacije',
+        sortDirection: 'desc',
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      if (isAktivneTab) {
-        rezervacijeAktivne = rezervacijaResult.result;
-        hasNextPageAktivne = rezervacijaResult.result.length >= 10;
-        isLoadMoreRunningAktivne = false;
-      } else {
-        rezervacijeHistorija = rezervacijaResult.result;
-        hasNextPageHistorija = rezervacijaResult.result.length >= 10;
-        isLoadMoreRunningHistorija = false;
-      }
-    });
+      setState(() {
+        if (isAktivneTab) {
+          rezervacijeAktivne = rezervacijaResult.result;
+          hasNextPageAktivne = rezervacijaResult.result.length >= 10;
+          isLoadMoreRunningAktivne = false;
+        } else {
+          rezervacijeHistorija = rezervacijaResult.result;
+          hasNextPageHistorija = rezervacijaResult.result.length >= 10;
+          isLoadMoreRunningHistorija = false;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   void _loadMore(ScrollController controller) async {

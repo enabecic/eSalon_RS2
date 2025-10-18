@@ -2,6 +2,7 @@ import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
 import 'package:esalon_desktop/models/recenzija.dart';
 import 'package:esalon_desktop/models/recenzija_odgovor.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_odgovor_provider.dart';
 import 'package:esalon_desktop/screens/admin_recenzije_details.dart';
@@ -238,7 +239,24 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
   });
 
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
+    if (AuthProvider.korisnikId == null) return;
+    if (!context.mounted) return;
+
+    try {
+      await reset(targetPage: page);
+    } catch (e) {
+      if (!context.mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   void filterServerSide() async {
@@ -249,7 +267,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
     final newPage = targetPage ?? page;
 
     final filter = {
-      'korisnickoIme': korisnickoImeFilter,
+      'KorisnickoIme': korisnickoImeFilter,
     };
 
     try {

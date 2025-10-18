@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
 import 'package:esalon_desktop/models/promocija.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/base_provider.dart';
 import 'package:esalon_desktop/providers/promocija_provider.dart';
 import 'package:esalon_desktop/screens/admin_promocija_details.dart';
@@ -413,7 +414,24 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
   });
 
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
+    if (AuthProvider.korisnikId == null) return;
+    if (!context.mounted) return;
+
+    try {
+      await reset(targetPage: page);
+    } catch (e) {
+      if (!context.mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   @override

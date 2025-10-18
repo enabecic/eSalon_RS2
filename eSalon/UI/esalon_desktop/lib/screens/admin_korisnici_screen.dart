@@ -40,11 +40,28 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
   }
 
   Future<void> _loadUloge() async {
-    final result = await _ulogaProvider.get();
-    if (!mounted) return;
-    setState(() {
-      _ulogeList = result.result;
-    });
+    if (AuthProvider.korisnikId == null) return;
+    if (!context.mounted) return;
+
+    try {
+      final result = await _ulogaProvider.get();
+      if (!mounted) return;
+      setState(() {
+        _ulogeList = result.result;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   @override
@@ -296,7 +313,24 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
   });
 
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
+    if (AuthProvider.korisnikId == null) return;
+    if (!context.mounted) return;
+
+    try {
+      await reset(targetPage: page);
+    } catch (e) {
+      if (!context.mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
+    }
   }
 
   void filterServerSide() async {
@@ -306,8 +340,8 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
   Future<void> reset({int? targetPage}) async {
     final newPage = targetPage ?? page;
     final filter = {
-      'korisnickoIme': korisnickoImeFilter,
-      if (ulogaIdFilter != null) 'ulogaId': ulogaIdFilter,
+      'KorisnickoIme': korisnickoImeFilter,
+      if (ulogaIdFilter != null) 'UlogaId': ulogaIdFilter,
     };
 
     final result = await provider.get(

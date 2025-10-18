@@ -17,6 +17,8 @@ import 'package:esalon_desktop/main.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/screens/admin_home_screen.dart';
 import 'package:esalon_desktop/screens/frizer_home_screen.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class MasterScreen extends StatefulWidget {
   final String title;
@@ -68,20 +70,34 @@ class _MasterScreenState extends State<MasterScreen> {
 
   Future<void> _loadNepregledaneObavijesti() async {
     if (!mounted) return;
-    late ObavijestProvider obavijestProvider = ObavijestProvider();
-    var result = await obavijestProvider.get(
-      filter: <String, dynamic>{
-        'KorisnikId': AuthProvider.korisnikId,
-        'JePogledana': false,
-      },
-      // pageSize: 10,
-      // page: 1,
-    );
+    if (AuthProvider.korisnikId == null) return; 
 
-    if (!mounted) return;
-    setState(() {
-      nepregledaneObavijesti = result.result.length;
-    });
+    try {
+      late ObavijestProvider obavijestProvider = ObavijestProvider();
+      var result = await obavijestProvider.get(
+        filter: <String, dynamic>{
+          'KorisnikId': AuthProvider.korisnikId,
+          'JePogledana': false,
+        },
+      );
+
+      if (!mounted) return;
+      setState(() {
+        nepregledaneObavijesti = result.result.length;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: 'Greška',
+      text: e.toString(),
+      confirmBtnText: 'OK',
+      confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      textColor: Colors.black,
+      titleColor: Colors.black,
+      );
+    }
   }
 
   @override

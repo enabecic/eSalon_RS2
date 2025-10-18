@@ -1,6 +1,7 @@
 import 'dart:convert'; 
 import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
+import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/base_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -110,7 +111,7 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               ));
               if (result == true) {
                 final refreshed = await _vrstaUslugeProvider.get(
-                  filter: {'naziv': _source.nazivFilter},
+                  filter: {'Naziv': _source.nazivFilter},
                   page: 1,
                   pageSize: _source.pageSize,
                 );
@@ -224,8 +225,25 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
   });
 
   Future<void> loadInitial() async {
-    await reset(targetPage: page);
+  if (AuthProvider.korisnikId == null) return; 
+  if (!context.mounted) return;
+  
+  try {
+    await  reset(targetPage: page);
+  } catch (e) {
+    if (!context.mounted) return;
+    await QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: "Greška",
+      text: e.toString(),
+      confirmBtnText: 'OK',
+      confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      textColor: Colors.black,
+      titleColor: Colors.black,
+    );
   }
+}
 
   @override
   DataRow? getRow(int index) {
@@ -425,7 +443,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
     final newPage = targetPage ?? page;
 
     final result = await provider.get(
-      filter: {'naziv': nazivFilter},
+      filter: {'Naziv': nazivFilter},
       page: newPage,
       pageSize: pageSize,
     );
@@ -436,7 +454,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
       final fallbackResult = await provider.get(
-        filter: {'naziv': nazivFilter},
+        filter: {'Naziv': nazivFilter},
         page: fallbackPage,
         pageSize: pageSize,
       );
