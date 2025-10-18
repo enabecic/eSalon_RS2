@@ -347,7 +347,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                             ],
                           ),
                           child: const Text(
-                            "Nema više obavijesti za prikazati.",
+                            "Nema obavijesti za prikazati.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,

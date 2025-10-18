@@ -29,9 +29,23 @@ namespace eSalon.Services.RezervacijaStateMachine
             return Mapper.Map<Model.Rezervacija>(entity);
         }
 
+        public override async Task<Model.Rezervacija> Ponistena(int rezervacijaId, CancellationToken cancellationToken = default)
+        {
+            var set = Context.Set<Database.Rezervacija>();
+            var entity = await set.FindAsync(new object[] { rezervacijaId }, cancellationToken);
+
+            if (entity == null)
+                throw new UserException("Rezervacija nije pronađena");
+
+            entity.StateMachine = "ponistena";
+            await Context.SaveChangesAsync(cancellationToken);
+
+            return Mapper.Map<Model.Rezervacija>(entity);
+        }
+
         public override List<string> AllowedActions(Rezervacija entity)
         {
-            return new List<string>() { nameof(Zavrsena) };
+            return new List<string>() { nameof(Zavrsena), nameof(Ponistena) };
         }
     }
 }

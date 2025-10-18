@@ -793,16 +793,33 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            () {
-                              if (AuthProvider.korisnikId == e.frizerId) {
-                                if (e.stateMachine == "kreirana") {
-                                  return "Klikni za detalje i da odobriš rezervaciju.";
-                                } else if (e.stateMachine == "odobrena") {
+                          () {
+                            if (AuthProvider.korisnikId == e.frizerId) {
+                              if (e.stateMachine == "kreirana") {
+                                return "Klikni za detalje i da odobriš rezervaciju.";
+                              } else if (e.stateMachine == "odobrena") {
+                                final sada = DateTime.now();
+                                final vrijemeParts = e.vrijemePocetka?.split(":");
+                                final hour = int.tryParse(vrijemeParts?[0] ?? "0") ?? 0;
+                                final minute = int.tryParse(vrijemeParts?[1] ?? "0") ?? 0;
+
+                                final datumVrijemeRezervacije = DateTime(
+                                  e.datumRezervacije!.year,
+                                  e.datumRezervacije!.month,
+                                  e.datumRezervacije!.day,
+                                  hour,
+                                  minute,
+                                );
+
+                                if (sada.isAfter(datumVrijemeRezervacije)) {
                                   return "Klikni za detalje i da završiš rezervaciju.";
+                                } else {
+                                  return "Klikni za detalje i da završiš/otkažeš rezervaciju.";
                                 }
                               }
-                              return "Klikni za detalje";
-                            }(),
+                            }
+                            return "Klikni za detalje";
+                          }(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,

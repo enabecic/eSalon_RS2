@@ -28,7 +28,7 @@ namespace eSalon.API.Controllers
         }
 
         [HttpPut("{rezervacijaId}/ponisti")]
-        [Authorize(Roles = "Klijent")]
+        [Authorize(Roles = "Klijent,Frizer")]
         public async Task<Model.Rezervacija> Ponisti(int rezervacijaId, CancellationToken cancellationToken = default)
         {
             return await _rezervacijaService.PonistiAsync(rezervacijaId, cancellationToken);
