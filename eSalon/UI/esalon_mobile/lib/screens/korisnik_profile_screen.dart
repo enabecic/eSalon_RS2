@@ -40,7 +40,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
       if (AuthProvider.korisnikId == null) {
         return; 
       }
-
+      if (!mounted) return;
       final korisnik = await _provider.getById(AuthProvider.korisnikId!);
       _initialValue = {
         'ime': korisnik.ime ?? '',
@@ -101,7 +101,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const SizedBox(height: 10),
+                                  //const SizedBox(height: 10),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
                                     child: Column(
@@ -220,6 +220,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                         ),
                                       ),
                                       onPressed: () async {
+                                        if (!mounted) return;
                                         final potvrda = await showDialog<bool>(
                                           context: context,
                                           builder: (context) => AlertDialog(
@@ -278,6 +279,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                         ),
                                       ),
                                       onPressed: () async {
+                                        if (!mounted) return;
                                         final potvrda = await showDialog<bool>(
                                           context: context,
                                           builder: (context) => AlertDialog(
@@ -327,6 +329,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                           Navigator.of(context).pushReplacement(
                                             MaterialPageRoute(builder: (context) => const MyApp()),
                                           );
+                                          if (!mounted) return;
                                           setState(() {});
                                         }
                                       },
@@ -709,6 +712,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
 
     try {
       if (AuthProvider.korisnikId == null) throw UserException("KorisnikId je null.");
+      if (!mounted) return;
       await _provider.update(AuthProvider.korisnikId!, request);
 
       if (_promijeniLozinku &&
@@ -804,6 +808,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
 
                 try {
                   if (AuthProvider.korisnikId == null) throw UserException("KorisnikId je null.");
+                  if (!mounted) return;
                   await _provider.deaktiviraj(AuthProvider.korisnikId!);
 
                   AuthProvider.username = null;

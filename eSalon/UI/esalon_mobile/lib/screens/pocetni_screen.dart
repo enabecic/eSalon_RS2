@@ -1,0 +1,634 @@
+import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/providers/auth_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:esalon_mobile/models/ocjena.dart';
+import 'package:esalon_mobile/models/usluga.dart';
+import 'package:esalon_mobile/models/favorit.dart';
+import 'package:esalon_mobile/models/search_result.dart';
+import 'package:esalon_mobile/models/vrsta_usluge.dart';
+import 'package:esalon_mobile/providers/ocjena_provider.dart';
+import 'package:esalon_mobile/providers/favorit_provider.dart';
+import 'package:esalon_mobile/providers/usluga_provider.dart';
+import 'package:esalon_mobile/providers/utils.dart';
+import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
+import 'package:provider/provider.dart';
+
+class PocetniScreen extends StatefulWidget {
+  const PocetniScreen({super.key});
+
+  @override
+  State<PocetniScreen> createState() => _PocetniScreenState();
+}
+
+class _PocetniScreenState extends State<PocetniScreen> {
+  late UslugaProvider uslugaProvider;
+  late VrstaUslugeProvider vrstaUslugeProvider;
+  late OcjenaProvider ocjenaProvider;
+  late FavoritProvider favoritProvider;
+
+  SearchResult<Usluga>? uslugaResult;
+  SearchResult<VrstaUsluge>? vrstaUslugeResult;
+  SearchResult<Ocjena>? ocjenaResult;
+  SearchResult<Favorit>? favoritResult;
+
+  var uslugaFavInsert = {};
+  bool isFavorit = false;
+
+  List<Usluga> uslugaList = [];
+  int page = 1;
+
+  final int limit = 20;
+  int total = 0;
+  bool isFirstLoadRunning = false;
+  bool hasNextPage = true;
+  bool showbtn = false;
+
+  bool isLoadMoreRunning = false;
+  late ScrollController scrollController = ScrollController();
+
+  final Map<String, Widget> _cachedImages = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    uslugaProvider = context.read<UslugaProvider>();
+    vrstaUslugeProvider = context.read<VrstaUslugeProvider>();
+    ocjenaProvider = context.read<OcjenaProvider>();
+    favoritProvider = context.read<FavoritProvider>();
+    _firstLoad();
+    scrollController.addListener(() {
+      double showoffset = 10.0;
+
+      if (scrollController.offset > showoffset) {
+        showbtn = true;
+        if (!mounted) return;
+        setState(() {});
+      } else {
+        showbtn = false;
+        if (!mounted) return;
+        setState(() {});
+      }
+    });
+    _initForm();
+  }
+
+  void _firstLoad() async {
+    if (!mounted) return;
+    setState(() {
+      isFirstLoadRunning = true;
+      uslugaList = [];
+      page = 1;
+      hasNextPage = false;
+      isLoadMoreRunning = false;
+    });
+    if (!mounted) return;
+    var uslugaResult = await uslugaProvider.get(
+      page: 1,
+      pageSize: 10,
+      filter: {
+        'BrojZadnjeDodanih': 10, 
+      },
+    );
+    uslugaList = uslugaResult.result;
+    total = uslugaResult.count;
+    if (!mounted) return;
+
+    setState(() {
+      isFirstLoadRunning = false;
+      total = uslugaResult.count;
+      if (10 * page > total) {
+        hasNextPage = false;
+      }
+    });
+  }
+
+  Future _initForm() async {
+    try {
+      if (!mounted) return;
+      var vrste = await vrstaUslugeProvider.get();
+      if (!mounted) return;
+      var ocjene = await ocjenaProvider.get();
+      SearchResult<Favorit>? favoriti;
+
+      if (AuthProvider.isSignedIn) {
+        if (!mounted) return;
+        favoriti = await favoritProvider.get();
+      }
+      if (!mounted) return;
+      setState(() {
+        vrstaUslugeResult = vrste as SearchResult<VrstaUsluge>?;
+        ocjenaResult = ocjene;
+        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        vrstaUslugeResult = null;
+        ocjenaResult = null;
+        favoritResult = null;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 247, 244, 247),
+      body: SingleChildScrollView(
+        controller: scrollController,
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildPage(),
+          ],
+        ),
+      ),
+      floatingActionButton: AnimatedOpacity(
+        duration: const Duration(milliseconds: 1000),
+        opacity: showbtn ? 1.0 : 0.0,
+        child: FloatingActionButton(
+          onPressed: () {
+            scrollController.animateTo(0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.fastOutSlowIn);
+          },
+          backgroundColor: const Color.fromARGB(255, 210, 193, 214),
+          child: const Icon(
+            Icons.arrow_upward,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          const Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 7), 
+            child:  Text(
+              "Vrste usluga",
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (vrstaUslugeResult == null)
+            const Center(child: CircularProgressIndicator())
+          else if (vrstaUslugeResult!.result.isEmpty)
+            const Text("Nema dostupnih vrsta usluga.")
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        // 
+                      },
+                      child: Container(
+                        width: 115,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.4),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      child: SizedBox(
+                          width: 15,
+                          height: 15,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 95, 
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.asset(
+                                    "assets/images/menu.png",
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                              ),
+                              const Text("Sve", textAlign: TextAlign.center, 
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ),
+                    ),
+                  ),
+                  ...vrstaUslugeResult!.result.map((vrsta) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          // 
+                        },
+                        child: Container(
+                          width: 115,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.4),
+                                spreadRadius: 2,
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: 
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 70,
+                                    child: vrsta.slika != null && vrsta.slika!.isNotEmpty
+                                        ? FittedBox(
+                                            fit: BoxFit.cover,
+                                            clipBehavior: Clip.hardEdge,
+                                            child: (_cachedImages[vrsta.slika!] ??= imageFromString(vrsta.slika!)),
+                                          )
+                                        : Image.asset(
+                                            "assets/images/praznaVrstaUsluge.png",
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: 70,
+                                          ),
+                                  ),
+                                )
+                              ),
+                              const SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                child: Text(
+                                  vrsta.naziv ?? "",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPage() {
+    if (uslugaList.isEmpty) {
+      return Center(
+        child: Container(
+          width: 250,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(97, 158, 158, 158),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 7,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const Padding(
+            padding: EdgeInsets.all(10),
+            child: Text(
+              "Nema rezultata.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Najnovije usluge",
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 15),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: uslugaList.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, 
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.70,
+              ),
+
+              itemBuilder: (context, index) {
+                var e = uslugaList[index];
+                return GestureDetector(
+                  onTap: () async {
+                    //
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                height: 120,
+                                child: ClipRRect(
+                                  borderRadius:
+                                      const BorderRadius.vertical(top: Radius.circular(20)),
+                                  child: e.slika != null && e.slika!.isNotEmpty
+                                      ? FittedBox(
+                                          fit: BoxFit.fill,
+                                          clipBehavior: Clip.hardEdge,
+                                          child: (_cachedImages[e.slika!] ??=
+                                              imageFromString(e.slika!)),
+                                        )
+                                      : Image.asset(
+                                          "assets/images/praznaUsluga.png",
+                                          fit: BoxFit.fill,
+                                          width: double.infinity,
+                                          height: 100,
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                e.naziv ?? "",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "${formatNumber(e.cijena)} KM",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromARGB(255, 108, 108, 108),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.star,
+                                      color: Colors.yellow, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _avgOcjena(e.uslugaId).toString(),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Color.fromARGB(255, 108, 108, 108),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              InkWell(
+                                child: (favoritResult != null &&
+                                        favoritResult!.result.any(
+                                          (f) =>
+                                              f.korisnikId == AuthProvider.korisnikId &&
+                                              f.uslugaId == e.uslugaId,
+                                        ))
+                                    ? const Icon(Icons.favorite, color: Colors.red)
+                                    : const Icon(Icons.favorite_border),
+                                onTap: () async {
+                                  if (AuthProvider.korisnikId == null) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        duration:
+                                            const Duration(milliseconds: 1500),
+                                        content: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const LoginPage()),
+                                            );
+                                          },
+                                          child: RichText(
+                                            text: const TextSpan(
+                                              text:
+                                                  "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15),
+                                              children: [
+                                                TextSpan(
+                                                  text: "Prijavite se!",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration:
+                                                        TextDecoration.underline,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  try {
+                                    bool isFavorite = favoritResult!.result.any(
+                                      (f) =>
+                                          f.korisnikId ==
+                                              AuthProvider.korisnikId &&
+                                          f.uslugaId == e.uslugaId,
+                                    );
+
+                                    if (!isFavorite) {
+                                      if (!mounted) return;
+                                      await favoritProvider.insert({
+                                        'korisnikId': AuthProvider.korisnikId,
+                                        'uslugaId': e.uslugaId
+                                      });
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          backgroundColor:
+                                              Color.fromARGB(255, 138, 182, 140),
+                                          duration:
+                                              Duration(milliseconds: 1500),
+                                          content: Center(
+                                            child: Text(
+                                              "Uspješno dodano u favorite.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      var favRest = favoritResult!.result
+                                          .firstWhere((f) =>
+                                              f.korisnikId ==
+                                                  AuthProvider.korisnikId &&
+                                              f.uslugaId == e.uslugaId);
+                                      if (!mounted) return;
+                                      await favoritProvider
+                                          .delete(favRest.favoritId!);
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          backgroundColor:
+                                              Color.fromARGB(255, 138, 182, 140),
+                                          duration:
+                                              Duration(milliseconds: 1500),
+                                          content: Center(
+                                            child: Text(
+                                              "Uspješno izbačeno iz favorita.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    if (!mounted) return;
+                                    favoritResult = await favoritProvider.get();
+                                    if (!mounted) return;
+                                    setState(() {});
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        duration:
+                                            const Duration(milliseconds: 1500),
+                                        content: Center(
+                                          child: Text(
+                                            e.toString(),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  dynamic _avgOcjena(int? restoranId) {
+    if (ocjenaResult == null) {
+      return 0;
+    }
+
+    var ocjenaRestoran = ocjenaResult!.result
+        .where((e) => e.uslugaId == restoranId)
+        .toList();
+
+    if (ocjenaRestoran.isEmpty) {
+      return 0;
+    }
+
+    double avgOcjena = ocjenaRestoran.map((e) => e.vrijednost ?? 0).reduce((a, b) => a + b) /
+            ocjenaRestoran.length;
+
+    return formatNumber(avgOcjena);
+  }
+}

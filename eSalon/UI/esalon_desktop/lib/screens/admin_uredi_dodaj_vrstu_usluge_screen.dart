@@ -124,7 +124,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                 borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
                   image: _imageProvider ??
-                      const AssetImage("assets/images/praznaUsluga.png"),
+                      const AssetImage("assets/images/praznaVrstaUsluge.png"),
                   fit: BoxFit.cover,
                 ),
                 boxShadow: [

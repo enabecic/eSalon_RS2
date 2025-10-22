@@ -326,7 +326,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
-                      "assets/images/praznaUsluga.png",
+                      "assets/images/praznaVrstaUsluge.png",
                       width: 70,
                       height: 70,
                       fit: BoxFit.cover,

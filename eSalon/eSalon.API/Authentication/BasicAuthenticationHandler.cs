@@ -34,7 +34,7 @@ namespace eSalon.API.Authentication
             }
 
             if (!Request.Headers.ContainsKey("Authorization"))
-                return AuthenticateResult.NoResult();
+                return AuthenticateResult.Fail("Nedostaje Authorization header.");
 
             var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
             var credentialsBytes = Convert.FromBase64String(authHeader.Parameter!);

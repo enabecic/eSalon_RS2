@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
+import 'package:esalon_mobile/screens/pocetni_screen.dart';
 import 'package:flutter/material.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -12,7 +13,7 @@ class _MasterScreenState extends State<MasterScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const Center(child: Text("Početna stranica")),
+    const PocetniScreen(),
     const Center(child: Text("Moje usluge (Korpa)")),
     const KorisnikProfileScreen(),
     const Center(child: Text("Favoriti")),
@@ -135,9 +136,9 @@ class _MasterScreenState extends State<MasterScreen> {
           backgroundColor: const Color.fromARGB(255, 210, 193, 214),
           selectedItemColor: Colors.grey[900],
           unselectedItemColor: Colors.grey[900],
-          selectedFontSize: 17,   
-          unselectedFontSize: 15,  
-          iconSize: 37,          
+          selectedFontSize: 15,   
+          unselectedFontSize: 14,  
+          iconSize: 30,          
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),

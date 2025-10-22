@@ -1,7 +1,11 @@
 import 'package:esalon_mobile/layouts/master_screen.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
+import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
+import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/uloga_provider.dart';
+import 'package:esalon_mobile/providers/usluga_provider.dart';
+import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
 import 'package:esalon_mobile/screens/registracija_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +19,10 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => KorisnikProvider()),
         ChangeNotifierProvider(create: (_) => UlogaProvider()),
+        ChangeNotifierProvider(create: (_) => VrstaUslugeProvider()),
+        ChangeNotifierProvider(create: (_) => UslugaProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritProvider()),
+        ChangeNotifierProvider(create: (_) => OcjenaProvider()),
 
       ],
       child: const MyApp(),
