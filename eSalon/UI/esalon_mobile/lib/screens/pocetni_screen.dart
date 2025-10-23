@@ -12,6 +12,8 @@ import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class PocetniScreen extends StatefulWidget {
   const PocetniScreen({super.key});
@@ -78,33 +80,39 @@ class _PocetniScreenState extends State<PocetniScreen> {
   }
 
   void _firstLoad() async {
-    if (!mounted) return;
-    setState(() {
-      isFirstLoadRunning = true;
-      uslugaList = [];
-      page = 1;
-      hasNextPage = false;
-      isLoadMoreRunning = false;
-    });
-    if (!mounted) return;
-    var uslugaResult = await uslugaProvider.get(
-      page: 1,
-      pageSize: 10,
-      filter: {
-        'BrojZadnjeDodanih': 10, 
-      },
-    );
-    uslugaList = uslugaResult.result;
-    total = uslugaResult.count;
-    if (!mounted) return;
+    try {
+      if (!mounted) return;
+      setState(() => isFirstLoadRunning = true);
 
-    setState(() {
-      isFirstLoadRunning = false;
-      total = uslugaResult.count;
-      if (10 * page > total) {
-        hasNextPage = false;
-      }
-    });
+      if (!mounted) return;
+      var uslugaResult = await uslugaProvider.get(
+        page: 1,
+        pageSize: 10,
+        filter: {'BrojZadnjeDodanih': 10},
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        uslugaList = uslugaResult.result;
+        total = uslugaResult.count;
+        isFirstLoadRunning = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => isFirstLoadRunning = false);
+
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: "Greška prilikom učitavanja: $e",
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
   }
 
   Future _initForm() async {
@@ -345,7 +353,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
           child: const Padding(
             padding: EdgeInsets.all(10),
             child: Text(
-              "Nema rezultata.",
+              "Nema usluga za prikazati.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -613,21 +621,21 @@ class _PocetniScreenState extends State<PocetniScreen> {
     );
   }
 
-  dynamic _avgOcjena(int? restoranId) {
+  dynamic _avgOcjena(int? uslugaId) {
     if (ocjenaResult == null) {
       return 0;
     }
 
-    var ocjenaRestoran = ocjenaResult!.result
-        .where((e) => e.uslugaId == restoranId)
+    var ocjena = ocjenaResult!.result
+        .where((e) => e.uslugaId == uslugaId)
         .toList();
 
-    if (ocjenaRestoran.isEmpty) {
+    if (ocjena.isEmpty) {
       return 0;
     }
 
-    double avgOcjena = ocjenaRestoran.map((e) => e.vrijednost ?? 0).reduce((a, b) => a + b) /
-            ocjenaRestoran.length;
+    double avgOcjena = ocjena.map((e) => e.vrijednost ?? 0).reduce((a, b) => a + b) /
+            ocjena.length;
 
     return formatNumber(avgOcjena);
   }

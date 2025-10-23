@@ -37,18 +37,21 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
 
   Future<void> _loadKorisnik() async {
     try {
-      if (AuthProvider.korisnikId == null) {
-        return; 
-      }
+      if (AuthProvider.korisnikId == null) return;
       if (!mounted) return;
+
       final korisnik = await _provider.getById(AuthProvider.korisnikId!);
-      _initialValue = {
-        'ime': korisnik.ime ?? '',
-        'prezime': korisnik.prezime ?? '',
-        'telefon': korisnik.telefon ?? '',
-        'jeAktivan': korisnik.jeAktivan ?? true,
-        'promijeniLozinku': false,
-      };
+
+      if (!mounted) return;
+      setState(() {
+        _initialValue = {
+          'ime': korisnik.ime ?? '',
+          'prezime': korisnik.prezime ?? '',
+          'telefon': korisnik.telefon ?? '',
+          'jeAktivan': korisnik.jeAktivan ?? true,
+          'promijeniLozinku': false,
+        };
+      });
     } catch (e) {
       if (!mounted) return;
       await QuickAlert.show(
@@ -62,6 +65,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
         titleColor: Colors.black,
       );
     } finally {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -76,6 +80,38 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       filled: true,
       fillColor: Colors.white,
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 210, 193, 214),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Moj korisnički profil",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 19,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(
+              Icons.person,
+              color: Colors.black,
+              size: 28,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -107,14 +143,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          "Korisnički podaci",
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.normal,
-                                            color: Colors.black,
-                                          ),
-                                        ),
+                                        _buildHeader(), 
                                         const SizedBox(height: 30),
                                         Container(
                                           margin: const EdgeInsets.only(bottom: 12),
@@ -257,6 +286,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                                           ),
                                         );
                                         if (potvrda == true) {
+                                          if (!mounted) return;
                                           await _save();
                                         }
                                       },

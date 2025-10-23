@@ -1,5 +1,6 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
 import 'package:esalon_mobile/screens/pocetni_screen.dart';
+import 'package:esalon_mobile/screens/usluga_favorit_screen.dart';
 import 'package:flutter/material.dart';
 
 class MasterScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _MasterScreenState extends State<MasterScreen> {
     const PocetniScreen(),
     const Center(child: Text("Moje usluge (Korpa)")),
     const KorisnikProfileScreen(),
-    const Center(child: Text("Favoriti")),
+    const UslugaFavoritScreen(),
     const Center(child: Text("Sve usluge")),
     const Center(child: Text("Moje rezervacije")),
     const Center(child: Text("Posebne ponude")),

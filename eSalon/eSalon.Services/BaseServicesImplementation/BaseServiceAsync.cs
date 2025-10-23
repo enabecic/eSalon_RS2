@@ -32,6 +32,7 @@ namespace eSalon.Services.BaseServicesImplementation
             List<TModel> result = new List<TModel>();
 
             var query = Context.Set<TDbEntity>().AsQueryable();
+            //var query = Context.Set<TDbEntity>().AsNoTracking().AsQueryable();
 
             if (typeof(ISoftDelete).IsAssignableFrom(typeof(TDbEntity)))
             {
