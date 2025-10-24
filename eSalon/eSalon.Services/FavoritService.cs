@@ -81,7 +81,7 @@ namespace eSalon.Services
         {
             var query = Context.Favorits
               .Include(f => f.Usluga)
-              .Where(f => !f.IsDeleted);
+              .Where(f => !f.IsDeleted && f.Usluga != null && !f.Usluga.IsDeleted);
 
             query = AddFilter(search, query);
 

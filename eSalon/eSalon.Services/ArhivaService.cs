@@ -56,7 +56,7 @@ namespace eSalon.Services
         {
             var query = Context.Arhivas
                .Include(a => a.Usluga)
-               .Where(a => !a.IsDeleted);
+               .Where(a => !a.IsDeleted && a.Usluga != null && !a.Usluga.IsDeleted);
 
 
             query = AddFilter(search, query);

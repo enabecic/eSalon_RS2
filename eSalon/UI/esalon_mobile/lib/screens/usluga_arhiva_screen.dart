@@ -1,32 +1,33 @@
 import 'package:esalon_mobile/main.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:esalon_mobile/models/ocjena.dart';
-import 'package:esalon_mobile/models/favorit.dart';
+import 'package:esalon_mobile/models/arhiva.dart';
 import 'package:esalon_mobile/models/search_result.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
-import 'package:esalon_mobile/providers/favorit_provider.dart';
+import 'package:esalon_mobile/providers/arhiva_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-class UslugaFavoritScreen extends StatefulWidget {
-  const UslugaFavoritScreen({super.key});
+class UslugaArhivaScreen extends StatefulWidget {
+  const UslugaArhivaScreen({super.key});
 
   @override
-  State<UslugaFavoritScreen> createState() => _UslugaFavoritScreenState();
+  State<UslugaArhivaScreen> createState() => _UslugaArhivaScreenState();
 }
 
-class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
-  late FavoritProvider uslugaFavoritProvider;
+class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
+  late ArhivaProvider uslugaArhivaProvider;
   late OcjenaProvider ocjenaProvider;
 
   SearchResult<Ocjena>? ocjenaResult;
   Map<String, dynamic> searchRequest = {};
 
-  List<Favorit> favoritList = [];
+  List<Arhiva> arhivaList = [];
   int page = 1;
 
   final int pageSize = 10;
@@ -34,6 +35,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
   bool isFirstLoadRunning = false;
   bool hasNextPage = true;
   bool showbtn = false;
+  Map<int, int> brojArhiviranjaMap = {}; 
 
   bool isLoadMoreRunning = false;
   late final ScrollController scrollController;
@@ -54,13 +56,21 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    uslugaFavoritProvider = context.read<FavoritProvider>();
+    uslugaArhivaProvider = context.read<ArhivaProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
 
-    if (!isFirstLoadRunning && favoritList.isEmpty) {
-      _firstLoad();
-      _initForm();
+    if (!isFirstLoadRunning && arhivaList.isEmpty) {
+      _loadInitialData();
     }
+  }
+
+  Future<void> _loadInitialData() async {
+    if (!mounted) return;
+    await _firstLoad();
+    if (!mounted) return;
+    await _loadBrojArhiviranja(); 
+    if (!mounted) return;
+    await _initForm();            
   }
 
   @override
@@ -114,7 +124,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
     setState(() {
       isFirstLoadRunning = true;
-      favoritList = [];
+      arhivaList = [];
       page = 1;
       hasNextPage = true;
       isLoadMoreRunning = false;
@@ -123,7 +133,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     try {
       if (AuthProvider.isSignedIn) { 
         if (!mounted) return;
-        final favoritResult = await uslugaFavoritProvider.get(
+        final arhivaResult = await uslugaArhivaProvider.get(
           filter: searchRequest,
           page: page,
           pageSize: pageSize,
@@ -132,14 +142,14 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         if (!mounted) return;
 
         setState(() {
-          favoritList = favoritResult.result;
-          total = favoritResult.count;
+          arhivaList = arhivaResult.result;
+          total = arhivaResult.count;
           hasNextPage = (page * pageSize) < total;
         });
       } else {
         if (!mounted) return;
         setState(() {
-          favoritList = [];
+          arhivaList = [];
           total = 0;
           hasNextPage = false;
         });
@@ -148,11 +158,10 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       if (!mounted) return;
 
       setState(() {
-        favoritList = [];
+        arhivaList = [];
         total = 0;
         hasNextPage = false;
       });
-
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -181,7 +190,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     try {
       page += 1;
       if (!mounted) return;
-      final result = await uslugaFavoritProvider.get(
+      final result = await uslugaArhivaProvider.get(
         filter: searchRequest,
         page: page,
         pageSize: pageSize,
@@ -192,7 +201,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       if (result.result.isNotEmpty) {
         if (!mounted) return;
         setState(() {
-          favoritList.addAll(result.result);
+          arhivaList.addAll(result.result);
           total = result.count;
           hasNextPage = (page * pageSize) < total;
         });
@@ -208,7 +217,6 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       setState(() {
         hasNextPage = false;
       });
-
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -219,6 +227,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
+      if (!mounted) return;
       setState(() {
         isLoadMoreRunning = false;
       });
@@ -247,6 +256,22 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     }
   }
 
+  Future<void> _loadBrojArhiviranja() async {
+    for (var e in arhivaList) {
+      if (e.uslugaId != null && !brojArhiviranjaMap.containsKey(e.uslugaId)) {
+        try {
+          if (!mounted) return;
+          int broj = await uslugaArhivaProvider.getBrojArhiviranja(e.uslugaId!);
+          brojArhiviranjaMap[e.uslugaId!] = broj;
+        } catch (_) {
+          brojArhiviranjaMap[e.uslugaId!] = 0;
+        }
+        if (!mounted) return;
+        setState(() {}); 
+      }
+    }
+  }
+
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -260,7 +285,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Moji favoriti",
+              "Moja lista 'Želim probati'",
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 19,
@@ -269,7 +294,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
             ),
             SizedBox(width: 8),
             Icon(
-              Icons.favorite,
+              Icons.bookmark,
               color: Colors.black,
               size: 22,
             ),
@@ -279,15 +304,9 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     );
   }
 
-  Widget _buildFavoriteItem(Favorit e) {
-    bool isFavorite = favoritList.any(
-      (f) => f.uslugaId == e.uslugaId && f.korisnikId == AuthProvider.korisnikId,
-    );
-
+  Widget _buildArhivaItem(Arhiva e) {
     return InkWell(
-      onTap: () {
-      //
-      },
+      onTap: () {},
       child: Container(
         height: 95,
         decoration: BoxDecoration(
@@ -304,116 +323,118 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         ),
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         width: double.infinity,
-        child: Row(
-          children: [
-            // Slika
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 120,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(18)),
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: _buildImage(e.slika),
+        child: Slidable(
+          startActionPane: ActionPane(
+            motion: const BehindMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) async {
+                  if (!mounted) return;
+                  await uslugaArhivaProvider.delete(e.arhivaId!);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                      duration: Duration(seconds: 1),
+                      content: Center(child: Text("Uspješno izbačeno iz liste 'Želim probati'.")),
+                    ),
+                  );
+                  if (!mounted) return;
+                  await _firstLoad();
+                },
+                backgroundColor: Colors.red,
+                icon: Icons.delete,
+                label: 'Obriši',
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 120,
+                  height: 100,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(18)),
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: _buildImage(e.slika),
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Tekst i ocjena + srce
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      e.uslugaNaziv ?? "",
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                        overflow: TextOverflow.ellipsis,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        e.uslugaNaziv ?? "",
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 1,
                       ),
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      e.cijena != null ? "${formatNumber(e.cijena)} KM" : "",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 4),
+                      Text(
+                        e.cijena != null ? "${formatNumber(e.cijena)} KM" : "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Ocjena
-                        Row(
-                          children: [
-                            const Icon(Icons.star, color: Colors.yellow, size: 18),
-                            const SizedBox(width: 4),
-                            Text(
-                              _avgOcjena(e.uslugaId).toString(),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Color.fromARGB(255, 108, 108, 108),
-                                fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.star, color: Colors.yellow, size: 18),
+                              const SizedBox(width: 4),
+                              Text(
+                                _avgOcjena(e.uslugaId).toString(),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Color.fromARGB(255, 108, 108, 108),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-
-                        // Srce
-                        InkWell(
-                          onTap: () async {
-                            if (!mounted) return;
-                            try {
-                              if (!mounted) return;
-                              await uslugaFavoritProvider.delete(e.favoritId!);
-                              if (!mounted) return;
-                              await _firstLoad();
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  backgroundColor: Color.fromARGB(255, 138, 182, 140),
-                                  duration: Duration(milliseconds: 1500),
-                                  content: Center(
-                                    child: Text("Uspješno izbačeno iz favorita."),
-                                  ),
-                                ),
-                              );
-                            } catch (err) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(milliseconds: 1500),
-                                  content: Center(
-                                    child: Text(err.toString()),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          child: Icon(
-                            Icons.favorite,
-                            color: isFavorite ? Colors.red : Colors.grey,
-                            size: 22,
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.bookmark_outline,
+                                color: Color.fromARGB(255, 108, 108, 108),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                brojArhiviranjaMap[e.uslugaId]?.toString() ?? '0',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromARGB(255, 108, 108, 108),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -459,11 +480,11 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       );
     }
 
-    if (isFirstLoadRunning && favoritList.isEmpty) {
+    if (isFirstLoadRunning && arhivaList.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final visibleList = favoritList.where((f) => f.korisnikId == AuthProvider.korisnikId).toList();
+    final visibleList = arhivaList.where((f) => f.korisnikId == AuthProvider.korisnikId).toList();
     final itemCount = 1 + visibleList.length + 1;
 
     return Scaffold(
@@ -481,7 +502,17 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
+                  const Text(
+                    "Imajte svoje usluge koje želite probati u skorije vrijeme sve na jednom mjestu!",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 17),
                   Text(
                     "Ukupan broj usluga: $total",
                     style: const TextStyle(
@@ -498,7 +529,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
           final listIndex = index - 1;
           if (listIndex < visibleList.length) {
             final e = visibleList[listIndex];
-            return _buildFavoriteItem(e);
+            return _buildArhivaItem(e);
           }
 
           if (isLoadMoreRunning) {
@@ -529,8 +560,8 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                   padding: const EdgeInsets.all(10),
                   child: Text(
                     visibleList.isEmpty
-                        ? "Nemate usluga u favoritima!"
-                        : "Nemate više usluga u favoritima za prikazati.",
+                        ? "Nemate usluga u listi 'Želim probati'!"
+                        : "Nema više usluga u listi 'Želim probati' za prikazati.",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,

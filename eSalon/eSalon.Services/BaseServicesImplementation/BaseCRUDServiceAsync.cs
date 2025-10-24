@@ -19,14 +19,16 @@ namespace eSalon.Services.BaseServicesImplementation
 
         public virtual async Task<TModel> InsertAsync(TInsert request, CancellationToken cancellationToken = default)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
 
             TDbEntity entity = Mapper.Map<TDbEntity>(request);
 
-            await BeforeInsertAsync(request, entity);
+            await BeforeInsertAsync(request, entity, cancellationToken);
             Context.Add(entity);
             await Context.SaveChangesAsync(cancellationToken);
 
-            await AfterInsertAsync(request, entity);
+            await AfterInsertAsync(request, entity, cancellationToken);
 
             return Mapper.Map<TModel>(entity);
         }
@@ -48,12 +50,12 @@ namespace eSalon.Services.BaseServicesImplementation
             }
 
             Mapper.Map(request, entity);
-            await BeforeUpdateAsync(request, entity);
+            await BeforeUpdateAsync(request, entity, cancellationToken);
 
 
             await Context.SaveChangesAsync(cancellationToken);
 
-            await AfterUpdateAsync(request, entity);
+            await AfterUpdateAsync(request, entity, cancellationToken);
 
             return Mapper.Map<TModel>(entity);
         }
