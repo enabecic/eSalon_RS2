@@ -38,6 +38,9 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
   bool isLoadMoreRunning = false;
   late final ScrollController scrollController;
 
+  bool _isLoading = true; 
+  bool _initialLoaded = false; 
+
   @override
   void initState() {
     super.initState();
@@ -46,20 +49,23 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
     searchRequest = {
       'KorisnikId': AuthProvider.korisnikId,
-      'orderBy': 'DatumDodavanja', 
-      'sortDirection': 'desc',   
+      'orderBy': 'DatumDodavanja',
+      'sortDirection': 'desc',
     };
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     uslugaFavoritProvider = context.read<FavoritProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
 
-    if (!isFirstLoadRunning && favoritList.isEmpty) {
-      _firstLoad();
-      _initForm();
+    if (!_initialLoaded) {
+      _initialLoaded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadInitialData();
+      });
     }
   }
 
@@ -88,40 +94,19 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     }
   }
 
-  Future<void> _initForm() async {
-    try {
-      if (!mounted) return;
-      final r = await ocjenaProvider.get();
-      if (!mounted) return;
-      setState(() {
-        ocjenaResult = r;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-      );
-    }
-  }
-
-  Future<void> _firstLoad() async {
+  Future<void> _loadInitialData() async {
     if (!mounted) return;
-
     setState(() {
-      isFirstLoadRunning = true;
-      favoritList = [];
-      page = 1;
-      hasNextPage = true;
-      isLoadMoreRunning = false;
+      _isLoading = true;
+      isFirstLoadRunning = true; 
     });
 
     try {
-      if (AuthProvider.isSignedIn) { 
+      if (!mounted) return;
+      final r = await ocjenaProvider.get();
+
+      if (AuthProvider.isSignedIn) {
+        page = 1;
         if (!mounted) return;
         final favoritResult = await uslugaFavoritProvider.get(
           filter: searchRequest,
@@ -130,8 +115,8 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         );
 
         if (!mounted) return;
-
         setState(() {
+          ocjenaResult = r;
           favoritList = favoritResult.result;
           total = favoritResult.count;
           hasNextPage = (page * pageSize) < total;
@@ -139,20 +124,13 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       } else {
         if (!mounted) return;
         setState(() {
+          ocjenaResult = r;
           favoritList = [];
           total = 0;
           hasNextPage = false;
         });
       }
     } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        favoritList = [];
-        total = 0;
-        hasNextPage = false;
-      });
-
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -165,6 +143,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     } finally {
       if (!mounted) return;
       setState(() {
+        _isLoading = false;
         isFirstLoadRunning = false;
       });
     }
@@ -204,11 +183,9 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         hasNextPage = false;
       });
-
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -219,6 +196,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
+      if (!mounted) return;
       setState(() {
         isLoadMoreRunning = false;
       });
@@ -237,11 +215,12 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     }
 
     try {
-      final widget = imageFromString(base64OrNull); 
+      final widget = imageFromString(base64OrNull);
       _cachedImages[base64OrNull] = widget;
       return widget;
     } catch (e) {
-      final fallback = Image.asset("assets/images/praznaUsluga.png", fit: BoxFit.cover);
+      final fallback =
+          Image.asset("assets/images/praznaUsluga.png", fit: BoxFit.cover);
       _cachedImages[base64OrNull] = fallback;
       return fallback;
     }
@@ -286,7 +265,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
     return InkWell(
       onTap: () {
-      //
+        //
       },
       child: Container(
         height: 95,
@@ -306,7 +285,6 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         width: double.infinity,
         child: Row(
           children: [
-            // Slika
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
@@ -322,7 +300,6 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
               ),
             ),
 
-            // Tekst i ocjena + srce
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(10),
@@ -353,7 +330,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Ocjena
+
                         Row(
                           children: [
                             const Icon(Icons.star, color: Colors.yellow, size: 18),
@@ -369,7 +346,6 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                           ],
                         ),
 
-                        // Srce
                         InkWell(
                           onTap: () async {
                             if (!mounted) return;
@@ -377,11 +353,12 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                               if (!mounted) return;
                               await uslugaFavoritProvider.delete(e.favoritId!);
                               if (!mounted) return;
-                              await _firstLoad();
+                              await _loadInitialData(); 
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                  backgroundColor:
+                                      Color.fromARGB(255, 138, 182, 140),
                                   duration: Duration(milliseconds: 1500),
                                   content: Center(
                                     child: Text("Uspješno izbačeno iz favorita."),
@@ -459,7 +436,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       );
     }
 
-    if (isFirstLoadRunning && favoritList.isEmpty) {
+    if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -472,8 +449,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         controller: scrollController,
         padding: const EdgeInsets.all(10),
         itemCount: itemCount,
-        itemBuilder: (context, index) { 
-
+        itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
@@ -530,7 +506,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                   child: Text(
                     visibleList.isEmpty
                         ? "Nemate usluga u favoritima!"
-                        : "Nemate više usluga u favoritima za prikazati.",
+                        : "Nema više usluga u favoritima za prikazati.",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,

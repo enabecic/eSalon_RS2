@@ -251,7 +251,10 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
             const SizedBox(height: 15),
             FormBuilderCheckbox(
               name: 'promijeniLozinku',
-              title: const Text('Promijeni lozinku'),
+              title: const Text(
+                'Promijeni lozinku',
+                style: TextStyle(fontSize: 15),
+              ),
               onChanged: (val) {
                 if (!mounted) return;
                 setState(() {
