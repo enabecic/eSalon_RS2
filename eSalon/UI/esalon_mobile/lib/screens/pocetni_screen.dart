@@ -33,7 +33,6 @@ class _PocetniScreenState extends State<PocetniScreen> {
   SearchResult<Ocjena>? ocjenaResult;
   SearchResult<Favorit>? favoritResult;
 
-  var uslugaFavInsert = {};
   bool isFavorit = false;
 
   List<Usluga> uslugaList = [];
@@ -41,11 +40,10 @@ class _PocetniScreenState extends State<PocetniScreen> {
 
   final int limit = 20;
   int total = 0;
-  bool isFirstLoadRunning = false;
-  bool hasNextPage = true;
-  bool showbtn = false;
 
-  bool isLoadMoreRunning = false;
+  bool showbtn = false;
+  bool _isLoading = true;
+
   late ScrollController scrollController = ScrollController();
 
   final Map<String, Widget> _cachedImages = {};
@@ -62,7 +60,11 @@ class _PocetniScreenState extends State<PocetniScreen> {
     vrstaUslugeProvider = context.read<VrstaUslugeProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
     favoritProvider = context.read<FavoritProvider>();
-    _firstLoad();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+
     scrollController.addListener(() {
       double showoffset = 10.0;
 
@@ -77,42 +79,6 @@ class _PocetniScreenState extends State<PocetniScreen> {
       }
     });
     _initForm();
-  }
-
-  void _firstLoad() async {
-    try {
-      if (!mounted) return;
-      setState(() => isFirstLoadRunning = true);
-
-      if (!mounted) return;
-      var uslugaResult = await uslugaProvider.get(
-        page: 1,
-        pageSize: 10,
-        filter: {'BrojZadnjeDodanih': 10},
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        uslugaList = uslugaResult.result;
-        total = uslugaResult.count;
-        isFirstLoadRunning = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() => isFirstLoadRunning = false);
-
-      if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: "Greška prilikom učitavanja: $e",
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-      );
-    }
   }
 
   Future _initForm() async {
@@ -143,19 +109,71 @@ class _PocetniScreenState extends State<PocetniScreen> {
     }
   }
 
+  Future<void> _loadInitialData() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    try {
+      if (!mounted) return;
+      var vrste = await vrstaUslugeProvider.get();
+      if (!mounted) return;
+      var ocjene = await ocjenaProvider.get();
+      SearchResult<Favorit>? favoriti;
+      if (AuthProvider.isSignedIn) {
+        if (!mounted) return;
+        favoriti = await favoritProvider.get();
+      }
+      if (!mounted) return;
+      var uslugaResult = await uslugaProvider.get(
+        page: 1,
+        pageSize: 10,
+        filter: {'BrojZadnjeDodanih': 10},
+      );
+
+      if (!mounted) return;
+      setState(() {
+        vrstaUslugeResult = vrste as SearchResult<VrstaUsluge>?;
+        ocjenaResult = ocjene;
+        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
+        uslugaList = uslugaResult.result;
+        total = uslugaResult.count;
+
+        _isLoading = false; 
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: "Greška prilikom učitavanja: $e",
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 247, 244, 247),
-      body: SingleChildScrollView(
-        controller: scrollController,
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildPage(),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),//8
+                    child: _buildHeader(),
+                  ),
+                  _buildVrste(),
+                  _buildPage(),
+                ],
+              ),
+            ),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 1000),
         opacity: showbtn ? 1.0 : 0.0,
@@ -176,12 +194,52 @@ class _PocetniScreenState extends State<PocetniScreen> {
   }
 
   Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 210, 193, 214),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  "Brzo i jednostavno rezervišite svoj termin",
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.event_available,
+                color: Colors.black,
+                size: constraints.maxWidth * 0.12, 
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildVrste() {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
+          //const SizedBox(height: 30),
           const Padding(
             padding:  EdgeInsets.symmetric(horizontal: 7), 
             child:  Text(
@@ -241,7 +299,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                   ),
                                 ),
                               ),
-                              const Text("Sve", textAlign: TextAlign.center, 
+                              const Text("Sve usluge", textAlign: TextAlign.center, 
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.black87,
@@ -625,18 +683,14 @@ class _PocetniScreenState extends State<PocetniScreen> {
     if (ocjenaResult == null) {
       return 0;
     }
-
     var ocjena = ocjenaResult!.result
         .where((e) => e.uslugaId == uslugaId)
         .toList();
-
     if (ocjena.isEmpty) {
       return 0;
     }
-
     double avgOcjena = ocjena.map((e) => e.vrijednost ?? 0).reduce((a, b) => a + b) /
             ocjena.length;
-
     return formatNumber(avgOcjena);
   }
 }
