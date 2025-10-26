@@ -82,8 +82,8 @@ class _MasterScreenState extends State<MasterScreen> {
                       padding: const EdgeInsets.only(right: 15.0),
                       child: Image.asset(
                         "assets/images/logo.png",
-                        height: 70,
-                        width: 70,
+                        height: 55,
+                        width: 55,
                       ),
                     ),
                   ],

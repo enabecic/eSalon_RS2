@@ -20,10 +20,13 @@ namespace eSalon.Services.Validator
 
         public virtual async Task ValidateEntityExistsAsync(int id, CancellationToken cancellationToken = default)
         {
-            TEntity? entity = await context.Set<TEntity>().FindAsync(id);
+            var entity = await context.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken);
 
             if (entity == null)
                 throw new UserException($"Ne postoji {typeof(TEntity).Name} sa id: {id}");
+
+            if (entity is ISoftDelete softDeletedEntity && softDeletedEntity.IsDeleted)
+                throw new UserException($"{typeof(TEntity).Name} sa id: {id} je obrisan.");
         }
 
         public virtual void ValidateNoDuplicates(List<int> array)
