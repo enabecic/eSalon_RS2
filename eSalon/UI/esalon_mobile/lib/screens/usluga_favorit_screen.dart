@@ -149,6 +149,57 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     }
   }
 
+  Future<void> _refreshFavoritList() async {
+    if (!mounted) return;
+    setState(() {
+      isFirstLoadRunning = true;
+    });
+
+    try {
+      if (AuthProvider.isSignedIn) {
+        if (!mounted) return;
+        final favoritResult = await uslugaFavoritProvider.get(
+          filter: searchRequest,
+          page: page, 
+          pageSize: pageSize,
+        );
+
+        if (!mounted) return;
+        setState(() {
+          favoritList = favoritResult.result;
+          total = favoritResult.count;
+          hasNextPage = (page * pageSize) < total;
+        });
+      } else {
+        if (!mounted) return;
+        setState(() {
+          favoritList = [];
+          total = 0;
+          hasNextPage = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        hasNextPage = false;
+      });
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isFirstLoadRunning = false;
+      });
+    }
+  }
+
   Future<void> _loadMore() async {
     if (!hasNextPage || isFirstLoadRunning || isLoadMoreRunning) return;
     if (!mounted) return;
@@ -353,12 +404,11 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                               if (!mounted) return;
                               await uslugaFavoritProvider.delete(e.favoritId!);
                               if (!mounted) return;
-                              await _loadInitialData(); 
+                              await _refreshFavoritList(); 
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 138, 182, 140),
+                                  backgroundColor: Color.fromARGB(255, 138, 182, 140),
                                   duration: Duration(milliseconds: 1500),
                                   content: Center(
                                     child: Text("Uspješno izbačeno iz favorita."),

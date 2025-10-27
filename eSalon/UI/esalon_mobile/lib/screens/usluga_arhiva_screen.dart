@@ -35,10 +35,13 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
   bool isFirstLoadRunning = false;
   bool hasNextPage = true;
   bool showbtn = false;
-  Map<int, int> brojArhiviranjaMap = {}; 
+  Map<int, int> brojArhiviranjaMap = {};
 
   bool isLoadMoreRunning = false;
   late final ScrollController scrollController;
+
+  bool _isLoading = true;
+  bool _initialLoaded = false;
 
   @override
   void initState() {
@@ -48,8 +51,8 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
 
     searchRequest = {
       'KorisnikId': AuthProvider.korisnikId,
-      'orderBy': 'DatumDodavanja', 
-      'sortDirection': 'desc',   
+      'orderBy': 'DatumDodavanja',
+      'sortDirection': 'desc',
     };
   }
 
@@ -59,18 +62,43 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
     uslugaArhivaProvider = context.read<ArhivaProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
 
-    if (!isFirstLoadRunning && arhivaList.isEmpty) {
-      _loadInitialData();
+    if (!_initialLoaded) {
+      _initialLoaded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadInitialData();
+      });
     }
   }
 
   Future<void> _loadInitialData() async {
     if (!mounted) return;
-    await _firstLoad();
-    if (!mounted) return;
-    await _loadBrojArhiviranja(); 
-    if (!mounted) return;
-    await _initForm();            
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      if (!mounted) return;
+      await _firstLoad();
+      if (!mounted) return;
+      await _loadBrojArhiviranja();
+      if (!mounted) return;
+      await _initForm();
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -124,14 +152,14 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
 
     setState(() {
       isFirstLoadRunning = true;
-      arhivaList = [];
+      //arhivaList = [];
       page = 1;
       hasNextPage = true;
       isLoadMoreRunning = false;
     });
 
     try {
-      if (AuthProvider.isSignedIn) { 
+      if (AuthProvider.isSignedIn) {
         if (!mounted) return;
         final arhivaResult = await uslugaArhivaProvider.get(
           filter: searchRequest,
@@ -142,6 +170,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         if (!mounted) return;
 
         setState(() {
+
           arhivaList = arhivaResult.result;
           total = arhivaResult.count;
           hasNextPage = (page * pageSize) < total;
@@ -158,8 +187,6 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
       if (!mounted) return;
 
       setState(() {
-        arhivaList = [];
-        total = 0;
         hasNextPage = false;
       });
       if (!mounted) return;
@@ -205,6 +232,8 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
           total = result.count;
           hasNextPage = (page * pageSize) < total;
         });
+        if (!mounted) return;
+        await _loadBrojArhiviranja();
       } else {
         if (!mounted) return;
         setState(() {
@@ -246,7 +275,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
     }
 
     try {
-      final widget = imageFromString(base64OrNull); 
+      final widget = imageFromString(base64OrNull);
       _cachedImages[base64OrNull] = widget;
       return widget;
     } catch (e) {
@@ -267,7 +296,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
           brojArhiviranjaMap[e.uslugaId!] = 0;
         }
         if (!mounted) return;
-        setState(() {}); 
+        setState(() {});
       }
     }
   }
@@ -341,6 +370,8 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                   );
                   if (!mounted) return;
                   await _firstLoad();
+                  if (!mounted) return;
+                  await _loadBrojArhiviranja();
                 },
                 backgroundColor: Colors.red,
                 icon: Icons.delete,
@@ -364,7 +395,6 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                   ),
                 ),
               ),
-
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
@@ -480,7 +510,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
       );
     }
 
-    if (isFirstLoadRunning && arhivaList.isEmpty) {
+    if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -493,8 +523,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         controller: scrollController,
         padding: const EdgeInsets.all(10),
         itemCount: itemCount,
-        itemBuilder: (context, index) { 
-
+        itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
@@ -599,3 +628,4 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
     return formatNumber(avg);
   }
 }
+
