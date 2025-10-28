@@ -4,6 +4,7 @@ import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
+import 'package:esalon_mobile/providers/promocija_provider.dart';
 import 'package:esalon_mobile/providers/uloga_provider.dart';
 import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
@@ -25,6 +26,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => FavoritProvider()),
         ChangeNotifierProvider(create: (_) => OcjenaProvider()),
         ChangeNotifierProvider(create: (_) => ArhivaProvider()),
+        ChangeNotifierProvider(create: (_) => PromocijaProvider()),
 
       ],
       child: const MyApp(),

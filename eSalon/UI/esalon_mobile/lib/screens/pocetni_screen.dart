@@ -246,7 +246,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
               "Vrste usluga",
               style: TextStyle(
                 fontSize: 17,
-                fontWeight: FontWeight.normal,
+                fontWeight: FontWeight.w600,
                 color: Colors.black,
               ),
             ),
@@ -432,7 +432,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
               "Najnovije usluge",
               style: TextStyle(
                 fontSize: 17,
-                fontWeight: FontWeight.normal,
+                fontWeight: FontWeight.w600,
                 color: Colors.black,
               ),
             ),

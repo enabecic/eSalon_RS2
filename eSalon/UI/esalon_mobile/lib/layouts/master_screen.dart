@@ -1,5 +1,6 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
 import 'package:esalon_mobile/screens/pocetni_screen.dart';
+import 'package:esalon_mobile/screens/promocija_screen.dart';
 import 'package:esalon_mobile/screens/usluga_arhiva_screen.dart';
 import 'package:esalon_mobile/screens/usluga_favorit_screen.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class _MasterScreenState extends State<MasterScreen> {
     const UslugaFavoritScreen(),
     const Center(child: Text("Sve usluge")),
     const Center(child: Text("Moje rezervacije")),
-    const Center(child: Text("Posebne ponude")),
+    const PromocijaScreen(),
     const UslugaArhivaScreen(),
     const Center(child: Text("Obavijesti")),
   ];
