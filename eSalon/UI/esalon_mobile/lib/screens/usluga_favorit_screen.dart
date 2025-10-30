@@ -322,7 +322,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         height: 95,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -342,7 +342,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                 width: 120,
                 height: 100,
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(18)),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
                   child: FittedBox(
                     fit: BoxFit.cover,
                     child: _buildImage(e.slika),

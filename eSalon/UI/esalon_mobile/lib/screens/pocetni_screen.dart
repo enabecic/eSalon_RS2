@@ -273,7 +273,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                         height: 140,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.4),
@@ -325,7 +325,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                           height: 140,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.4),
@@ -342,7 +342,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: 
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: SizedBox(
                                     width: double.infinity,
                                     height: 70,
@@ -457,7 +457,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.5),
@@ -480,8 +480,7 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                 width: double.infinity,
                                 height: 120,
                                 child: ClipRRect(
-                                  borderRadius:
-                                      const BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: e.slika != null && e.slika!.isNotEmpty
                                       ? FittedBox(
                                           fit: BoxFit.fill,

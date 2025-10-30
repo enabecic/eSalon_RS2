@@ -1,3 +1,4 @@
+import 'package:esalon_mobile/screens/buduce_promocije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
@@ -35,6 +36,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
   }
 
   Future<void> _fetchAktivne() async {
+    if (!mounted) return;
     setState(() => _isLoadingAktivne = true);
     try {
       final filter = <String, dynamic>{
@@ -44,8 +46,9 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         'orderBy': 'DatumPocetka',
         'sortDirection': 'asc',
       };
-
+      if (!mounted) return;
       final result = await _promocijaProvider.get(filter: filter);
+      if (!mounted) return;
       setState(() {
         _trenutnoAktivne = result.result;
       });
@@ -60,11 +63,13 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
+      if (!mounted) return;
       setState(() => _isLoadingAktivne = false);
     }
   }
 
   Future<void> _fetchBuduce() async {
+    if (!mounted) return;
     setState(() => _isLoadingBuduce = true);
     try {
       final filter = <String, dynamic>{
@@ -74,8 +79,9 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         'orderBy': 'DatumPocetka',
         'sortDirection': 'asc',
       };
-
+      if (!mounted) return;
       final result = await _promocijaProvider.get(filter: filter);
+      if (!mounted) return;
       setState(() {
         _buducePromocije = result.result;
       });
@@ -90,6 +96,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
+      if (!mounted) return;
       setState(() => _isLoadingBuduce = false);
     }
   }
@@ -175,11 +182,19 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
             ),
             GestureDetector(
               onTap: () {
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(
-                //     builder: (_) => SvePromocijeScreen(filterAktivne: jeTrenutna),
-                //   ),
-                // );
+                if (jeTrenutna) {
+                  // Navigator.of(context).push(
+                  //   MaterialPageRoute(
+                  //     builder: (_) => const SveAktivnePromocijeScreen(),
+                  //   ),
+                  // );
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const BuducePromocijeScreen(),
+                    ),
+                  );
+                }
               },
               child: const Text(
                 "Vidi sve >>",
