@@ -157,6 +157,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
     try {
       if (AuthProvider.isSignedIn) {
+        //page = 1;
         if (!mounted) return;
         final favoritResult = await uslugaFavoritProvider.get(
           filter: searchRequest,

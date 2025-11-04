@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/layouts/master_screen.dart';
+import 'package:esalon_mobile/providers/aktivirana_promocija_provider.dart';
 import 'package:esalon_mobile/providers/arhiva_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
@@ -27,6 +28,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => OcjenaProvider()),
         ChangeNotifierProvider(create: (_) => ArhivaProvider()),
         ChangeNotifierProvider(create: (_) => PromocijaProvider()),
+        ChangeNotifierProvider(create: (_) => AktiviranaPromocijaProvider()),
 
       ],
       child: const MyApp(),

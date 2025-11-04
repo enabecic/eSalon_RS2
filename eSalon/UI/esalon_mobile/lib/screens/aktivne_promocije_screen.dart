@@ -1,21 +1,29 @@
+import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/models/search_result.dart';
+import 'package:esalon_mobile/providers/base_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
+import 'package:esalon_mobile/models/aktivirana_promocija.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
+import 'package:esalon_mobile/providers/aktivirana_promocija_provider.dart';
+import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-class BuducePromocijeScreen extends StatefulWidget {
-  const BuducePromocijeScreen({super.key});
+class AktivnePromocijeScreen extends StatefulWidget {
+  const AktivnePromocijeScreen({super.key});
 
   @override
-  State<BuducePromocijeScreen> createState() => _BuducePromocijeScreenState();
+  State<AktivnePromocijeScreen> createState() => _AktivnePromocijeScreenState();
 }
 
-class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
+class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
   late PromocijaProvider _promocijaProvider;
-  List<Promocija> _buducePromocije = [];
+  late AktiviranaPromocijaProvider _aktiviranaProvider;
+  List<Promocija> _aktivnePromocije = [];
+  List<AktiviranaPromocija> _aktiviranePromocije = [];
   int page = 1;
   final int pageSize = 10;
   int total = 0;
@@ -29,10 +37,14 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
   RangeValues? _popustFilter;
   final Map<String, Widget> _cachedImages = {};
 
+  int _selectedTabIndex = 0; 
+  final Map<int, bool> _itemLoading = {};
+
   @override
   void initState() {
     super.initState();
     _promocijaProvider = context.read<PromocijaProvider>();
+    _aktiviranaProvider = context.read<AktiviranaPromocijaProvider>();
     scrollController = ScrollController();
     scrollController.addListener(_onScroll);
     _searchController = TextEditingController();
@@ -51,11 +63,20 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
   void _onScroll() {
     const double showOffset = 10.0;
     if (scrollController.offset > showOffset) {
-      if (!mounted) return;
-      if (!showBtn) setState(() => showBtn = true);
+      if (!showBtn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => showBtn = true);
+      });
+    }
+
     } else {
-      if (!mounted) return;
-      if (showBtn) setState(() => showBtn = false);
+     if (showBtn) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() => showBtn = false);
+        });
+      }
     }
 
     if (!isFirstLoadRunning &&
@@ -75,22 +96,30 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
 
     try {
       final filter = <String, dynamic>{
-        'SamoBuduce': true,
+        'SamoAktivne': true,
         'NazivOpisFTS': _searchController.text,
         'page': page,
         'pageSize': pageSize,
-        'orderBy': 'DatumPocetka',
+        'orderBy': 'DatumKraja',
         'sortDirection': 'asc',
         if (_popustFilter != null) 'PopustGTE': _popustFilter!.start,
         if (_popustFilter != null) 'PopustLTE': _popustFilter!.end,
       };
-      if (!mounted) return;
+      if (!mounted) return; 
       final result = await _promocijaProvider.get(filter: filter);
+
+      SearchResult<AktiviranaPromocija>? aktiviraneResult;
+      if (AuthProvider.isSignedIn && AuthProvider.korisnikId != null) {
+        if (!mounted) return; 
+        aktiviraneResult = await _aktiviranaProvider.get(filter: {'KorisnikId': AuthProvider.korisnikId});
+      }
+
       if (!mounted) return;
       setState(() {
-        _buducePromocije = result.result;
-        total = result.count;
-        hasNextPage = (page * pageSize) < total;
+        _aktivnePromocije = result.result;
+        _aktiviranePromocije = aktiviraneResult?.result ?? [];
+        total = _filteredList.length;
+        hasNextPage = (page * pageSize) < result.count;
       });
     } catch (e) {
       if (!mounted) return;
@@ -122,30 +151,36 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
 
     try {
       final filter = <String, dynamic>{
-        'SamoBuduce': true,
+        'SamoAktivne': true,
         'NazivOpisFTS': _searchController.text,
         'page': page,
         'pageSize': pageSize,
-        'orderBy': 'DatumPocetka',
+        'orderBy': 'DatumKraja',
         'sortDirection': 'asc',
         if (_popustFilter != null) 'PopustGTE': _popustFilter!.start,
         if (_popustFilter != null) 'PopustLTE': _popustFilter!.end,
       };
       if (!mounted) return;
       final result = await _promocijaProvider.get(filter: filter);
-      if (!mounted) return;
 
       if (result.result.isNotEmpty) {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
-          _buducePromocije.addAll(result.result);
-          total = result.count;
-          hasNextPage = (page * pageSize) < total;
+          _aktivnePromocije.addAll(result.result);
+
+          total = _filteredList.length;
+          hasNextPage = (page * pageSize) < result.count;
         });
-      } else {
+      });
+    } else {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() => hasNextPage = false);
-      }
+      });
+    }
     } catch (e) {
       if (!mounted) return;
       setState(() => hasNextPage = false);
@@ -159,9 +194,253 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => isLoadMoreRunning = false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => isLoadMoreRunning = false);
+      });
     }
+  }
+
+  void _showSnack(String text, {bool success = true}) {
+    final snack = SnackBar(
+      content: Center(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+        ),
+      ),
+      backgroundColor: success
+          ? const Color.fromARGB(255, 138, 182, 140) 
+          : Colors.red,
+      duration: const Duration(milliseconds: 1500),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snack);
+  }
+
+  AktiviranaPromocija? _findAktiviranaByPromocijaId(int? promocijaId) {
+    if (promocijaId == null) return null;
+    try {
+      return _aktiviranePromocije.firstWhere((p) =>
+          p.promocijaId == promocijaId &&
+          p.korisnikId == AuthProvider.korisnikId &&
+          p.aktivirana == true &&
+          p.iskoristena != true);
+    } 
+    catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _toggleActivationForPromocija(Promocija promocija) async {
+    final pid = promocija.promocijaId;
+    if (pid == null) return;
+
+    final korisnikId = AuthProvider.korisnikId;
+
+    if (korisnikId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 2000),
+          content: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              );
+            },
+            child: RichText(
+              text: const TextSpan(
+                text: "Morate biti prijavljeni da biste aktivirali ovu promociju. ",
+                style: TextStyle(color: Colors.white, fontSize: 15),
+                children: [
+                  TextSpan(
+                    text: "Prijavite se!",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return; 
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _itemLoading[pid] = true);
+    });
+
+    try {
+      final existing = _findAktiviranaByPromocijaId(pid);
+
+      if (existing == null) {
+        final request = {
+          "promocijaId": pid,
+          "korisnikId": korisnikId,
+        };
+        if (!mounted) return; 
+        final dynamic result = await _aktiviranaProvider.insert(request);
+
+        final newId = (result as AktiviranaPromocija).aktiviranaPromocijaId;
+
+        final novi = AktiviranaPromocija(
+          aktiviranaPromocijaId: newId,
+          promocijaId: pid,
+          korisnikId: korisnikId,
+          aktivirana: true,
+          iskoristena: false,
+          datumAktiviranja: DateTime.now(),
+          promocijaNaziv: promocija.naziv,
+          kodPromocije: promocija.kod,
+          slikaUsluge: promocija.slikaUsluge,
+          popust: promocija.popust,
+          datumPocetka: promocija.datumPocetka,
+          datumKraja: promocija.datumKraja,
+        );
+        if (!mounted) return; 
+        setState(() {
+          _aktiviranePromocije.add(novi);
+          total = _filteredList.length;
+        });
+
+        _showSnack("Uspješno aktivirana promocija.");
+      } else {
+        final idToDelete = existing.aktiviranaPromocijaId;
+        if (idToDelete == null) throw UserException("Nepoznat ID za deaktivaciju.");
+        if (!mounted) return; 
+        await _aktiviranaProvider.delete(idToDelete);
+        if (!mounted) return; 
+        setState(() {
+          _aktiviranePromocije.removeWhere((p) => p.aktiviranaPromocijaId == idToDelete);
+          total = _filteredList.length;
+        });
+
+        _showSnack("Uspješno deaktivirana promocija.");
+      }
+    } catch (e) {
+      _showSnack("Greška: ${e.toString()}", success: false);
+    } finally {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _itemLoading[pid] = false);
+    });
+    }
+  }
+
+  List<Promocija> get _filteredList {
+    final aktiviraneNeiskoristeneIds = _aktiviranePromocije
+        .where((p) =>
+            p.korisnikId == AuthProvider.korisnikId &&
+            p.aktivirana == true &&
+            p.iskoristena != true)
+        .map((p) => p.promocijaId)
+        .toList();
+
+    final iskoristeneIds = _aktiviranePromocije
+        .where((p) => p.iskoristena == true && p.korisnikId == AuthProvider.korisnikId)
+        .map((p) => p.promocijaId)
+        .toList();
+
+    if (_selectedTabIndex == 0) {
+      return _aktivnePromocije
+          .where((p) => !iskoristeneIds.contains(p.promocijaId))
+          .toList();
+    }
+
+    if (_selectedTabIndex == 1) {
+      return _aktivnePromocije
+          .where((p) => aktiviraneNeiskoristeneIds.contains(p.promocijaId))
+          .toList();
+    }
+
+    return _aktivnePromocije
+        .where((p) =>
+            !aktiviraneNeiskoristeneIds.contains(p.promocijaId) &&
+            !iskoristeneIds.contains(p.promocijaId))
+        .toList();
+  }
+
+  Widget _buildTabs() {
+    return Row(
+      children: [
+        Expanded(child: _tabItem("Sve promocije", 0)),
+        const SizedBox(width: 8),
+        Expanded(child: _tabItem("Aktivirane", 1)),
+        const SizedBox(width: 8),
+        Expanded(child: _tabItem("Neaktivirane", 2)),
+      ],
+    );
+  }
+
+  Widget _tabItem(String label, int index) {
+    final isSelected = _selectedTabIndex == index;
+    return GestureDetector(
+      onTap: () {
+        if (!mounted) return;
+
+        if (!AuthProvider.isSignedIn && index != 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              duration: const Duration(milliseconds: 1500),
+              content: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  );
+                },
+                child: RichText(
+                  text: const TextSpan(
+                    text: "Morate biti prijavljeni da biste vidjeli aktivirane/neaktivirane promocije. ",
+                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    children: [
+                      TextSpan(
+                        text: "Prijavite se!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+          return; 
+        }
+        if (!mounted) return; 
+        setState(() {
+          _selectedTabIndex = index;
+          total = _filteredList.length;
+        });
+      },
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color.fromARGB(255, 210, 193, 214)
+              : const Color.fromARGB(255, 133, 131, 133).withOpacity(0.3),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.black87,
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildHeader() {
@@ -177,7 +456,7 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Buduće promocije",
+              "Trenutno aktivne promocije",
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 19,
@@ -197,14 +476,12 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
   }
 
   Widget _buildPromocijaItem(Promocija promocija) {
+    final pid = promocija.promocijaId;
+    final aktivirana = _findAktiviranaByPromocijaId(pid) != null;
+    final isLoadingItem = pid != null && (_itemLoading[pid] == true);
+
     return InkWell(
-      onTap: () {
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (_) => PromocijaDetailsScreen(promocija: promocija),
-        //   ),
-        // );
-      },
+      onTap: () {},
       borderRadius: BorderRadius.circular(15),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -262,14 +539,54 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              "${promocija.datumPocetka != null ? formatDate(promocija.datumPocetka!.toIso8601String()) : ""} - "
-              "${promocija.datumKraja != null ? formatDate(promocija.datumKraja!.toIso8601String()) : ""}",
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.black54,
-              ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Vrijedi do ${promocija.datumKraja != null ? formatDate(promocija.datumKraja!.toIso8601String()) : ""}",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 36,
+                  child: ElevatedButton(
+                    onPressed: isLoadingItem
+                        ? null
+                        : () {
+                            _toggleActivationForPromocija(promocija);
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: aktivirana
+                          ? const Color.fromARGB(255, 133, 131, 133).withOpacity(0.3) 
+                          : const Color.fromARGB(255, 210, 193, 214), 
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 0),
+                      elevation: 0,
+                    ),
+                    child: isLoadingItem
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
+                          )
+                        : Text(
+                            aktivirana ? "Deaktiviraj" : "Aktiviraj",
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -307,7 +624,7 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleList = _buducePromocije;
+    final visibleList = _filteredList;
     final itemCount = 1 + visibleList.length + 1;
 
     return Scaffold(
@@ -375,16 +692,8 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                       children: [
                         _buildHeader(),
                         const SizedBox(height: 15),
-                        const Text(
-                          "Otkrijte posebne ponude i ostvarite popuste koji uskoro postaju dostupni!",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
+                        _buildTabs(),
+                        const SizedBox(height: 20),
                         TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
@@ -417,12 +726,12 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                             _loadInitialData(); 
                           },
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 5),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Ukupan broj budućih promocija: $total",
+                              "Ukupan broj promocija: $total",
                               style: const TextStyle(
                                 color: Colors.black87,
                                 fontSize: 14,
@@ -518,9 +827,12 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                     ),
                   );
                 }
+
                 final listIndex = index - 1;
+
                 if (listIndex < visibleList.length) {
-                  return _buildPromocijaItem(visibleList[listIndex]);
+                  final p = visibleList[listIndex];
+                  return _buildPromocijaItem(p);
                 }
 
                 if (isLoadMoreRunning) {
@@ -551,8 +863,8 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                         padding: const EdgeInsets.all(10),
                         child: Text(
                           visibleList.isEmpty
-                              ? "Trenutno nema budućih promocija."
-                              : "Nema više budućih promocija za prikazati.",
+                              ? "Trenutno nema promocija za prikazati."
+                              : "Nema više promocija za prikazati.",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,

@@ -1,3 +1,4 @@
+import 'package:esalon_mobile/screens/aktivne_promocije_screen.dart';
 import 'package:esalon_mobile/screens/buduce_promocije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
@@ -183,11 +184,11 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
             GestureDetector(
               onTap: () {
                 if (jeTrenutna) {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (_) => const SveAktivnePromocijeScreen(),
-                  //   ),
-                  // );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AktivnePromocijeScreen(),
+                    ),
+                  );
                 } else {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -342,8 +343,12 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
       try {
         imageWidget = SizedBox(
           height: 120,
-          width: 108,
-          child: imageFromString(slikaBase64),
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
+            child: imageFromString(slikaBase64),
+          ),
         );
       } catch (_) {
         imageWidget = const Icon(Icons.broken_image, size: 100);

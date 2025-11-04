@@ -77,9 +77,12 @@ namespace eSalon.Services.RezervacijaStateMachine
                     .Include(x => x.Promocija)
                     .FirstOrDefaultAsync(x =>
                         x.KorisnikId == rezervacija.KorisnikId &&
+                        x.Promocija != null &&                    
+                        !x.Promocija.IsDeleted &&       //        
                         x.Promocija.Kod == rezervacija.KodPromocije &&
                         x.Aktivirana &&
-                        !x.Iskoristena,
+                        !x.Iskoristena &&
+                        !x.IsDeleted, //
                         cancellationToken);
 
                 if (aktivirana == null)
@@ -135,7 +138,12 @@ namespace eSalon.Services.RezervacijaStateMachine
             {
                 var aktivirana = await Context.AktiviranaPromocijas
                     .Include(x => x.Promocija)
-                    .FirstOrDefaultAsync(x => x.AktiviranaPromocijaId == entity.AktiviranaPromocijaId, cancellationToken);
+                   .FirstOrDefaultAsync(x =>
+                        x.AktiviranaPromocijaId == entity.AktiviranaPromocijaId &&
+                        x.Promocija != null &&
+                        !x.Promocija.IsDeleted &&
+                        !x.IsDeleted, //
+                        cancellationToken);
 
                 if (aktivirana != null && aktivirana.Promocija != null)
                 {
