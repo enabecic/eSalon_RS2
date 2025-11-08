@@ -317,7 +317,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 fontWeight: FontWeight.w600,),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 173, 178, 178),
+              backgroundColor: const Color.fromARGB(255, 210, 209, 210),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

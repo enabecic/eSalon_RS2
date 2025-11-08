@@ -1,6 +1,7 @@
 import 'package:esalon_mobile/main.dart';
 import 'package:esalon_mobile/models/search_result.dart';
 import 'package:esalon_mobile/providers/base_provider.dart';
+import 'package:esalon_mobile/screens/promocija_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/models/aktivirana_promocija.dart';
@@ -481,7 +482,19 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
     final isLoadingItem = pid != null && (_itemLoading[pid] == true);
 
     return InkWell(
-      onTap: () {},
+      onTap: () async {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PromocijaDetailsScreen(promocija: promocija),
+          ),
+        );
+
+         if (result == true) {
+          if (!mounted) return;
+          page = 1; 
+          await _loadInitialData();
+        }
+      },
       borderRadius: BorderRadius.circular(15),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -571,19 +584,33 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                       elevation: 0,
                     ),
                     child: isLoadingItem
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
-                          )
-                        : Text(
-                            aktivirana ? "Deaktiviraj" : "Aktiviraj",
-                            style: const TextStyle(
-                              color: Colors.black87,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
                           ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              aktivirana ? Icons.remove_circle_outline : Icons.check_circle_outline,
+                              color: Colors.black87,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              aktivirana ? "Deaktiviraj" : "Aktiviraj",
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                   ),
                 ),
               ],
@@ -596,14 +623,16 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
 
   Widget _buildImage(String? slikaBase64) {
     if (slikaBase64 == null || slikaBase64.isEmpty) {
-      return Image.asset(
-        "assets/images/praznaUsluga.png",
-        height: 140,
-        width: double.infinity,
-        fit: BoxFit.cover,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          "assets/images/praznaUsluga.png",
+          height: 140,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       );
     }
-
     final key = slikaBase64;
 
     final widget = _cachedImages[key] ??= SizedBox(
@@ -697,7 +726,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                         TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: "Pretraži po nazivu ili opisu",
+                            hintText: "Pretraži po nazivu ili opisu...",
                             hintStyle: const TextStyle(color: Colors.grey),
                             prefixIcon: const Icon(Icons.search, color: Colors.grey),
                             suffixIcon: _searchController.text.isNotEmpty

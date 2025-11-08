@@ -1,5 +1,8 @@
+import 'package:esalon_mobile/providers/aktivirana_promocija_provider.dart';
+import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/screens/aktivne_promocije_screen.dart';
 import 'package:esalon_mobile/screens/buduce_promocije_screen.dart';
+import 'package:esalon_mobile/screens/promocija_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
@@ -17,6 +20,7 @@ class PromocijaScreen extends StatefulWidget {
 
 class _PromocijaScreenState extends State<PromocijaScreen> {
   late PromocijaProvider _promocijaProvider;
+  late AktiviranaPromocijaProvider _aktiviranaPromocijaProvider;
 
   List<Promocija> _trenutnoAktivne = [];
   List<Promocija> _buducePromocije = [];
@@ -28,6 +32,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
   void initState() {
     super.initState();
     _promocijaProvider = context.read<PromocijaProvider>();
+    _aktiviranaPromocijaProvider = context.read<AktiviranaPromocijaProvider>();
     _fetchData();
   }
 
@@ -39,20 +44,36 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
   Future<void> _fetchAktivne() async {
     if (!mounted) return;
     setState(() => _isLoadingAktivne = true);
+
     try {
-      final filter = <String, dynamic>{
+      final filterPromocije = <String, dynamic>{
         'SamoAktivne': true,
-        'page': 1,
-        'pageSize': 2,
         'orderBy': 'DatumPocetka',
         'sortDirection': 'asc',
       };
-      if (!mounted) return;
-      final result = await _promocijaProvider.get(filter: filter);
-      if (!mounted) return;
+
+      final resultPromocije = await _promocijaProvider.get(filter: filterPromocije);
+
+      List<Promocija> aktivnePromocije = resultPromocije.result;
+
+      if (AuthProvider.korisnikId != null) {
+        final filterAktivirane = <String, dynamic>{
+          'KorisnikId': AuthProvider.korisnikId,
+          'Iskoristena': true,
+        };
+        final resultAktivirane = await _aktiviranaPromocijaProvider.get(filter: filterAktivirane);
+
+        final aktiviraneIds = resultAktivirane.result.map((e) => e.promocijaId).toList();
+
+        aktivnePromocije = aktivnePromocije
+            .where((p) => !aktiviraneIds.contains(p.promocijaId))
+            .toList();
+      }
+
       setState(() {
-        _trenutnoAktivne = result.result;
+        _trenutnoAktivne = aktivnePromocije.take(2).toList();
       });
+
     } catch (e) {
       if (!mounted) return;
       await QuickAlert.show(
@@ -171,16 +192,22 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
               ),
             ),
+
+            const SizedBox(width: 8),
+
             GestureDetector(
               onTap: () {
                 if (jeTrenutna) {
@@ -199,6 +226,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
               },
               child: const Text(
                 "Vidi sve >>",
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
@@ -211,15 +239,35 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         if (isLoading)
           const Center(child: CircularProgressIndicator())
         else if (promocije.isEmpty)
-          Center(
-            child: Text(
-              jeTrenutna
-                  ? "Trenutno nema aktivnih promocija."
-                  : "Trenutno nema budućih promocija.",
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF3C6E71),
+           Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Container(
+                width: 300,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(97, 158, 158, 158),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 7,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(
+                    jeTrenutna
+                        ? "Trenutno nema aktivnih promocija."
+                        : "Trenutno nema budućih promocija.",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ),
           )
@@ -243,7 +291,11 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
 
                 return GestureDetector(
                   onTap: () {
-
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PromocijaDetailsScreen(promocija: promocija),
+                      ),
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(

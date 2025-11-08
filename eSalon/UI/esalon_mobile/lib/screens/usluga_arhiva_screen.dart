@@ -321,7 +321,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(width: 8),
+            SizedBox(width: 2),
             Icon(
               Icons.bookmark,
               color: Colors.black,

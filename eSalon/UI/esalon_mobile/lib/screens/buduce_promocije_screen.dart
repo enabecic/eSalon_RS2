@@ -1,3 +1,4 @@
+import 'package:esalon_mobile/screens/promocija_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
@@ -199,11 +200,11 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
   Widget _buildPromocijaItem(Promocija promocija) {
     return InkWell(
       onTap: () {
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (_) => PromocijaDetailsScreen(promocija: promocija),
-        //   ),
-        // );
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PromocijaDetailsScreen(promocija: promocija),
+          ),
+        );
       },
       borderRadius: BorderRadius.circular(15),
       child: Container(
@@ -279,11 +280,14 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
 
   Widget _buildImage(String? slikaBase64) {
     if (slikaBase64 == null || slikaBase64.isEmpty) {
-      return Image.asset(
-        "assets/images/praznaUsluga.png",
-        height: 140,
-        width: double.infinity,
-        fit: BoxFit.cover,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          "assets/images/praznaUsluga.png",
+          height: 140,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
       );
     }
 

@@ -15,6 +15,7 @@ class Promocija {
   String? uslugaNaziv;
   String? slikaUsluge;
   bool? status;
+  bool? jeBuduca;
 
   Promocija({
     this.promocijaId,
@@ -28,6 +29,7 @@ class Promocija {
     this.uslugaNaziv,
     this.slikaUsluge,
     this.status,
+    this.jeBuduca,
   });
 
   factory Promocija.fromJson(Map<String, dynamic> json) =>

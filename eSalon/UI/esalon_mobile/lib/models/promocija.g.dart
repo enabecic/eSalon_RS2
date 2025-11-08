@@ -22,6 +22,7 @@ Promocija _$PromocijaFromJson(Map<String, dynamic> json) => Promocija(
       uslugaNaziv: json['uslugaNaziv'] as String?,
       slikaUsluge: json['slikaUsluge'] as String?,
       status: json['status'] as bool?,
+      jeBuduca: json['jeBuduca'] as bool?,
     );
 
 Map<String, dynamic> _$PromocijaToJson(Promocija instance) => <String, dynamic>{
@@ -36,4 +37,5 @@ Map<String, dynamic> _$PromocijaToJson(Promocija instance) => <String, dynamic>{
       'uslugaNaziv': instance.uslugaNaziv,
       'slikaUsluge': instance.slikaUsluge,
       'status': instance.status,
+      'jeBuduca': instance.jeBuduca,
     };
