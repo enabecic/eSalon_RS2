@@ -1,4 +1,6 @@
 import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/providers/usluga_provider.dart';
+import 'package:esalon_mobile/screens/usluga_details_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -23,6 +25,7 @@ class UslugaArhivaScreen extends StatefulWidget {
 class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
   late ArhivaProvider uslugaArhivaProvider;
   late OcjenaProvider ocjenaProvider;
+  late UslugaProvider uslugaProvider;
 
   SearchResult<Ocjena>? ocjenaResult;
   Map<String, dynamic> searchRequest = {};
@@ -61,6 +64,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
     super.didChangeDependencies();
     uslugaArhivaProvider = context.read<ArhivaProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
+    uslugaProvider = context.read<UslugaProvider>();
 
     if (!_initialLoaded) {
       _initialLoaded = true;
@@ -94,10 +98,11 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -199,10 +204,11 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isFirstLoadRunning = false;
-      });
+      if (mounted) {
+        setState(() {
+          isFirstLoadRunning = false;
+        });
+      }
     }
   }
 
@@ -256,10 +262,11 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isLoadMoreRunning = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadMoreRunning = false;
+        });
+      }
     }
   }
 
@@ -313,12 +320,16 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Moja lista 'Želim probati'",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Moja lista 'Želim probati'",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 2),
@@ -335,7 +346,34 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
 
   Widget _buildArhivaItem(Arhiva e) {
     return InkWell(
-      onTap: () {},
+       onTap: () async {
+        if (!mounted) return;
+          try {
+            final usluga = await uslugaProvider.getById(e.uslugaId!);
+            if (!mounted) return;
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UslugaDetailsScreen(usluga: usluga),
+              ),
+            );
+
+            if (result == true) {
+              await _loadInitialData();
+            }
+
+          }catch (e) {
+          if (!mounted) return;
+          await QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Greška',
+            text: e.toString(),
+            confirmBtnText: 'OK',
+            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+          );
+        }
+      },
       child: Container(
         height: 95,
         decoration: BoxDecoration(
@@ -511,7 +549,18 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
     }
 
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(
+          child: ColoredBox(
+            color: Color.fromARGB(255, 247, 244, 247), 
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurple, 
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     final visibleList = arhivaList.where((f) => f.korisnikId == AuthProvider.korisnikId).toList();

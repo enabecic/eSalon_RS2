@@ -17,6 +17,7 @@ namespace eSalon.Model
         public string UslugaNaziv { get; set; } = string.Empty;
         public byte[]? SlikaUsluge { get; set; }
         public bool? Status { get; set; }
-        public bool JeBuduca => DatumPocetka > DateTime.Now;
+        public bool JeBuduca => DatumPocetka.Date > DateTime.Now.Date;
+
     }
 }

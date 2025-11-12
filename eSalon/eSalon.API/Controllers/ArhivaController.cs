@@ -21,7 +21,7 @@ namespace eSalon.API.Controllers
         }
 
         [HttpGet("BrojArhiviranja/{uslugaId}")]
-        [Authorize(Roles = "Klijent,Admin,Frizer")]
+        [AllowAnonymous]
         public async Task<ActionResult<int>> GetBrojArhiviranja(int uslugaId, CancellationToken cancellationToken)
         {
             var brojArhiviranja = await _arhivaService.GetBrojArhiviranjaAsync(uslugaId, cancellationToken);

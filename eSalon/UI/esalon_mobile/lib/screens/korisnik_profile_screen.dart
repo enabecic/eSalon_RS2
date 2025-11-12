@@ -84,8 +84,11 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
         Navigator.pop(context);
       });
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -178,12 +181,16 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Moj korisnički profil",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Moj korisnički profil",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),

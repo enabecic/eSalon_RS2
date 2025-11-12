@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:esalon_mobile/main.dart';
 import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/providers/aktivirana_promocija_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PromocijaDetailsScreen extends StatefulWidget {
   final Promocija promocija;
@@ -27,31 +27,39 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
   bool _jeAktivirana = false;
   int? _aktiviranaPromocijaId;
   bool _showCode = false;
+  bool _changed = false;
 
   @override
   void initState() {
     super.initState();
-    _prepareImage();
-    _provjeriAktivaciju();
+    _ucitajPodatke();
+  }
+
+  Future<void> _ucitajPodatke() async {
+    setState(() => _isLoading = true);
+
+    await Future.wait([
+      _prepareImage(),
+      _provjeriAktivaciju(),
+    ]);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _prepareImage() async {
     final base64 = widget.promocija.slikaUsluge;
     if (base64 == null || base64.trim().isEmpty) return;
     if (!mounted) return;
-    setState(() => _isLoading = true);
 
     final key = widget.promocija.promocijaId ?? base64.hashCode;
-    try {
-      final bytes = _imageBytesCache[key] ??= base64Decode(base64);
-      final mem = _memoryImageCache[key] ??= MemoryImage(bytes);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        precacheImage(mem, context);
-      });
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+    final bytes = _imageBytesCache[key] ??= base64Decode(base64);
+    final mem = _memoryImageCache[key] ??= MemoryImage(bytes);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      precacheImage(mem, context);
+    });
   }
 
   Future<void> _provjeriAktivaciju() async {
@@ -135,7 +143,11 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           ),
         ),
       );
-      Navigator.of(context).pop(true);
+
+      setState(() {
+        _changed = true;
+      });
+     // Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -173,7 +185,11 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           ),
         ),
       );
-      Navigator.of(context).pop(true);
+
+      setState(() {
+        _changed = true;
+      });
+      //Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -216,47 +232,6 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
     }
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 20, color: Colors.black),
-            const SizedBox(width: 10),
-
-            SizedBox(
-              width: 100, 
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                  softWrap: true,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
@@ -269,12 +244,16 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Detalji promocije",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Detalji promocije",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),
@@ -289,6 +268,43 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
     );
   }
 
+  Widget buildInfoWithIcon(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.black),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "$label ",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  TextSpan(
+                    text: value,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500, 
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInfoSection() {
     final p = widget.promocija;
     return Container(
@@ -296,82 +312,149 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(borderRadius: BorderRadius.circular(12), child: _buildImage()),
-          const SizedBox(height: 16),
-          _buildInfoRow("Naziv:", p.naziv ?? "/", Icons.label_outline),
-          _buildInfoRow("Opis:", p.opis ?? "/", Icons.article_outlined),
-          if (!_jeBuducaPromocija && _jeAktivirana)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.lock_open_outlined, size: 20, color: Colors.black),
-                  const SizedBox(width: 10),
-                  const SizedBox(
-                    width: 100,
-                    child: Text(
-                      "Kod:",
-                      style: TextStyle(
-                        fontSize: 16,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  height: 180,
+                  width: 140,
+                  child: _buildImage(),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.naziv ?? "Nepoznata promocija",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                         color: Colors.black,
-                        fontWeight: FontWeight.w600, 
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _showCode ? (p.kod ?? "/") : "••••••",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                                letterSpacing: 2,
+                    const SizedBox(height: 6),
+                    if (p.popust != null)
+                      Text(
+                        "-${p.popust!.round()}%",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "na ${p.uslugaNaziv}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          if (p.datumPocetka != null)
+            buildInfoWithIcon(
+              Icons.calendar_month,
+              "Vrijedi od:",
+              formatDate(p.datumPocetka.toString()),
+            ),
+          if (p.datumKraja != null)
+            buildInfoWithIcon(
+              Icons.calendar_today,
+              "Vrijedi do:",
+              formatDate(p.datumKraja.toString()),
+            ),
+          if (_jeAktivirana && !_jeBuducaPromocija)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: Row(
+              children: [
+                const Icon(Icons.lock_open_outlined, size: 20, color: Colors.black),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (p.kod != null && _showCode) {
+                        Clipboard.setData(ClipboardData(text: p.kod!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                            content: Center(
+                              child: Text(
+                                "Kod kopiran u međuspremnik!",
+                                textAlign: TextAlign.center,
                               ),
-                              softWrap: true,
+                            ),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      }
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: "Kod: ",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _showCode = !_showCode;
-                              });
-                            },
-                            child: Icon(
-                              _showCode ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.grey[700],
-                              size: 22,
+                          TextSpan(
+                            text: _showCode ? (p.kod ?? "/") : "••••••",
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 2,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _showCode ? Icons.visibility_off : Icons.visibility,
+                    size: 22,
+                    color: Colors.grey[700],
+                  ),
+                  onPressed: () => setState(() => _showCode = !_showCode),
+                ),
+              ],
             ),
           ),
-          _buildInfoRow(
-              "Popust:", p.popust != null ? "${p.popust!.round()}%" : "/", Icons.percent),
-          _buildInfoRow("Usluga:", p.uslugaNaziv ?? "/", Icons.content_cut),
-          _buildInfoRow(
-              "Vrijedi od:",
-              p.datumPocetka != null ? formatDate(p.datumPocetka.toString()) : "/",
-              Icons.calendar_month),
-          _buildInfoRow(
-              "Vrijedi do:",
-              p.datumKraja != null ? formatDate(p.datumKraja.toString()) : "/",
-              Icons.calendar_today),
+          const SizedBox(height: 16),
+          Text(
+            "O promociji:",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            p.opis ?? "-",
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+          ),
         ],
       ),
     );
@@ -381,7 +464,6 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
     if (_jeBuducaPromocija) {
       return _zatvoriDugme();
     }
-
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -447,7 +529,9 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
                       color: Colors.black,
                       size: 40,
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context, _changed);
+                    },
                   ),
                   const Expanded(
                     child: Center(
@@ -507,4 +591,5 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
       ),
     );
   }
+
 }

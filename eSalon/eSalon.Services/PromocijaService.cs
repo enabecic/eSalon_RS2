@@ -65,21 +65,22 @@ namespace eSalon.Services
 
             if (search.SamoAktivne == true)
             {
-                var danas = DateTime.Now;
-                query = query.Where(x => x.DatumPocetka <= danas && x.DatumKraja >= danas);
+                var danas = DateTime.Now.Date;
+                query = query.Where(x => x.DatumPocetka.Date <= danas && x.DatumKraja.Date >= danas);
             }
 
             if (search.SamoBuduce == true)
             {
-                var danas = DateTime.Now;
-                query = query.Where(x => x.DatumPocetka > danas);
+                var danas = DateTime.Now.Date;
+                query = query.Where(x => x.DatumPocetka.Date > danas);
             }
 
             if (search.SamoProsle == true)
             {
-                var danas = DateTime.Now;
-                query = query.Where(x => x.DatumKraja < danas);
+                var danas = DateTime.Now.Date;
+                query = query.Where(x => x.DatumKraja.Date < danas);
             }
+
 
             return query;
         }

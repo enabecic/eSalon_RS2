@@ -71,12 +71,16 @@ class _MasterScreenState extends State<MasterScreen> {
                         onPressed: () => Scaffold.of(context).openDrawer(),
                       ),
                     ),
-                    const Text(
-                      "eSalon",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 35,
+                    const Flexible( 
+                      child: Text(
+                        "eSalon",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 35,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1, 
+                        overflow: TextOverflow.ellipsis, 
                       ),
                     ),
                     Padding(

@@ -1,4 +1,6 @@
 import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/providers/usluga_provider.dart';
+import 'package:esalon_mobile/screens/usluga_details_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/ocjena.dart';
@@ -22,6 +24,7 @@ class UslugaFavoritScreen extends StatefulWidget {
 class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
   late FavoritProvider uslugaFavoritProvider;
   late OcjenaProvider ocjenaProvider;
+  late UslugaProvider uslugaProvider;
 
   SearchResult<Ocjena>? ocjenaResult;
   Map<String, dynamic> searchRequest = {};
@@ -60,6 +63,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
     uslugaFavoritProvider = context.read<FavoritProvider>();
     ocjenaProvider = context.read<OcjenaProvider>();
+    uslugaProvider = context.read<UslugaProvider>();
 
     if (!_initialLoaded) {
       _initialLoaded = true;
@@ -141,11 +145,12 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        isFirstLoadRunning = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          isFirstLoadRunning = false;
+        });
+      }
     }
   }
 
@@ -194,10 +199,11 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isFirstLoadRunning = false;
-      });
+      if (mounted) {
+        setState(() {
+          isFirstLoadRunning = false;
+        });
+      }
     }
   }
 
@@ -248,10 +254,11 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isLoadMoreRunning = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadMoreRunning = false;
+        });
+      }
     }
   }
 
@@ -290,12 +297,16 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Moji favoriti",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Moji favoriti",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),
@@ -316,8 +327,32 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     );
 
     return InkWell(
-      onTap: () {
-        //
+      onTap: () async {
+        if (!mounted) return;
+        try {
+          final usluga = await uslugaProvider.getById(e.uslugaId!);
+          if (!mounted) return;
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UslugaDetailsScreen(usluga: usluga),
+            ),
+          );
+
+          if (result == true) {
+            await _refreshFavoritList();
+          }
+        } catch (e) {
+          if (!mounted) return;
+          await QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Greška',
+            text: e.toString(),
+            confirmBtnText: 'OK',
+            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+          );
+        }
       },
       child: Container(
         height: 95,
@@ -416,16 +451,15 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                                   ),
                                 ),
                               );
-                            } catch (err) {
+                            } catch (e) {
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(milliseconds: 1500),
-                                  content: Center(
-                                    child: Text(err.toString()),
-                                  ),
-                                ),
+                              await QuickAlert.show(
+                                context: context,
+                                type: QuickAlertType.error,
+                                title: 'Greška',
+                                text: e.toString(),
+                                confirmBtnText: 'OK',
+                                confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
                               );
                             }
                           },
@@ -488,7 +522,18 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     }
 
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(
+          child: ColoredBox(
+            color: Color.fromARGB(255, 247, 244, 247), 
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurple, 
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     final visibleList = favoritList.where((f) => f.korisnikId == AuthProvider.korisnikId).toList();

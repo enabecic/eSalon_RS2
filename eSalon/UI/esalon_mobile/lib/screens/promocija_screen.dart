@@ -85,8 +85,11 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoadingAktivne = false);
+      if (mounted) {
+        setState(() {
+          _isLoadingAktivne = false;
+        });
+      }
     }
   }
 
@@ -118,8 +121,11 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoadingBuduce = false);
+      if (mounted) {
+        setState(() {
+          _isLoadingBuduce = false;
+        });
+      }
     }
   }
 
@@ -166,12 +172,16 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Posebne ponude",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Posebne ponude",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),

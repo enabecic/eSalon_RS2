@@ -59,10 +59,11 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       if (!mounted) return;
       Navigator.pop(context);
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -164,7 +165,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
     );
   }
 
-   Widget _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
@@ -176,12 +177,16 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Uredi korisnički profil",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Uredi korisnički profil",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),
@@ -550,6 +555,10 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                     type: QuickAlertType.error,
                     title: 'Greška',
                     text: e.toString(),
+                    confirmBtnText: 'OK',
+                    confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                    textColor: Colors.black,
+                    titleColor: Colors.black,
                   );
                 }
               },

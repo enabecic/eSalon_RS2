@@ -1,5 +1,6 @@
 import 'package:esalon_mobile/main.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
+import 'package:esalon_mobile/screens/usluga_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/ocjena.dart';
 import 'package:esalon_mobile/models/usluga.dart';
@@ -452,8 +453,33 @@ class _PocetniScreenState extends State<PocetniScreen> {
                 var e = uslugaList[index];
                 return GestureDetector(
                   onTap: () async {
-                    //
-                  },
+                    try {
+                      final uslugaDetalji =
+                        await uslugaProvider.getById(e.uslugaId!);
+                      if (!context.mounted) return;
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                            UslugaDetailsScreen(usluga: uslugaDetalji),
+                        ),
+                      );
+
+                      if (result == true) {
+                        _loadInitialData();
+                      }
+                    }catch (e) {
+                      if (!context.mounted) return;
+                      await QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            title: 'Greška',
+                            text: e.toString(),
+                            confirmBtnText: 'OK',
+                            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                      );
+                    }
+                  },     
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -647,18 +673,13 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                     setState(() {});
                                   } catch (e) {
                                     if (!context.mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: Colors.red,
-                                        duration:
-                                            const Duration(milliseconds: 1500),
-                                        content: Center(
-                                          child: Text(
-                                            e.toString(),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
+                                     await QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.error,
+                                      title: 'Greška',
+                                      text: e.toString(),
+                                      confirmBtnText: 'OK',
+                                      confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
                                     );
                                   }
                                 },

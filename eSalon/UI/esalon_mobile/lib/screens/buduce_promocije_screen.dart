@@ -104,11 +104,12 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isFirstLoadRunning = false;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isFirstLoadRunning = false;
+         _isLoading = false;
+        });
+      }
     }
   }
 
@@ -160,8 +161,11 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => isLoadMoreRunning = false);
+      if (mounted) {
+        setState(() {
+          isLoadMoreRunning = false;
+        });
+      }
     }
   }
 
@@ -177,12 +181,16 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Buduće promocije",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Buduće promocije",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),
@@ -392,7 +400,7 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                         TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: "Pretraži po nazivu ili opisu",
+                            hintText: "Pretraži po nazivu ili opisu...",
                             hintStyle: const TextStyle(color: Colors.grey),
                             prefixIcon: const Icon(Icons.search, color: Colors.grey),
                             suffixIcon: _searchController.text.isNotEmpty

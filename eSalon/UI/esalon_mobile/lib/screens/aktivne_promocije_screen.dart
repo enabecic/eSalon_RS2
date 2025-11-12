@@ -133,11 +133,12 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        isFirstLoadRunning = false;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isFirstLoadRunning = false;
+         _isLoading = false;
+        });
+      }
     }
   }
 
@@ -456,12 +457,16 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Trenutno aktivne promocije",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
+            Flexible( 
+              child: Text(
+                "Trenutno aktivne promocije",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1, 
+                overflow: TextOverflow.ellipsis, 
               ),
             ),
             SizedBox(width: 8),
@@ -707,7 +712,14 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Container(
+            color: const Color.fromARGB(255, 247, 244, 247), 
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurple, 
+              ),
+            ),
+          )
           : ListView.builder(
               controller: scrollController,
               padding: const EdgeInsets.all(16),
