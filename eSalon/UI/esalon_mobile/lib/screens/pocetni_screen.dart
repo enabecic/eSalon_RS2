@@ -254,7 +254,14 @@ class _PocetniScreenState extends State<PocetniScreen> {
           ),
           const SizedBox(height: 10),
           if (vrstaUslugeResult == null)
-            const Center(child: CircularProgressIndicator())
+          Container(
+            color: const Color.fromARGB(255, 247, 244, 247), 
+            height: double.infinity, 
+            width: double.infinity,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
           else if (vrstaUslugeResult!.result.isEmpty)
             const Text("Nema dostupnih vrsta usluga.")
           else

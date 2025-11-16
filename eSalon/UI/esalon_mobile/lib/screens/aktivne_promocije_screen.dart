@@ -41,6 +41,9 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
   int _selectedTabIndex = 0; 
   final Map<int, bool> _itemLoading = {};
 
+  String _orderBy = 'DatumKraja'; 
+  String _sortDirection = 'asc'; 
+
   @override
   void initState() {
     super.initState();
@@ -99,15 +102,17 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
       final filter = <String, dynamic>{
         'SamoAktivne': true,
         'NazivOpisFTS': _searchController.text,
-        'page': page,
-        'pageSize': pageSize,
-        'orderBy': 'DatumKraja',
-        'sortDirection': 'asc',
+        'orderBy': _orderBy,       
+        'sortDirection': _sortDirection,
         if (_popustFilter != null) 'PopustGTE': _popustFilter!.start,
         if (_popustFilter != null) 'PopustLTE': _popustFilter!.end,
       };
       if (!mounted) return; 
-      final result = await _promocijaProvider.get(filter: filter);
+      final result = await _promocijaProvider.get(
+        filter: filter,
+        page: page,
+        pageSize: pageSize,
+        );
 
       SearchResult<AktiviranaPromocija>? aktiviraneResult;
       if (AuthProvider.isSignedIn && AuthProvider.korisnikId != null) {
@@ -155,15 +160,17 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
       final filter = <String, dynamic>{
         'SamoAktivne': true,
         'NazivOpisFTS': _searchController.text,
-        'page': page,
-        'pageSize': pageSize,
-        'orderBy': 'DatumKraja',
-        'sortDirection': 'asc',
+        'orderBy': _orderBy,       
+        'sortDirection': _sortDirection,
         if (_popustFilter != null) 'PopustGTE': _popustFilter!.start,
         if (_popustFilter != null) 'PopustLTE': _popustFilter!.end,
       };
       if (!mounted) return;
-      final result = await _promocijaProvider.get(filter: filter);
+      final result = await _promocijaProvider.get(
+        filter: filter,
+        page: page,
+        pageSize: pageSize,
+        );
 
       if (result.result.isNotEmpty) {
       if (!mounted) return;
@@ -197,8 +204,11 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
       );
     } finally {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => isLoadMoreRunning = false);
+        if (mounted) {
+          setState(() {
+            isLoadMoreRunning = false;
+          });
+        }
       });
     }
   }
@@ -589,12 +599,19 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                       elevation: 0,
                     ),
                     child: isLoadingItem
-                      ? const SizedBox(
+                        ? Container(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 247, 244, 247), 
+                            shape: BoxShape.circle, 
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
                           ),
                         )
                       : Row(
@@ -653,6 +670,187 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: widget,
+    );
+  }
+
+  void _openPopustFilterSheet() {
+    RangeValues tempPopust = _popustFilter ?? const RangeValues(0, 100);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start, 
+                children: [
+                  const Align(
+                    alignment: Alignment.center, 
+                    child: Text(
+                      "Filter",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Popust (%)",
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Od ${tempPopust.start.round()}% do ${tempPopust.end.round()}%",
+                      style: const TextStyle(fontSize: 12,  color: Colors.black87),
+                    ),
+                  ),
+                  RangeSlider(
+                    values: tempPopust,
+                    min: 0,
+                    max: 100,
+                    divisions: 20,
+                    labels: RangeLabels(
+                      "${tempPopust.start.round()}%",
+                      "${tempPopust.end.round()}%",
+                    ),
+                    onChanged: (v) {
+                      setSheetState(() => tempPopust = v);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, 
+                    children: [
+                      const Text(
+                        "Sortirajte",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: () {
+                          setSheetState(() {
+                            _orderBy = "Popust";
+                            _sortDirection = "asc";
+                          });
+                        },
+                        child: Text(
+                          "Popust: najniži → najviši",
+                          style: TextStyle(
+                            color: _orderBy == "Popust" && _sortDirection == "asc"
+                                ? Colors.deepPurple
+                                : Colors.black87,
+                            fontWeight: _orderBy == "Popust" && _sortDirection == "asc"
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setSheetState(() {
+                            _orderBy = "Popust";
+                            _sortDirection = "desc";
+                          });
+                        },
+                        child: Text(
+                          "Popust: najviši → najniži",
+                          style: TextStyle(
+                            color: _orderBy == "Popust" && _sortDirection == "desc"
+                                ? Colors.deepPurple
+                                : Colors.black87,
+                            fontWeight: _orderBy == "Popust" && _sortDirection == "desc"
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setSheetState(() {
+                            _orderBy = "Naziv";
+                            _sortDirection = "asc";
+                          });
+                        },
+                        child: Text(
+                          "Naziv: A → Z",
+                          style: TextStyle(
+                            color: _orderBy == "Naziv" && _sortDirection == "asc"
+                                ? Colors.deepPurple
+                                : Colors.black87,
+                            fontWeight: _orderBy == "Naziv" && _sortDirection == "asc"
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setSheetState(() {
+                            _orderBy = "Naziv";
+                            _sortDirection = "desc";
+                          });
+                        },
+                        child: Text(
+                          "Naziv: Z → A",
+                          style: TextStyle(
+                            color: _orderBy == "Naziv" && _sortDirection == "desc"
+                                ? Colors.deepPurple
+                                : Colors.black87,
+                            fontWeight: _orderBy == "Naziv" && _sortDirection == "desc"
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _popustFilter = null;
+                            _orderBy = 'DatumKraja';
+                            _sortDirection = 'asc';
+                          });
+                          page = 1;
+                          _loadInitialData();
+                        },
+                        child: const Text("Izbriši  filter"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _popustFilter = tempPopust;                           
+                          });
+                          page = 1;
+                          _loadInitialData();
+                        },
+                        child: const Text("Filtriraj"),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -720,7 +918,10 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
               ),
             ),
           )
-          : ListView.builder(
+         : ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+            child: ListView.builder(
+          //: ListView.builder(
               controller: scrollController,
               padding: const EdgeInsets.all(16),
               itemCount: itemCount,
@@ -758,10 +959,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                           ),
-                          onChanged: (value) {
-                            if (!mounted) return;
-                            setState(() {}); 
-                          },
+                          onChanged: (_) {},
                           onSubmitted: (value) {
                             page = 1;
                             _loadInitialData(); 
@@ -800,64 +998,8 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                                     _popustFilter != null ? Icons.filter_alt : Icons.filter_list,
                                     color: _popustFilter != null ? Colors.deepPurple : Colors.black87,
                                   ),
-                                  onPressed: () async {
-                                    if (!mounted) return; 
-                                    final result = await showDialog<RangeValues>(
-                                      context: context,
-                                      builder: (context) {
-                                        double start = _popustFilter?.start ?? 0;
-                                        double end = _popustFilter?.end ?? 100;
-
-                                        return StatefulBuilder(
-                                          builder: (context, setState) {
-                                            return AlertDialog(
-                                              title: const Text("Filtriraj po popustu"),
-                                              content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text("Od: ${start.round()}% do: ${end.round()}%"),
-                                                  RangeSlider(
-                                                    values: RangeValues(start, end),
-                                                    min: 0,
-                                                    max: 100,
-                                                    divisions: 20,
-                                                    labels: RangeLabels("${start.round()}%", "${end.round()}%"),
-                                                    onChanged: (values) {
-                                                      if (!mounted) return;
-                                                      setState(() {
-                                                        start = values.start;
-                                                        end = values.end;
-                                                      });
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context, null),
-                                                  child: const Text("Otkaži"),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () => Navigator.pop(context, RangeValues(start, end)),
-                                                  child: const Text("Filtriraj"),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-
-                                    if (result != null) {
-                                      _popustFilter = result;
-                                    } else {
-                                      _popustFilter = null;
-                                    }
-
-                                    page = 1;
-                                    _loadInitialData();
-                                    if (!mounted) return; 
-                                    setState(() {}); 
+                                  onPressed: () {
+                                    _openPopustFilterSheet();
                                   },
                                 ),
                               ],
@@ -876,47 +1018,74 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                   return _buildPromocijaItem(p);
                 }
 
-                if (isLoadMoreRunning) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+               if (isLoadMoreRunning) {
+                  return Container(
+                    width: double.infinity,
+                    color: const Color.fromARGB(255, 247, 244, 247), 
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.deepPurple, 
+                      ),
+                    ),
                   );
                 }
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: Container(
-                      width: 300,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(97, 158, 158, 158),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 7,
-                            offset: const Offset(0, 3),
+                  child: 
+                  Center(
+                    child: visibleList.isEmpty
+                        ? const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.local_offer, 
+                                size: 40,
+                                color: Color.fromARGB(255, 76, 72, 72),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "Nema promocija za prikazati.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(
+                            width: 300,
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(97, 158, 158, 158),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                "Nema više promocija za prikazati.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          visibleList.isEmpty
-                              ? "Trenutno nema promocija za prikazati."
-                              : "Nema više promocija za prikazati.",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  )
                 );
               },
             ),
+    ),//
       floatingActionButton: IgnorePointer(
         ignoring: !showBtn,
         child: AnimatedOpacity(

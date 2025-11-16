@@ -518,30 +518,22 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                   AuthProvider.uloge = null;
                   AuthProvider.slika = null;
                   AuthProvider.isSignedIn = false;
-
                   if (!mounted) return;
-                  await showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Uspjeh"),
-                      content: const Text("Profil je uspješno deaktiviran."),
-                      actions: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text(
-                            "OK",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Color.fromARGB(255, 138, 182, 140), 
+                      duration: Duration(milliseconds: 1500),
+                      content: Center(
+                        child: Text(
+                          "Profil je uspješno deaktiviran.",
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ],
+                      ),
                     ),
                   );
+                  if (!mounted) return;
+                  await Future.delayed(const Duration(milliseconds: 1500));
 
                   if (!mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
@@ -596,31 +588,25 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
           formValues['lozinka'] != '') {
         AuthProvider.password = formValues['lozinka'];
       }
-
       if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Uspjeh"),
-          content: const Text("Profil uspješno ažuriran."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text(
-                "OK",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor:  Color.fromARGB(255, 138, 182, 140), 
+          duration:  Duration(milliseconds: 1500),
+          content:  Center(
+            child: Text(
+              "Profil uspješno ažuriran.",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ],
+          ),
         ),
       );
       if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (!mounted) return;
       Navigator.pop(context, true);
+
     } catch (e) {
       if (!mounted) return;
       await QuickAlert.show(

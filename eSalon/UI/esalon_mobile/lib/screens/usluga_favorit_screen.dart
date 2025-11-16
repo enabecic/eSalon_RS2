@@ -440,6 +440,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                               if (!mounted) return;
                               await uslugaFavoritProvider.delete(e.favoritId!);
                               if (!mounted) return;
+                              page=1;
                               await _refreshFavoritList(); 
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -582,35 +583,55 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
 
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: Container(
-                width: 300,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(97, 158, 158, 158),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 7,
-                      offset: const Offset(0, 3),
+            child: 
+            Center(
+              child: visibleList.isEmpty
+                  ? const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cut, 
+                          size: 40,
+                          color: Color.fromARGB(255, 76, 72, 72),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Nemate usluga u favoritima!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(
+                      width: 300,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(97, 158, 158, 158),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 7,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          "Nema više usluga u favoritima za prikazati.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    visibleList.isEmpty
-                        ? "Nemate usluga u favoritima!"
-                        : "Nema više usluga u favoritima za prikazati.",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            )
           );
         },
       ),
