@@ -1,6 +1,7 @@
 import 'package:esalon_mobile/main.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/screens/usluga_details_screen.dart';
+import 'package:esalon_mobile/screens/usluge_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/ocjena.dart';
 import 'package:esalon_mobile/models/usluga.dart';
@@ -273,8 +274,17 @@ class _PocetniScreenState extends State<PocetniScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
                     child: GestureDetector(
-                      onTap: () {
-                        // 
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UslugeFilterScreen(),
+                          ),
+                        );
+
+                        if (result == true) {
+                          _loadInitialData();
+                        }
                       },
                       child: Container(
                         width: 115,
@@ -324,10 +334,22 @@ class _PocetniScreenState extends State<PocetniScreen> {
                   ...vrstaUslugeResult!.result.map((vrsta) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          // 
-                        },
+                      child: GestureDetector( 
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UslugeFilterScreen(
+                                vrstaId: vrsta.vrstaId,
+                                vrstaNaziv: vrsta.naziv,
+                              ),
+                            ),
+                          );
+
+                          if (result == true) {
+                            _loadInitialData(); 
+                          }
+                        },    
                         child: Container(
                           width: 115,
                           height: 140,

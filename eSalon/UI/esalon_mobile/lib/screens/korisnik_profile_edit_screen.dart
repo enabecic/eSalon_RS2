@@ -596,7 +596,6 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
           content:  Center(
             child: Text(
               "Profil uspješno ažuriran.",
-              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
