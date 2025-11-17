@@ -14,8 +14,6 @@ import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class PocetniScreen extends StatefulWidget {
   const PocetniScreen({super.key});
@@ -146,13 +144,21 @@ class _PocetniScreenState extends State<PocetniScreen> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: "Greška prilikom učitavanja: $e",
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
       );
     }
   }
@@ -254,15 +260,10 @@ class _PocetniScreenState extends State<PocetniScreen> {
             ),
           ),
           const SizedBox(height: 10),
+
           if (vrstaUslugeResult == null)
-          Container(
-            color: const Color.fromARGB(255, 247, 244, 247), 
-            height: double.infinity, 
-            width: double.infinity,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
+            const Center(child: CircularProgressIndicator())
+
           else if (vrstaUslugeResult!.result.isEmpty)
             const Text("Nema dostupnih vrsta usluga.")
           else
@@ -499,13 +500,21 @@ class _PocetniScreenState extends State<PocetniScreen> {
                       }
                     }catch (e) {
                       if (!context.mounted) return;
-                      await QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.error,
-                            title: 'Greška',
-                            text: e.toString(),
-                            confirmBtnText: 'OK',
-                            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          duration: const Duration(milliseconds: 1800),
+                          content: Center(
+                            child: Text(
+                              e.toString(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
                       );
                     }
                   },     
@@ -702,13 +711,21 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                     setState(() {});
                                   } catch (e) {
                                     if (!context.mounted) return;
-                                     await QuickAlert.show(
-                                      context: context,
-                                      type: QuickAlertType.error,
-                                      title: 'Greška',
-                                      text: e.toString(),
-                                      confirmBtnText: 'OK',
-                                      confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        duration: const Duration(milliseconds: 1800),
+                                        content: Center(
+                                          child: Text(
+                                            e.toString(),
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     );
                                   }
                                 },

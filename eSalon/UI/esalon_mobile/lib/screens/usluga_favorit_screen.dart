@@ -11,8 +11,6 @@ import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:provider/provider.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class UslugaFavoritScreen extends StatefulWidget {
   const UslugaFavoritScreen({super.key});
@@ -136,13 +134,20 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -190,13 +195,20 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         hasNextPage = false;
       });
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -245,13 +257,20 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         hasNextPage = false;
       });
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -344,13 +363,20 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
           }
         } catch (e) {
           if (!mounted) return;
-          await QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'Greška',
-            text: e.toString(),
-            confirmBtnText: 'OK',
-            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              duration: const Duration(milliseconds: 1800),
+              content: Center(
+                child: Text(
+                  e.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
           );
         }
       },
@@ -454,13 +480,20 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                               );
                             } catch (e) {
                               if (!mounted) return;
-                              await QuickAlert.show(
-                                context: context,
-                                type: QuickAlertType.error,
-                                title: 'Greška',
-                                text: e.toString(),
-                                confirmBtnText: 'OK',
-                                confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(milliseconds: 1800),
+                                  content: Center(
+                                    child: Text(
+                                      e.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               );
                             }
                           },

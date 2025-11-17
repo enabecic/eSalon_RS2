@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/main.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class KorisnikProfileScreen extends StatefulWidget {
   const KorisnikProfileScreen({super.key});
@@ -68,21 +66,23 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        await QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Greška',
-          text: 'Neuspješno učitavanje podataka o korisniku.',
-          confirmBtnText: 'OK',
-          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-          textColor: Colors.black,
-          titleColor: Colors.black,
-        );
-        if (!mounted) return;
-        Navigator.pop(context);
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          duration: Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              "Neuspješno učitavanje podataka o korisniku.",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      );
+
+      // Future.delayed(const Duration(milliseconds: 1800), () {
+      //   if (!mounted) return;
+      //   Navigator.pop(context);
+      // });
     } finally {
       if (mounted) {
         setState(() {

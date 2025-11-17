@@ -6,8 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/main.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class KorisnikProfileEditScreen extends StatefulWidget {
   const KorisnikProfileEditScreen({super.key});
@@ -46,18 +44,24 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       };
     } catch (e) {
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: 'Neuspješno učitavanje podataka o korisniku.',
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-        textColor: Colors.black,
-        titleColor: Colors.black,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          duration: Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              "Neuspješno učitavanje podataka o korisniku.",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
       );
-      if (!mounted) return;
-      Navigator.pop(context);
+
+      Future.delayed(const Duration(milliseconds: 1800), () {
+        if (!mounted) return;
+        Navigator.pop(context);
+      });
+      
     } finally {
       if (mounted) {
         setState(() {
@@ -527,7 +531,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                       content: Center(
                         child: Text(
                           "Profil je uspješno deaktiviran.",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
@@ -542,15 +546,20 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                   );
                 } catch (e) {
                   if (!mounted) return;
-                  await QuickAlert.show(
-                    context: context,
-                    type: QuickAlertType.error,
-                    title: 'Greška',
-                    text: e.toString(),
-                    confirmBtnText: 'OK',
-                    confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                    textColor: Colors.black,
-                    titleColor: Colors.black,
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red,
+                      duration: const Duration(milliseconds: 1800),
+                      content: Center(
+                        child: Text(
+                          e.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
                   );
                 }
               },
@@ -608,13 +617,20 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
 
     } catch (e) {
       if (!mounted) return;
-      await QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
       );
     }
   }

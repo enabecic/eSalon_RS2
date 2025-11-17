@@ -13,8 +13,6 @@ import 'package:esalon_mobile/screens/registracija_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 void main() {
    runApp(
@@ -206,16 +204,22 @@ class _LoginPageState extends State<LoginPage> {
 
                                       if (korisnik.jeAktivan == false) {
                                         if (!context.mounted) return;
-                                        QuickAlert.show(
-                                          context: context,
-                                          type: QuickAlertType.error,
-                                          title: 'Račun deaktiviran',
-                                          text: 'Vaš korisnički račun je deaktiviran.',
-                                          confirmBtnText: 'OK',
-                                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                                          textColor: Colors.black,
-                                          titleColor: Colors.black,
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            duration: Duration(milliseconds: 1800),
+                                            content: Center(
+                                              child: Text(
+                                                "Vaš korisnički račun je deaktiviran.",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         );
+
                                         return;
                                       }
 
@@ -229,28 +233,39 @@ class _LoginPageState extends State<LoginPage> {
                                       }                             
                                       else {
                                         if (!context.mounted) return;
-                                        QuickAlert.show(
-                                          context: context,
-                                          type: QuickAlertType.error,
-                                          title: "Pristup odbijen",
-                                          text: "Niste autorizovani za pristup ovog interfejsa.",
-                                          confirmBtnText: 'OK',
-                                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                                          textColor: Colors.black,
-                                          titleColor: Colors.black,
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            backgroundColor: Colors.red,
+                                            duration: Duration(milliseconds: 1800),
+                                            content: Center(
+                                              child: Text(
+                                                "Niste autorizovani za pristup ovog interfejsa.",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         );
                                       }
                                     } on Exception catch (e) {
                                       if (!context.mounted) return;
-                                      QuickAlert.show(
-                                        context: context,
-                                        type: QuickAlertType.error,
-                                        title: "Greška",
-                                        text: e.toString(),
-                                        confirmBtnText: 'OK',
-                                        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                                        textColor: Colors.black,
-                                        titleColor: Colors.black,
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(milliseconds: 1800),
+                                          content: Center(
+                                            child: Text(
+                                              e.toString(),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       );
                                     }
                                   }
