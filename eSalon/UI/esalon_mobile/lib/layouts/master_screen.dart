@@ -1,6 +1,7 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
 import 'package:esalon_mobile/screens/pocetni_screen.dart';
 import 'package:esalon_mobile/screens/promocija_screen.dart';
+import 'package:esalon_mobile/screens/moje_rezervacije_screen.dart';
 import 'package:esalon_mobile/screens/usluga_arhiva_screen.dart';
 import 'package:esalon_mobile/screens/usluga_favorit_screen.dart';
 import 'package:esalon_mobile/screens/usluge_screen.dart';
@@ -22,7 +23,7 @@ class _MasterScreenState extends State<MasterScreen> {
     const KorisnikProfileScreen(),
     const UslugaFavoritScreen(),
     const UslugeScreen(),
-    const Center(child: Text("Moje rezervacije")),
+    const MojeRezervacijeScreen(),
     const PromocijaScreen(),
     const UslugaArhivaScreen(),
     const Center(child: Text("Obavijesti")),
