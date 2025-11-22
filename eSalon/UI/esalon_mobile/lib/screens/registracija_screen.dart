@@ -5,6 +5,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/uloga_provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class RegistracijaScreen extends StatefulWidget {
   const RegistracijaScreen({super.key});
@@ -44,21 +46,16 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.red,
-            duration: Duration(milliseconds: 1800),
-            content: Center(
-              child: Text(
-                'Neuspješno učitavanje uloge Klijent.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-          ),
-        );
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: 'Neuspješno učitavanje uloge Klijent.',
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
+      );
       if (!mounted) return;
       Navigator.pop(context);
     }
@@ -456,20 +453,15 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Greška",
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
       );
     }
   }

@@ -1,9 +1,5 @@
 import 'dart:async';
-import 'package:esalon_mobile/main.dart';
-import 'package:esalon_mobile/screens/historija_rezervacija_screen.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:esalon_mobile/models/rezervacija.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
@@ -12,14 +8,14 @@ import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-class MojeRezervacijeScreen extends StatefulWidget {
-  const MojeRezervacijeScreen({super.key});
+class HistorijaRezervacijaScreen extends StatefulWidget {
+  const HistorijaRezervacijaScreen({super.key});
 
   @override
-  State<MojeRezervacijeScreen> createState() => _MojeRezervacijeScreenState();
+  State<HistorijaRezervacijaScreen> createState() => _HistorijaRezervacijaScreenState();
 }
 
-class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
+class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
     with SingleTickerProviderStateMixin {
 
   late RezervacijaProvider rezervacijaProvider;
@@ -31,13 +27,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
   late TabController _tabController;
   bool isLoadMoreRunning = false;
 
-  late ScrollController aktivneScrollController;
-  late ScrollController odobreneScrollController;
+  late ScrollController zavrseneScrollController;
+  late ScrollController otkazaneScrollController;
 
-  bool isAktivneLoading = false;
-  bool isOdobreneLoading = false;
-  List<Rezervacija>? aktivneRezervacije;
-  List<Rezervacija>? odobreneRezervacije;
+  bool isZavrseneLoading = false;
+  bool isOtkazaneLoading = false;
+  List<Rezervacija>? zavrseneRezervacije;
+  List<Rezervacija>? otkazaneRezervacije;
 
   @override
   void didChangeDependencies() {
@@ -55,8 +51,8 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
     _tabController = TabController(length: 2, vsync: this);
     rezervacijaProvider = context.read<RezervacijaProvider>();
 
-    aktivneScrollController = ScrollController();
-    odobreneScrollController = ScrollController();
+    zavrseneScrollController = ScrollController();
+    otkazaneScrollController = ScrollController();
 
     _firstLoad();
 
@@ -67,14 +63,14 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
       }
     });
 
-    aktivneScrollController.addListener(() => _scrollListener(isAktivneTab: true));
-    odobreneScrollController.addListener(() => _scrollListener(isAktivneTab: false));
+    zavrseneScrollController.addListener(() => _scrollListener(isZavrseneTab: true));
+    otkazaneScrollController.addListener(() => _scrollListener(isZavrseneTab: false));
 
     _initForm();
   }
 
-  void _scrollListener({required bool isAktivneTab}) {
-    final controller = isAktivneTab ? aktivneScrollController : odobreneScrollController;
+  void _scrollListener({required bool isZavrseneTab}) {
+    final controller = isZavrseneTab ? zavrseneScrollController : otkazaneScrollController;
     
     double showOffset = 10.0;
     if (controller.offset > showOffset) {
@@ -93,12 +89,12 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
 
   void _firstLoad() async {
     if (!mounted) return;
-    bool isAktivneTab = _tabController.index == 0;
+    bool isZavrseneTab = _tabController.index == 0;
     setState(() {
-      if (isAktivneTab) {
-        isAktivneLoading = true;
+      if (isZavrseneTab) {
+        isZavrseneLoading = true;
       } else {
-        isOdobreneLoading = true;
+        isOtkazaneLoading = true;
       }
 
       page = 1;
@@ -106,60 +102,58 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
       isLoadMoreRunning = false;
     });
 
-    searchRequest['StateMachine'] = isAktivneTab ? 'kreirana' : 'odobrena';
+    searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'otkazana';
 
-    if (AuthProvider.isSignedIn) {
-      try {
-        if (!mounted) return;
-        var rezervacijaResult = await rezervacijaProvider.get(
-          filter: searchRequest,
-          page: page,
-          pageSize: 10,
-          orderBy: 'DatumRezervacije',
-          sortDirection: 'desc',
-        );
+    try {
+      if (!mounted) return;
+      var rezervacijaResult = await rezervacijaProvider.get(
+        filter: searchRequest,
+        page: page,
+        pageSize: 10,
+        orderBy: 'DatumRezervacije',
+        sortDirection: 'desc',
+      );
 
-        if (!mounted) return;
-        setState(() {
-          if (isAktivneTab) {
-          aktivneRezervacije = rezervacijaResult.result;
-          total = rezervacijaResult.count;
-          isAktivneLoading = false;
-        } else {
-          odobreneRezervacije = rezervacijaResult.result;
-          total = rezervacijaResult.count;
-          isOdobreneLoading = false;
-        }
-          if (10 * page > total) hasNextPage = false;
-        });
-      } catch (e) {
-        if (!mounted) return;
-        setState(() {
-          if (isAktivneTab) {
-            isAktivneLoading = false;
-          } else {
-            isOdobreneLoading = false;
-          }
-        });
-        if (!mounted) return;
-
-        await QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Greška',
-          text: e.toString(),
-          confirmBtnText: 'OK',
-          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-        );
+      if (!mounted) return;
+      setState(() {
+        if (isZavrseneTab) {
+        zavrseneRezervacije = rezervacijaResult.result;
+        total = rezervacijaResult.count;
+        isZavrseneLoading = false;
+      } else {
+        otkazaneRezervacije = rezervacijaResult.result;
+        total = rezervacijaResult.count;
+        isOtkazaneLoading = false;
       }
+        if (10 * page > total) hasNextPage = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (isZavrseneTab) {
+          isZavrseneLoading = false;
+        } else {
+          isOtkazaneLoading = false;
+        }
+      });
+      if (!mounted) return;
+
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
     }
   }
 
   void _loadMore() async {
-    bool isAktivneTab = _tabController.index == 0;
-    ScrollController controller = isAktivneTab ? aktivneScrollController : odobreneScrollController;
+    bool isZavrseneTab = _tabController.index == 0;
+    ScrollController controller = isZavrseneTab ? zavrseneScrollController : otkazaneScrollController;
 
-    if ((isAktivneTab ? isAktivneLoading : isOdobreneLoading) || isLoadMoreRunning) return;
+    if ((isZavrseneTab ? isZavrseneLoading : isOtkazaneLoading) || isLoadMoreRunning) return;
     if (!hasNextPage || controller.position.extentAfter > 300) return;
 
     if (!mounted) return;
@@ -169,7 +163,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
 
     try {
       page += 1;
-      searchRequest['StateMachine'] = isAktivneTab ? 'kreirana' : 'odobrena';
+      searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'otkazana';
       if (!mounted) return;
       var rezervacijaResult = await rezervacijaProvider.get(
         filter: searchRequest,
@@ -184,12 +178,12 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
       if (rezervacijaResult.result.isNotEmpty) {
         if (!mounted) return;
         setState(() {
-          if (isAktivneTab) {
-            aktivneRezervacije ??= [];
-            aktivneRezervacije!.addAll(rezervacijaResult.result);
+          if (isZavrseneTab) {
+            zavrseneRezervacije ??= [];
+            zavrseneRezervacije!.addAll(rezervacijaResult.result);
           } else {
-            odobreneRezervacije ??= [];
-            odobreneRezervacije!.addAll(rezervacijaResult.result);
+            otkazaneRezervacije ??= [];
+            otkazaneRezervacije!.addAll(rezervacijaResult.result);
           }
 
           total = rezervacijaResult.count;
@@ -203,7 +197,6 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
       }
     } catch (e) {
       if (!mounted) return;
-
       await QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
@@ -229,47 +222,57 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
 
   @override
   Widget build(BuildContext context) {
-  if (!AuthProvider.isSignedIn) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 247, 244, 247),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              text: "Za pristup ovom dijelu aplikacije morate biti prijavljeni! ",
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 15,
-              ),
-              children: <TextSpan>[
-                TextSpan(
-                  text: "Molimo prijavite se!",
-                  style: const TextStyle(
-                    color: Colors.deepPurple,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
+       appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight + 25),
+        child: AppBar(
+          elevation: 0,
+          backgroundColor: const Color(0xFFF6F4F3),
+          automaticallyImplyLeading: false,
+          toolbarHeight: kToolbarHeight + 25,
+          title: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: 
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                      size: 40,
+                    ),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        "eSalon",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 35,
                         ),
-                      );
-                    },
-                ),
-              ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Image.asset(
+                      "assets/images/logo.png",
+                      height: 55,
+                      width: 55,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 247, 244, 247),
       body: DefaultTabController(
         length: 2,
         child: Column(
@@ -283,15 +286,15 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
               child: TabBar(
                 controller: _tabController,
                 tabs: const [
-                  Tab(text: "Aktivne"),
-                  Tab(text: "Odobrene"),
+                  Tab(text: "Završene"),
+                  Tab(text: "Otkazane"),
                 ],
               ),
             ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [_buildAktivne(), _buildOdobrene()],
+                children: [_buildZavrsene(), _buildOtkazane()],
               ),
             ),
           ],
@@ -302,9 +305,9 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
         opacity: showbtn ? 1.0 : 0.0,
         child: FloatingActionButton(
           onPressed: () {
-            bool isAktivneTab = _tabController.index == 0;
+            bool isZavrseneTab = _tabController.index == 0;
             ScrollController controller =
-                isAktivneTab ? aktivneScrollController : odobreneScrollController;
+                isZavrseneTab ? zavrseneScrollController : otkazaneScrollController;
 
             controller.animateTo(
               0,
@@ -336,7 +339,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
           children: [
             Flexible( 
               child: Text(
-                "Moje rezervacije",
+                "Historija rezervacija",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 19,
@@ -348,9 +351,9 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
             ),
             SizedBox(width: 8),
             Icon(
-              Icons.calendar_today,
+              Icons.event_note,
               color: Colors.black,
-              size: 22,
+              size: 24,
             ),
           ],
         ),
@@ -358,38 +361,21 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
     );
   }
 
-  Widget _buildAktivne() {
-    if (isAktivneLoading || aktivneRezervacije == null) {
+  Widget _buildZavrsene() {
+    if (isZavrseneLoading || zavrseneRezervacije == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return SingleChildScrollView(
-      controller: aktivneScrollController,
+      controller: zavrseneScrollController,
       padding: const EdgeInsets.all(16),
+
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(97, 158, 158, 158),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Text(
-              "Napomena: Rezervacija se može otkazati najkasnije 3 dana prije termina.",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-
           Align(
             alignment: Alignment.centerLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 8.0),
+              padding: const EdgeInsets.fromLTRB(2.0, 0.0, 2.0, 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -407,53 +393,12 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                       ),
                     ),
                   ),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const HistorijaRezervacijaScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 210, 193, 214),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min, 
-                            children: [
-                              Icon(
-                                Icons.event_note,
-                                size: 18,
-                                color: Colors.black87,
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                "Historija rezervacija",
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
 
-          if (aktivneRezervacije!.isEmpty)
+          if (zavrseneRezervacije!.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 26),
               child: Align(
@@ -462,13 +407,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.calendar_today,
+                      Icons.event_available,
                       size: 38,
                       color: Color.fromARGB(255, 76, 72, 72),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Nemate trenutno aktivnih rezervacija.",
+                      "Nemate završenih rezervacija.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -481,8 +426,8 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
               ),
             ),
 
-          if (aktivneRezervacije!.isNotEmpty)
-            ...aktivneRezervacije!.map(
+          if (zavrseneRezervacije!.isNotEmpty)
+            ...zavrseneRezervacije!.map(
               (e) => InkWell(
                 // onTap: () {
                 //   Navigator.of(context).push(
@@ -507,84 +452,6 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                     ],
                   ),
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Slidable(
-                    startActionPane: ActionPane(
-                      motion: const BehindMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) async {
-                            try {
-                              DateTime? termin = e.datumRezervacije;
-                              if (termin != null) {
-                                if (termin.difference(DateTime.now()).inDays >= 3) {
-                                  if (!mounted) return;
-                                  await rezervacijaProvider.ponisti(e.rezervacijaId!);
-
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      backgroundColor: Color.fromARGB(255, 138, 182, 140),
-                                      duration: Duration(seconds: 1),
-                                      content: Center(
-                                        child: Text("Rezervacija je uspješno poništena."),
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 2),
-                                      content: Center(
-                                        child: Text(
-                                          "Rezervacija se može otkazati najkasnije 3 dana prije termina.",
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                              if (!mounted) return;
-                              var rezervacijaResult =
-                                  await rezervacijaProvider.get(
-                                filter: searchRequest,
-                                orderBy: 'DatumRezervacije',
-                                sortDirection: 'desc',
-                              );
-                              if (!mounted) return;
-                              setState(() {
-                                aktivneRezervacije =
-                                    rezervacijaResult.result.isNotEmpty
-                                        ? rezervacijaResult.result
-                                        : [];
-                                total = rezervacijaResult.count;
-                              });
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(milliseconds: 1800),
-                                  content: Center(
-                                    child: Text(
-                                      e.toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          backgroundColor: Colors.red,
-                          icon: Icons.close,
-                          label: 'Otkaži',
-                        ),
-                      ],
-                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -660,12 +527,11 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                         ),
                       ],
                     ),
-                  ),
                 ),
               ),
             ),
 
-            if (aktivneRezervacije!.isNotEmpty) ...[
+            if (zavrseneRezervacije!.isNotEmpty) ...[
               if (hasNextPage) const CircularProgressIndicator(),
               if (!hasNextPage)
                 Container(
@@ -699,13 +565,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
     );
   }
 
-  Widget _buildOdobrene() {
-    if (isOdobreneLoading || odobreneRezervacije == null) {
+  Widget _buildOtkazane() {
+    if (isOtkazaneLoading || otkazaneRezervacije == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return SingleChildScrollView(
-      controller: odobreneScrollController,
+      controller: otkazaneScrollController,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -730,53 +596,12 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                       ),
                     ),
                   ),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const HistorijaRezervacijaScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 210, 193, 214),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min, 
-                            children: [
-                              Icon(
-                                Icons.event_note,
-                                size: 18,
-                                color: Colors.black87,
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                "Historija rezervacija",
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
 
-          if (odobreneRezervacije!.isEmpty)
+          if (otkazaneRezervacije!.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 26),
               child: Align(
@@ -785,13 +610,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.event_available,
+                      Icons.event_busy,
                       size: 40,
                       color: Color.fromARGB(255, 76, 72, 72),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Nemate odobrenih rezervacija.",
+                      "Nemate otkazanih rezervacija.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -804,8 +629,8 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
               ),
             ),
 
-          if (odobreneRezervacije!.isNotEmpty)
-            ...odobreneRezervacije!.map(
+          if (otkazaneRezervacije!.isNotEmpty)
+            ...otkazaneRezervacije!.map(
               (e) => InkWell(
                 // onTap: () {
                 //   Navigator.of(context).push(
@@ -907,7 +732,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
               ),
             ),
 
-          if (odobreneRezervacije!.isNotEmpty) ...[
+          if (otkazaneRezervacije!.isNotEmpty) ...[
             if (hasNextPage) const CircularProgressIndicator(),
             if (!hasNextPage)
               Container(

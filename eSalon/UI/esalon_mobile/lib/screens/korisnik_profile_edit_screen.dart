@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/main.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class KorisnikProfileEditScreen extends StatefulWidget {
   const KorisnikProfileEditScreen({super.key});
@@ -44,23 +46,19 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       };
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.red,
-          duration: Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              "Neuspješno učitavanje podataka o korisniku.",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: 'Neuspješno učitavanje podataka o korisniku.',
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        textColor: Colors.black,
+        titleColor: Colors.black,
       );
 
-      Future.delayed(const Duration(milliseconds: 1800), () {
-        if (!mounted) return;
-        Navigator.pop(context);
-      });
+      if (!mounted) return;
+      Navigator.pop(context);
       
     } finally {
       if (mounted) {

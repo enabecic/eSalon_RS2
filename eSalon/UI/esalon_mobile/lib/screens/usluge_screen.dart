@@ -11,6 +11,8 @@ import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class UslugeScreen extends StatefulWidget {
   const UslugeScreen({super.key});
@@ -86,7 +88,6 @@ class _UslugeScreenState extends State<UslugeScreen> {
         _loadMore();
       }
     });
-    _initForm();
   }
 
   @override
@@ -94,30 +95,6 @@ class _UslugeScreenState extends State<UslugeScreen> {
     scrollController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  Future _initForm() async {
-    try {
-      if (!mounted) return;
-      var ocjene = await ocjenaProvider.get();
-      SearchResult<Favorit>? favoriti;
-
-      if (AuthProvider.isSignedIn) {
-        if (!mounted) return;
-        favoriti = await favoritProvider.get();
-      }
-      if (!mounted) return;
-      setState(() {
-        ocjenaResult = ocjene;
-        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        ocjenaResult = null;
-        favoritResult = null;
-      });
-    }
   }
 
   Future<void> _loadInitialData() async {
@@ -177,20 +154,13 @@ class _UslugeScreenState extends State<UslugeScreen> {
         isFirstLoadRunning = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     }
   }
@@ -239,20 +209,13 @@ class _UslugeScreenState extends State<UslugeScreen> {
         }
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red,
-            duration: const Duration(milliseconds: 1800),
-            content: Center(
-              child: Text(
-                e.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-          ),
+        await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
         );
       } finally {
         if (mounted) {

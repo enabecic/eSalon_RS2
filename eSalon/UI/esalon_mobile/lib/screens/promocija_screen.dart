@@ -8,6 +8,8 @@ import 'package:esalon_mobile/models/promocija.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class PromocijaScreen extends StatefulWidget {
   const PromocijaScreen({super.key});
@@ -74,20 +76,13 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
 
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
       if (mounted) {
@@ -117,20 +112,13 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     } finally {
       if (mounted) {

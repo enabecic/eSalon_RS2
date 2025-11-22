@@ -14,6 +14,8 @@ import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class PocetniScreen extends StatefulWidget {
   const PocetniScreen({super.key});
@@ -78,87 +80,59 @@ class _PocetniScreenState extends State<PocetniScreen> {
         setState(() {});
       }
     });
-    _initForm();
   }
-
-  Future _initForm() async {
-    try {
-      if (!mounted) return;
-      var vrste = await vrstaUslugeProvider.get();
-      if (!mounted) return;
-      var ocjene = await ocjenaProvider.get();
-      SearchResult<Favorit>? favoriti;
-
-      if (AuthProvider.isSignedIn) {
-        if (!mounted) return;
-        favoriti = await favoritProvider.get();
-      }
-      if (!mounted) return;
-      setState(() {
-        vrstaUslugeResult = vrste as SearchResult<VrstaUsluge>?;
-        ocjenaResult = ocjene;
-        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        vrstaUslugeResult = null;
-        ocjenaResult = null;
-        favoritResult = null;
-      });
-    }
-  }
-
+  
   Future<void> _loadInitialData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
 
     try {
       if (!mounted) return;
-      var vrste = await vrstaUslugeProvider.get();
+      final vrsteFuture = vrstaUslugeProvider.get();
       if (!mounted) return;
-      var ocjene = await ocjenaProvider.get();
-      SearchResult<Favorit>? favoriti;
+      final ocjeneFuture = ocjenaProvider.get();
+      Future<SearchResult<Favorit>?>? favoritiFuture;
+
       if (AuthProvider.isSignedIn) {
         if (!mounted) return;
-        favoriti = await favoritProvider.get();
+        favoritiFuture = favoritProvider.get();
       }
       if (!mounted) return;
-      var uslugaResult = await uslugaProvider.get(
+      final uslugaFuture = uslugaProvider.get(
         page: 1,
         pageSize: 10,
         filter: {'BrojZadnjeDodanih': 10},
       );
-
       if (!mounted) return;
+      final results = await Future.wait([
+        vrsteFuture,
+        ocjeneFuture,
+        if (favoritiFuture != null) favoritiFuture,
+        uslugaFuture,
+      ]);
+
+      final uslugaResult = results.last as SearchResult<Usluga>;
+      if (!mounted) return;
+
       setState(() {
-        vrstaUslugeResult = vrste as SearchResult<VrstaUsluge>?;
-        ocjenaResult = ocjene;
-        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
+        vrstaUslugeResult = results[0] as SearchResult<VrstaUsluge>?;
+        ocjenaResult = results[1] as SearchResult<Ocjena>?;
+        favoritResult = AuthProvider.isSignedIn ? results[2] as SearchResult<Favorit>? : null;
         uslugaList = uslugaResult.result;
         total = uslugaResult.count;
-
-        _isLoading = false; 
+        _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     }
   }
