@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
+import 'package:esalon_mobile/screens/obavijesti_screen.dart';
 import 'package:esalon_mobile/screens/pocetni_screen.dart';
 import 'package:esalon_mobile/screens/promocija_screen.dart';
 import 'package:esalon_mobile/screens/moje_rezervacije_screen.dart';
@@ -26,7 +27,7 @@ class _MasterScreenState extends State<MasterScreen> {
     const MojeRezervacijeScreen(),
     const PromocijaScreen(),
     const UslugaArhivaScreen(),
-    const Center(child: Text("Obavijesti")),
+    const ObavijestiScreen(),
   ];
 
   void _onBottomNavTapped(int index) {
