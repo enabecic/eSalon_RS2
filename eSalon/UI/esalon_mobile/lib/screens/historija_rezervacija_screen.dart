@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:esalon_mobile/screens/detalji_rezervacije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/rezervacija.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
@@ -102,7 +103,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
       isLoadMoreRunning = false;
     });
 
-    searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'otkazana';
+    searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'ponistena';
 
     try {
       if (!mounted) return;
@@ -163,7 +164,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
 
     try {
       page += 1;
-      searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'otkazana';
+      searchRequest['StateMachine'] = isZavrseneTab ? 'zavrsena' : 'ponistena';
       if (!mounted) return;
       var rezervacijaResult = await rezervacijaProvider.get(
         filter: searchRequest,
@@ -429,13 +430,13 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
           if (zavrseneRezervacije!.isNotEmpty)
             ...zavrseneRezervacije!.map(
               (e) => InkWell(
-                // onTap: () {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //       builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   height: 135,
@@ -481,15 +482,27 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Šifra rezervacije: #${e.sifra}",
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  maxLines: 1,
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_outline,
+                                      size: 18,
+                                      color: Colors.black,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        "Rezervacija: #${e.sifra}",
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(1.0),
@@ -632,13 +645,13 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
           if (otkazaneRezervacije!.isNotEmpty)
             ...otkazaneRezervacije!.map(
               (e) => InkWell(
-                // onTap: () {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //       builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   height: 135,
@@ -683,15 +696,27 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Šifra rezervacije: #${e.sifra}",
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                maxLines: 1,
+                             Row(
+                                children: [
+                                  const Icon(
+                                    Icons.cancel_outlined,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      "Rezervacija: #${e.sifra}",
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(1.0),

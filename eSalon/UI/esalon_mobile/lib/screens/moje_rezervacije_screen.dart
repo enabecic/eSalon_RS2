@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:esalon_mobile/main.dart';
 import 'package:esalon_mobile/screens/historija_rezervacija_screen.dart';
+import 'package:esalon_mobile/screens/detalji_rezervacije_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -484,13 +485,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
           if (aktivneRezervacije!.isNotEmpty)
             ...aktivneRezervacije!.map(
               (e) => InkWell(
-                // onTap: () {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //       builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   height: 135,
@@ -614,15 +615,27 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Šifra rezervacije: #${e.sifra}",
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  maxLines: 1,
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 18,
+                                      color: Colors.black,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        "Rezervacija: #${e.sifra}",
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(1.0),
@@ -807,13 +820,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
           if (odobreneRezervacije!.isNotEmpty)
             ...odobreneRezervacije!.map(
               (e) => InkWell(
-                // onTap: () {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //       builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
-                //     ),
-                //   );
-                // },
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
+                    ),
+                  );
+                },
                 child: Container(
                   width: double.infinity,
                   height: 135,
@@ -858,15 +871,27 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Šifra rezervacije: #${e.sifra}",
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                maxLines: 1,
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.event_available_outlined,
+                                    size: 20,
+                                    color: Colors.black,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      "Rezervacija: #${e.sifra}",
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(1.0),
