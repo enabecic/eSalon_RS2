@@ -38,7 +38,6 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
   final int limit = 20;
   int total = 0;
   bool showbtn = false;
-  bool _isLoading = true;
   bool isFirstLoadRunning = false;
   bool hasNextPage = true;
   bool isLoadMoreRunning = false;
@@ -56,6 +55,10 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
   String  _sortDirection = 'desc';
   bool _changed = false;
 
+  bool _isLoadingOcjene = true;
+  bool _isLoadingFavoriti = true;
+  bool _isLoadingUsluge = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -70,7 +73,9 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
     _searchController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
+      _loadUsluge();  
+      _loadOcjene();    
+      _loadFavoriti();   
     });
 
     scrollController.addListener(() {
@@ -100,27 +105,9 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
     _searchController.dispose();
     super.dispose();
   }
-
-  Future<void> _loadInitialData() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-      isFirstLoadRunning = true;
-      uslugaList = [];
-      page = 1;
-      hasNextPage = true;
-      isLoadMoreRunning = false;
-    });
-
+  
+  Future<void> _loadUsluge() async {
     try {
-      if (!mounted) return;
-      var ocjene = await ocjenaProvider.get();
-      SearchResult<Favorit>? favoriti;
-      if (AuthProvider.isSignedIn) {
-        if (!mounted) return;
-        favoriti = await favoritProvider.get();
-      }
-      if (!mounted) return;
       final filter = <String, dynamic>{
         'NazivOpisFTS': _searchController.text,
         if (_cijenaFilter != null) 'CijenaGTE': _cijenaFilter!.start,
@@ -138,26 +125,76 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
         filter: filter,
         page: page,
         pageSize: 10,
-        );
+      );
+
       if (!mounted) return;
       setState(() {
-        ocjenaResult = ocjene;
-        favoritResult = AuthProvider.isSignedIn ? favoriti : null;
         uslugaList = uslugaResult.result;
         total = uslugaResult.count;
-        isFirstLoadRunning = false;
-        _isLoading = false;
+        _isLoadingUsluge = false;
 
-        if (10 * page > total) { 
-          hasNextPage = false;
-        }
+        hasNextPage = (10 * page < total);
       });
     } catch (e) {
       if (!mounted) return;
+      setState(() => _isLoadingUsluge = false);
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
+  Future<void> _loadOcjene() async {
+    try {
+      if (!mounted) return;
+      var ocjene = await ocjenaProvider.get();
+      if (!mounted) return;
       setState(() {
-        _isLoading = false;
-        isFirstLoadRunning = false;
+        ocjenaResult = ocjene;
+        _isLoadingOcjene = false;
       });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingOcjene = false);
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
+  Future<void> _loadFavoriti() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingFavoriti = true;
+    });
+    try {
+      if (AuthProvider.isSignedIn) {
+        if (!mounted) return;
+         var favoriti = await favoritProvider.get(filter: {
+          "KorisnikId": AuthProvider.korisnikId,
+        });
+        if (!mounted) return;
+        setState(() {
+          favoritResult = favoriti;
+        });
+      }
+      if (!mounted) return;
+      setState(() => _isLoadingFavoriti = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingFavoriti = false);
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -256,7 +293,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                         onPressed: () {
                           _searchController.clear();
                           page = 1;
-                          _loadInitialData();
+                          _loadUsluge();
                           if (!mounted) return;
                           setState(() {});
                         },
@@ -271,7 +308,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
               ),
               onSubmitted: (value) {
                 page = 1;
-                _loadInitialData();
+                _loadUsluge();
               },
             ),
           ),
@@ -374,7 +411,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
                       const Text(
-                        "Sortirajte",
+                        "Sortiranje",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
@@ -515,7 +552,8 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                             _sortDirection = 'desc';
                           });
                           if (!mounted) return;
-                          await _loadInitialData();
+                          page = 1;
+                          _loadUsluge();
                         },
                         child: const Text("Izbriši filter"),
                       ),
@@ -528,7 +566,8 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                             _trajanjeFilter = tempTrajanje;
                           });
                           if (!mounted) return;
-                          await _loadInitialData();
+                          page = 1;
+                          _loadUsluge();
                         },
                         child: const Text("Filtriraj"),
                       ),
@@ -597,7 +636,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
           ),
         ),
       ),
-      body: _isLoading
+      body: _isLoadingUsluge
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               controller: scrollController,
@@ -673,7 +712,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
   }
 
   Widget _buildPage() {
-    if (_isLoading && uslugaList.isEmpty) { 
+    if (_isLoadingUsluge && uslugaList.isEmpty) { 
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -729,7 +768,6 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                   onTap: () async {
                     try {
                       if (!mounted) return;
-                      if (!mounted) return;
                       final uslugaDetalji = await uslugaProvider.getById(e.uslugaId!);
                       if (!context.mounted) return;
                       final result = await Navigator.push(
@@ -739,7 +777,13 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                         ),
                       );
                       if (result == true) {
-                        _loadInitialData();
+                        page = 1;
+                        _loadFavoriti();
+                        _loadOcjene();
+                        if (!mounted) return;
+                        setState(() {
+                          _changed = true;
+                        });
                       }
                     } catch (e) {
                       if (!context.mounted) return;
@@ -832,145 +876,150 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                                   const Icon(Icons.star,
                                       color: Colors.yellow, size: 16),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    _avgOcjena(e.uslugaId).toString(),
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Color.fromARGB(255, 108, 108, 108),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                                  _isLoadingOcjene
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        _avgOcjena(e.uslugaId).toString(),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Color.fromARGB(255, 108, 108, 108),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                 ],
                               ),
                               InkWell(
-                                child: (favoritResult != null &&
-                                        favoritResult!.result.any(
-                                          (f) =>
-                                              f.korisnikId == AuthProvider.korisnikId &&
-                                              f.uslugaId == e.uslugaId,
-                                        ))
-                                    ? const Icon(Icons.favorite, color: Colors.red)
-                                    : const Icon(Icons.favorite_border),
-                                  onTap: () async {
-                                    if (AuthProvider.korisnikId == null) {
-                                      if (!mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.red,
-                                          duration:
-                                              const Duration(milliseconds: 1500),
-                                          content: GestureDetector(
-                                            onTap: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const LoginPage()),
-                                              );
-                                            },
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                text:
-                                                    "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15),
-                                                children: [
-                                                  TextSpan(
-                                                    text: "Prijavite se!",
+                                onTap: _isLoadingFavoriti
+                                    ? null
+                                    : () async {
+                                        if (AuthProvider.korisnikId == null) {
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              backgroundColor: Colors.red,
+                                              duration: const Duration(milliseconds: 1500),
+                                              content: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) => const LoginPage()),
+                                                  );
+                                                },
+                                                child: RichText(
+                                                  text: const TextSpan(
+                                                    text:
+                                                        "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
                                                     style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
-                                                      decoration:
-                                                          TextDecoration.underline,
-                                                    ),
+                                                        color: Colors.white, fontSize: 15),
+                                                    children: [
+                                                      TextSpan(
+                                                        text: "Prijavite se!",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold,
+                                                          decoration: TextDecoration.underline,
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    try {
-                                      bool isFavorite = favoritResult!.result.any(
-                                        (f) =>
-                                            f.korisnikId ==
-                                                AuthProvider.korisnikId &&
-                                            f.uslugaId == e.uslugaId,
-                                      );
-
-                                      if (!isFavorite) {
-                                        if (!mounted) return;
-                                        await favoritProvider.insert({
-                                          'korisnikId': AuthProvider.korisnikId,
-                                          'uslugaId': e.uslugaId
-                                        });
-                                        if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            backgroundColor:
-                                                Color.fromARGB(255, 138, 182, 140),
-                                            duration:
-                                                Duration(milliseconds: 1500),
-                                            content: Center(
-                                              child: Text(
-                                                "Uspješno dodano u favorite.",
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        var favRest = favoritResult!.result
-                                            .firstWhere((f) =>
-                                                f.korisnikId ==
-                                                    AuthProvider.korisnikId &&
+                                          );
+                                          return;
+                                        }
+                                        try {
+                                          bool isFavorite = !_isLoadingFavoriti &&
+                                            favoritResult != null &&
+                                            favoritResult!.result.any((f) =>
+                                                f.korisnikId == AuthProvider.korisnikId &&
                                                 f.uslugaId == e.uslugaId);
-                                        if (!mounted) return;
-                                        await favoritProvider
-                                            .delete(favRest.favoritId!);
-                                        if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            backgroundColor:
-                                                Color.fromARGB(255, 138, 182, 140),
-                                            duration:
-                                                Duration(milliseconds: 1500),
-                                            content: Center(
-                                              child: Text(
-                                                "Uspješno izbačeno iz favorita.",
-                                                textAlign: TextAlign.center,
+
+                                          if (!isFavorite) {
+                                            if (!mounted) return;
+                                            await favoritProvider.insert({
+                                              'korisnikId': AuthProvider.korisnikId,
+                                              'uslugaId': e.uslugaId
+                                            });
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                                duration: Duration(milliseconds: 1500),
+                                                content: Center(
+                                                  child: Text(
+                                                    "Uspješno dodano u favorite.",
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            var favRest = favoritResult!.result
+                                                .firstWhere((f) =>
+                                                    f.korisnikId == AuthProvider.korisnikId &&
+                                                    f.uslugaId == e.uslugaId);
+                                            if (!mounted) return;
+                                            await favoritProvider.delete(favRest.favoritId!);
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                                duration: Duration(milliseconds: 1500),
+                                                content: Center(
+                                                  child: Text(
+                                                    "Uspješno izbačeno iz favorita.",
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          if (!mounted) return;
+                                          setState(() {
+                                            _changed = true;
+                                          });
+                                          if (!mounted) return;
+                                          favoritResult = await favoritProvider.get(filter: {
+                                            "KorisnikId": AuthProvider.korisnikId,
+                                          });
+                                          if (!mounted) return;
+                                          setState(() {});
+                                        } catch (e) {
+                                          if (!context.mounted) return;
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              backgroundColor: Colors.red,
+                                              duration: const Duration(milliseconds: 1800),
+                                              content: Center(
+                                                child: Text(
+                                                  e.toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.normal,
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      }
-                                      if (!mounted) return;
-                                      favoritResult = await favoritProvider.get();
-                                      if (!mounted) return;
-                                      setState(() {
-                                        _changed = true;
-                                      });
-                                    } catch (e) {
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.red,
-                                          duration: const Duration(milliseconds: 1800),
-                                          content: Center(
-                                            child: Text(
-                                              e.toString(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
+                                          );
+                                        }
+                                      },
+                                child: _isLoadingFavoriti
+                                    ? const Icon(Icons.favorite, color: Colors.grey) 
+                                    : (favoritResult != null &&
+                                            favoritResult!.result.any(
+                                              (f) =>
+                                                  f.korisnikId == AuthProvider.korisnikId &&
+                                                  f.uslugaId == e.uslugaId,
+                                            ))
+                                        ? const Icon(Icons.favorite, color: Colors.red)
+                                        : const Icon(Icons.favorite_border),
                               )
                             ],
                           ),

@@ -31,7 +31,9 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   late String? datumObjavljivanja;
   late String? vrstaUsluge;
   String? slika;
-  bool _isLoading = true;
+  bool _isLoadingFavorite = true;
+  bool _isLoadingArhiva = true;
+  bool _isLoadingOcjena = true;
 
   late ArhivaProvider arhivaProvider;
   SearchResult<Arhiva>? arhivaResult;
@@ -46,6 +48,9 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
 
   Image? _cachedImage;
   bool _changed = false;
+
+  int _mojaOcjena = 0; 
+  bool _isLoadingOcjenaUser = true; 
 
   @override
   void initState() {
@@ -70,59 +75,61 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     favoritProvider = context.read<FavoritProvider>();
     arhivaProvider = context.read<ArhivaProvider>(); 
 
-    _initAllData();
-  }
-
-  Future<void> _initAllData() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      if (!mounted) return;
-      await Future.wait([
-        _loadData(),
-        _loadArhivaResult(),
-        _loadBrojArhiviranja(),
-      ]);
-    } catch (e) {
-      if (mounted) {
-        await QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Greška',
-          text: e.toString(),
-          confirmBtnText: 'OK',
-          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    _loadData();
+    _loadOcjena();
+    _loadUserOcjena();
+    _loadArhivaResult();
   }
 
   Future<void> _loadData() async {
     try {
       if (!mounted) return;
-      final ocjene = await ocjenaProvider.get();
 
       SearchResult<Favorit>? favoriti;
       if (AuthProvider.korisnikId != null) {
         if (!mounted) return;
-        favoriti = await favoritProvider.get();
+        favoriti = await favoritProvider.get(filter: {
+          "KorisnikId": AuthProvider.korisnikId,
+          "UslugaId": widget.usluga.uslugaId
+        });
       }
 
       if (!mounted) return;
       setState(() {
-        ocjenaResult = ocjene; 
         favoritResult = favoriti; 
+        _isLoadingFavorite = false;  
       });
     } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingFavorite = false;
+      });
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
+  Future<void> _loadOcjena() async {
+    try {
+      if (!mounted) return;
+      final ocjene = await ocjenaProvider.get();
+      if (!mounted) return;
+      setState(() {
+        ocjenaResult = ocjene; 
+        _isLoadingOcjena = false;  
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOcjena = false;
+      });
       if (!mounted) return;
       await QuickAlert.show(
         context: context,
@@ -136,39 +143,93 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   }
 
   Future<void> _loadArhivaResult() async {
-    if (AuthProvider.korisnikId == null) return;
-
-    try {
+    if (AuthProvider.korisnikId == null) {
       if (!mounted) return;
-      arhivaResult = await arhivaProvider.get(); 
-      if (!mounted) return;
-      setState(() {});
-    } catch (e) {
-      if (!mounted) return;
-      arhivaResult = null;
+      setState(() {
+        _isLoadingArhiva = false;
+      });
+      return;
     }
-  }
-
-  Future<void> _loadBrojArhiviranja() async {
     try {
+      if (!mounted) return;
+      arhivaResult = await arhivaProvider.get(filter: {
+          "KorisnikId": AuthProvider.korisnikId,
+          "UslugaId": widget.usluga.uslugaId
+        });
       if (!mounted) return;
       int broj = await arhivaProvider.getBrojArhiviranja(widget.usluga.uslugaId!);
+
       if (!mounted) return;
       setState(() {
         brojArhiviranja = broj;
+        _isLoadingArhiva = false;
       });
     } catch (e) {
       if (!mounted) return;
-      brojArhiviranja = 0; 
+      setState(() {
+        _isLoadingArhiva = false;
+        brojArhiviranja = 0;
+        arhivaResult = null;
+      });
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
+  Future<void> _loadUserOcjena() async {
+    if (AuthProvider.korisnikId == null) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOcjenaUser = false;
+      });
+      return;
+    }
+
+    try {
+      if (!mounted) return;
+      final result = await ocjenaProvider.get(filter: {
+        'KorisnikId': AuthProvider.korisnikId,
+        'UslugaId': widget.usluga.uslugaId,
+      });
+
+      if (!mounted) return;
+
+      if (result.result.isNotEmpty) {
+        _mojaOcjena = result.result.first.vrijednost ?? 0;
+      }
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOcjenaUser = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOcjenaUser = false;
+      });
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 247, 244, 247),
-        appBar: PreferredSize(
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 247, 244, 247),
+      appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight + 25),
           child: AppBar(
             elevation: 0,
@@ -187,7 +248,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                         color: Colors.black,
                         size: 40,
                       ),
-                       onPressed: () {
+                      onPressed: () {
                         Navigator.pop(context, _changed);
                       },
                     ),
@@ -218,100 +279,35 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
             ),
           ),
         ),
-        body: const Center(
-          child: CircularProgressIndicator(
-            color: Colors.deepPurple, 
-          ),
-        ),
-      );
-    }
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 247, 244, 247),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 25),
-        child: AppBar(
-          elevation: 0,
-          backgroundColor: const Color.fromARGB(255, 247, 244, 247),
-          automaticallyImplyLeading: false,
-          toolbarHeight: kToolbarHeight + 25,
-          title: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
-                      size: 40,
-                    ),
-                     onPressed: () {
-                      Navigator.pop(context, _changed);
-                    },
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        "eSalon",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 35,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      height: 55,
-                      width: 55,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildHeaderInfo(),
-                      const SizedBox(height: 20),
-                      _buildDetails(),
-                    ],
-                  ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 6, offset: const Offset(0, 3))],
                 ),
-                const SizedBox(height: 24),
-                _buildActionButtons(), 
-              ],
-            ),
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeaderInfo(), 
+                    const SizedBox(height: 20),
+                    _buildDetails(),   
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildActionButtons(), 
+              _buildOcijeni(),
+            ],
           ),
         ),
       ),
@@ -441,27 +437,34 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
               children: [
                 const Icon(Icons.star, color: Colors.yellow, size: 18),
                 const SizedBox(width: 6),
-                Text(
-                  _avgOcjena(widget.usluga.uslugaId).toString(),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
+                _isLoadingOcjena
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      _avgOcjena(widget.usluga.uslugaId).toString(),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    )
               ],
             ),
             const Spacer(),
             StatefulBuilder(
               builder: (context, setLocalState) {
-                bool isFavorite = favoritResult != null &&
-                    favoritResult!.result.any(
-                      (f) =>
-                          f.korisnikId == AuthProvider.korisnikId &&
-                          f.uslugaId == widget.usluga.uslugaId,
-                    );
+                bool isFavorite = !_isLoadingFavorite &&
+                favoritResult != null &&
+                favoritResult!.result.any(
+                  (f) =>
+                      f.korisnikId == AuthProvider.korisnikId &&
+                      f.uslugaId == widget.usluga.uslugaId,
+                );
                 return InkWell(
-                  onTap: () async {
+                 onTap: _isLoadingFavorite ? null : () async {
                     if (AuthProvider.korisnikId == null) {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -536,7 +539,10 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                         _changed = true;
                       });
                       if (!mounted) return;
-                      favoritResult = await favoritProvider.get();
+                       favoritResult = await favoritProvider.get(filter: {
+                        "KorisnikId": AuthProvider.korisnikId,
+                        "UslugaId": widget.usluga.uslugaId
+                      });
                       setLocalState(() {});
                     } catch (e) {
                       if (!context.mounted) return;
@@ -557,18 +563,113 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                       );
                     }
                   },
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.black,
-                    size: 28,
-                  ),
+                  child: _isLoadingFavorite
+                  ? const Icon(Icons.favorite, color: Colors.grey, size: 28,) 
+                  : Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.black,
+                      size: 28,
+                    ),
                 );
               },
             ),
+
           ],
         )
       ],
     );
+  }
+
+  Future<void> _spasiOcjenu(int vrijednost) async {
+    if (AuthProvider.korisnikId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1500),
+          content: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+            child: RichText(
+              text: const TextSpan(
+                text: "Morate biti prijavljeni da biste ocijenili uslugu.",
+                style: TextStyle(color: Colors.white, fontSize: 15),
+                children: [
+                  TextSpan(
+                    text: "Prijavite se!",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _isLoadingOcjenaUser = true;
+    });
+
+    try {
+      if (!mounted) return;
+      final postojeca = await ocjenaProvider.get(filter: {
+        'KorisnikId': AuthProvider.korisnikId,
+        'UslugaId': widget.usluga.uslugaId,
+      });
+
+      if (!mounted) return;
+      if (postojeca.result.isEmpty) {
+        if (!mounted) return;
+        await ocjenaProvider.insert({
+          'korisnikId': AuthProvider.korisnikId,
+          'uslugaId': widget.usluga.uslugaId,
+          'vrijednost': vrijednost,
+        });
+      } else {
+        if (!mounted) return;
+        await ocjenaProvider.update(postojeca.result.first.ocjenaId!, {
+          'vrijednost': vrijednost,
+        });
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _mojaOcjena = vrijednost;
+        _isLoadingOcjenaUser = false;
+        _changed = true;
+      });
+      if (!mounted) return;
+      await _loadOcjena(); 
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color.fromARGB(255, 138, 182, 140),
+          duration: Duration(milliseconds: 1500),
+          content: Center(child: Text("Ocjena je uspješno spremljena.")),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOcjenaUser = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("$e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   dynamic _avgOcjena(int? uslugaId) {
@@ -585,7 +686,6 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
             ocjena.length;
     return formatNumber(avgOcjena);
   }
-
 
   Widget _buildActionButtons() {
     return Column(
@@ -617,12 +717,13 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded( 
+            Expanded(
               child: SizedBox(
                 height: 48,
                 child: StatefulBuilder(
                   builder: (context, setLocalState) {
-                    bool inArhiva = arhivaResult != null &&
+                    bool inArhiva = !_isLoadingArhiva &&
+                        arhivaResult != null &&
                         arhivaResult!.result.any(
                           (a) =>
                               a.korisnikId == AuthProvider.korisnikId &&
@@ -630,7 +731,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                         );
 
                     return ElevatedButton(
-                      onPressed: () async {
+                      onPressed: _isLoadingArhiva ? null : () async {
                         if (!mounted) return;
                         await _handleArhivaAction(inArhiva, setLocalState, context);
                       },
@@ -640,23 +741,43 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: FittedBox( 
+                      child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              " ‘Želim probati’  $brojArhiviranja",
-                              style: const TextStyle(
+                            const Text(
+                              " ‘Želim probati’  ",
+                              style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            Icon(
-                              inArhiva ? Icons.bookmark : Icons.bookmark_outline,
-                              color: Colors.black,                     
-                            ),
+                            _isLoadingArhiva
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Row(
+                                    children: [
+                                      Text(
+                                        brojArhiviranja.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Icon(
+                                        inArhiva ? Icons.bookmark : Icons.bookmark_outline,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
                           ],
                         ),
                       ),
@@ -705,6 +826,37 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       ],
     );
   }
+
+  Widget _buildOcijeni() {
+  return Column(
+    children: [
+      const SizedBox(height: 16),
+      Text(
+        _mojaOcjena > 0 ? "Vaša ocjena" : "Ocijenite uslugu",
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+      ),
+      const SizedBox(height: 8),
+      _isLoadingOcjenaUser
+          ? const CircularProgressIndicator()
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (i) {
+                final index = i + 1;
+                final isActive = index <= _mojaOcjena;
+                return GestureDetector(
+                  onTap: () => _spasiOcjenu(index),
+                  child: Icon(
+                    Icons.star,
+                    color: isActive ? Colors.yellow : Colors.grey,
+                    size: 32,
+                  ),
+                );
+              }),
+            ),
+    ],
+  );
+}
+
 
   Future<void> _handleArhivaAction(
     bool inArhiva,
@@ -777,11 +929,15 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
           ),
         );
       }
+      if (!mounted) return;
       setState(() {
         _changed = true;
       });
       if (!mounted) return;
-      arhivaResult = await arhivaProvider.get();
+      arhivaResult = await arhivaProvider.get(filter: {
+          "KorisnikId": AuthProvider.korisnikId,
+          "UslugaId": widget.usluga.uslugaId
+        });
       if (!mounted) return;
       int broj = await arhivaProvider.getBrojArhiviranja(widget.usluga.uslugaId!);
       if (!mounted) return;
@@ -843,3 +999,4 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   }
 
 }
+

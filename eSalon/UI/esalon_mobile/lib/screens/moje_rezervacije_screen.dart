@@ -377,7 +377,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Text(
-              "Napomena: Rezervacija se može otkazati najkasnije 3 dana prije termina.",
+              "Napomena: Rezervacija se može otkazati najkasnije 3 dana prije termina i ako se plaća gotovinom.",
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black,
@@ -515,53 +515,69 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                         SlidableAction(
                           onPressed: (context) async {
                             try {
+                              String? nacinPlacanja = e.nacinPlacanjaNaziv?.toLowerCase();
                               DateTime? termin = e.datumRezervacije;
-                              if (termin != null) {
-                                if (termin.difference(DateTime.now()).inDays >= 3) {
-                                  if (!mounted) return;
-                                  await rezervacijaProvider.ponisti(e.rezervacijaId!);
 
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      backgroundColor: Color.fromARGB(255, 138, 182, 140),
-                                      duration: Duration(seconds: 1),
-                                      content: Center(
-                                        child: Text("Rezervacija je uspješno poništena."),
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 2),
-                                      content: Center(
-                                        child: Text(
-                                          "Rezervacija se može otkazati najkasnije 3 dana prije termina.",
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                              bool isGotovina = nacinPlacanja == "gotovina";
+                              bool is3DanaPrije = termin != null &&
+                                  termin.difference(DateTime.now()).inDays >= 3;
+
+                              if (!isGotovina || !is3DanaPrije) {
+                                if (!context.mounted) return;
+
+                                String poruka = "Rezervaciju nije moguće otkazati jer";
+
+                                if (!isGotovina) {
+                                  poruka += "\n način plaćanja nije gotovina";
                                 }
+                                if (!is3DanaPrije) {
+                                  poruka += "\n može se otkazati najkasnije 3 dana prije termina";
+                                }
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 3),
+                                    content: Center(
+                                      child: Text(
+                                        poruka,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                                return; 
                               }
+
                               if (!mounted) return;
-                              var rezervacijaResult =
-                                  await rezervacijaProvider.get(
+                              await rezervacijaProvider.ponisti(e.rezervacijaId!);
+
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                  duration: Duration(seconds: 1),
+                                  content: Center(
+                                    child: Text("Rezervacija je uspješno poništena."),
+                                  ),
+                                ),
+                              );
+
+                              if (!mounted) return;
+                              var rezervacijaResult = await rezervacijaProvider.get(
                                 filter: searchRequest,
                                 orderBy: 'DatumRezervacije',
                                 sortDirection: 'desc',
                               );
+
                               if (!mounted) return;
                               setState(() {
-                                aktivneRezervacije =
-                                    rezervacijaResult.result.isNotEmpty
-                                        ? rezervacijaResult.result
-                                        : [];
+                                aktivneRezervacije = rezervacijaResult.result.isNotEmpty
+                                    ? rezervacijaResult.result
+                                    : [];
                                 total = rezervacijaResult.count;
                               });
+
                             } catch (e) {
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -571,9 +587,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                   content: Center(
                                     child: Text(
                                       e.toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
+                                      style: const TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ),

@@ -381,7 +381,7 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
                       const Text(
-                        "Sortirajte",
+                        "Sortiranje",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),

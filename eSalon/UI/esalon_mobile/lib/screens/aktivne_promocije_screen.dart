@@ -33,7 +33,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
   bool hasNextPage = true;
   bool showBtn = false;
   late final ScrollController scrollController;
-  bool _isLoading = true;
+
   late TextEditingController _searchController;
   RangeValues? _popustFilter;
   final Map<String, Widget> _cachedImages = {};
@@ -43,6 +43,8 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
 
   String _orderBy = 'DatumKraja'; 
   String _sortDirection = 'asc'; 
+  bool _isLoadingPromocije = true;
+  bool _loadingAktiviranePromocije = true;
 
   @override
   void initState() {
@@ -52,7 +54,8 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
     scrollController = ScrollController();
     scrollController.addListener(_onScroll);
     _searchController = TextEditingController();
-    _loadInitialData();
+    _loadPromocije(); 
+    _loadAktiviranePromocije(); 
   }
 
   @override
@@ -91,39 +94,31 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
     }
   }
 
-  Future<void> _loadInitialData() async {
+  Future<void> _loadPromocije() async {
     if (!mounted) return;
     setState(() {
-      isFirstLoadRunning = true;
-      _isLoading = true;
+      _isLoadingPromocije = true;
     });
 
     try {
       final filter = <String, dynamic>{
         'SamoAktivne': true,
         'NazivOpisFTS': _searchController.text,
-        'orderBy': _orderBy,       
+        'orderBy': _orderBy,
         'sortDirection': _sortDirection,
         if (_popustFilter != null) 'PopustGTE': _popustFilter!.start,
         if (_popustFilter != null) 'PopustLTE': _popustFilter!.end,
       };
-      if (!mounted) return; 
+      if (!mounted) return;
       final result = await _promocijaProvider.get(
         filter: filter,
         page: page,
         pageSize: pageSize,
-        );
-
-      SearchResult<AktiviranaPromocija>? aktiviraneResult;
-      if (AuthProvider.isSignedIn && AuthProvider.korisnikId != null) {
-        if (!mounted) return; 
-        aktiviraneResult = await _aktiviranaProvider.get(filter: {'KorisnikId': AuthProvider.korisnikId});
-      }
+      );
 
       if (!mounted) return;
       setState(() {
         _aktivnePromocije = result.result;
-        _aktiviranePromocije = aktiviraneResult?.result ?? [];
         total = _filteredList.length;
         hasNextPage = (page * pageSize) < result.count;
       });
@@ -140,8 +135,46 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
     } finally {
       if (mounted) {
         setState(() {
-          isFirstLoadRunning = false;
-         _isLoading = false;
+          _isLoadingPromocije = false;  
+        });
+      }
+    }
+  }
+
+  Future<void> _loadAktiviranePromocije() async {
+    if (!mounted) return;
+    setState(() {
+      _loadingAktiviranePromocije = true;
+    });
+
+    try {
+      SearchResult<AktiviranaPromocija>? aktiviraneResult;
+
+      if (AuthProvider.isSignedIn && AuthProvider.korisnikId != null) {
+        if (!mounted) return;
+        aktiviraneResult = await _aktiviranaProvider.get(
+          filter: {'KorisnikId': AuthProvider.korisnikId},
+        );
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _aktiviranePromocije = aktiviraneResult?.result ?? [];
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingAktiviranePromocije = false;
         });
       }
     }
@@ -498,6 +531,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
 
     return InkWell(
       onTap: () async {
+        if (!mounted) return;
         final result = await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PromocijaDetailsScreen(promocija: promocija),
@@ -507,7 +541,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
          if (result == true) {
           if (!mounted) return;
           page = 1; 
-          await _loadInitialData();
+          _loadAktiviranePromocije();
         }
       },
       borderRadius: BorderRadius.circular(15),
@@ -583,56 +617,51 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                 SizedBox(
                   height: 36,
                   child: ElevatedButton(
-                    onPressed: isLoadingItem
-                        ? null
-                        : () {
+                    onPressed: (!isLoadingItem)
+                        ? () {
                             _toggleActivationForPromocija(promocija);
-                          },
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: aktivirana
-                          ? const Color.fromARGB(255, 133, 131, 133).withOpacity(0.3) 
-                          : const Color.fromARGB(255, 210, 193, 214), 
+                          ? const Color.fromARGB(255, 133, 131, 133).withOpacity(0.3)
+                          : const Color.fromARGB(255, 210, 193, 214),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 0),
                       elevation: 0,
                     ),
-                    child: isLoadingItem
-                        ? Container(
-                          width: 16,
-                          height: 16,
-                          decoration: const BoxDecoration(
-                            color: Color.fromARGB(255, 247, 244, 247), 
-                            shape: BoxShape.circle, 
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(2),
+                    child: (_loadingAktiviranePromocije || isLoadingItem)
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation(Colors.white),
                             ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              aktivirana ? Icons.remove_circle_outline : Icons.check_circle_outline,
-                              color: Colors.black87,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              aktivirana ? "Deaktiviraj" : "Aktiviraj",
-                              style: const TextStyle(
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                aktivirana
+                                    ? Icons.remove_circle_outline
+                                    : Icons.check_circle_outline,
                                 color: Colors.black87,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                                size: 18,
                               ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(width: 6),
+                              Text(
+                                aktivirana ? "Deaktiviraj" : "Aktiviraj",
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ],
@@ -729,7 +758,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
                       const Text(
-                        "Sortirajte",
+                        "Sortiranje",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
@@ -828,7 +857,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                             _sortDirection = 'asc';
                           });
                           page = 1;
-                          _loadInitialData();
+                          _loadPromocije();
                         },
                         child: const Text("Izbriši  filter"),
                       ),
@@ -839,7 +868,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                             _popustFilter = tempPopust;                           
                           });
                           page = 1;
-                          _loadInitialData();
+                          _loadPromocije();
                         },
                         child: const Text("Filtriraj"),
                       ),
@@ -909,7 +938,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
           ),
         ),
       ),
-      body: _isLoading
+      body: _isLoadingPromocije
           ? Container(
             color: const Color.fromARGB(255, 247, 244, 247), 
             child: const Center(
@@ -948,7 +977,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                                     onPressed: () {
                                       _searchController.clear();
                                       page = 1;
-                                      _loadInitialData();
+                                      _loadPromocije();
                                     },
                                   )
                                 : null,
@@ -962,7 +991,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                           onChanged: (_) {},
                           onSubmitted: (value) {
                             page = 1;
-                            _loadInitialData(); 
+                            _loadPromocije();
                           },
                         ),
                         const SizedBox(height: 5),

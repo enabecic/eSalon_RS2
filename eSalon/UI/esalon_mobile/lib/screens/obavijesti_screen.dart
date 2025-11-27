@@ -524,7 +524,7 @@ Future<void> _markAsRead(Obavijest o) async {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          "Još nemate nikavih obavijesti.",
+                          "Nemate obavijesti za prikazati.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,

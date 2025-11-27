@@ -415,41 +415,25 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
     try {
       await _korisnikProvider.insert(request);
       if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Uspjeh"),
-          content: const Text("Račun je uspješno kreiran. Molimo prijavite se."),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _formKey.currentState?.reset();
-                _passwordController.clear();
-                _confirmPasswordController.clear();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
-                  ),
-                );
-              },
-              child: const Text(
-                "OK",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color.fromARGB(255, 138, 182, 140), 
+          duration: Duration(milliseconds: 2000),
+          content: Center(
+            child: Text(
+              "Račun je uspješno kreiran. Molimo prijavite se.",
+              style: TextStyle(fontWeight: FontWeight.normal),
             ),
-          ],
+          ),
         ),
+      );
+      if (!mounted) return;
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => false,
       );
     } catch (e) {
       if (!mounted) return;
