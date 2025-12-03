@@ -48,6 +48,21 @@ namespace eSalon.API.Controllers
             return _rezervacijaService.AllowedActionsAsync(rezervacijaId, cancellationToken);
         }
 
+        [Authorize(Roles = "Klijent")]
+        [HttpGet("zauzeti-termini")]
+        public async Task<ActionResult<List<object>>> GetZauzetiTermini([FromQuery] int frizerId, [FromQuery] DateTime datumRezervacije, CancellationToken cancellationToken = default)
+        {
+            var zauzetiTermini = await _rezervacijaService.GetZauzetiTerminiZaDatumAsync(datumRezervacije, frizerId, cancellationToken);
+
+            var result = zauzetiTermini.Select(t => new
+            {
+                VrijemePocetka = t.VrijemePocetka.ToString(@"hh\:mm"),
+                VrijemeKraja = t.VrijemeKraja.ToString(@"hh\:mm")
+            }).ToList();
+
+            return Ok(result);
+        }
+
         [HttpPost("provjeri-termin")]
         [Authorize(Roles = "Klijent")]
         public async Task<IActionResult> ProvjeriTermin(RezervacijaInsertRequest request, CancellationToken cancellationToken = default)
@@ -55,6 +70,15 @@ namespace eSalon.API.Controllers
             var poruka = await _rezervacijaService.ProvjeriTerminAsync(request, cancellationToken);
             return Ok(poruka);
         }
+
+        [HttpGet("kalendar")]
+        [Authorize(Roles = "Klijent")]
+        public async Task<IActionResult> GetKalendar([FromQuery] int frizerId, [FromQuery] int godina, [FromQuery] int mjesec, CancellationToken cancellationToken)
+        {
+            var result = await _rezervacijaService.GetKalendarAsync(frizerId, godina, mjesec, cancellationToken);
+            return Ok(result);
+        }
+
 
         [HttpGet]
         [Authorize(Roles = "Klijent,Admin,Frizer")]

@@ -593,6 +593,8 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
           backgroundColor: const Color(0xFFF6F4F3),
           automaticallyImplyLeading: false,
           toolbarHeight: kToolbarHeight + 25,
+          surfaceTintColor: Colors.transparent,
+          forceMaterialTransparency: false,
           title: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 6.0),
@@ -904,29 +906,29 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                                             SnackBar(
                                               backgroundColor: Colors.red,
                                               duration: const Duration(milliseconds: 1500),
-                                              content: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) => const LoginPage()),
-                                                  );
-                                                },
-                                                child: RichText(
-                                                  text: const TextSpan(
-                                                    text:
-                                                        "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
-                                                    style: TextStyle(
-                                                        color: Colors.white, fontSize: 15),
-                                                    children: [
-                                                      TextSpan(
-                                                        text: "Prijavite se!",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.bold,
-                                                          decoration: TextDecoration.underline,
+                                              content: Center( 
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                                                    );
+                                                  },
+                                                  child: RichText(
+                                                    textAlign: TextAlign.center,
+                                                    text: const TextSpan(
+                                                      text: "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
+                                                      style: TextStyle(color: Colors.white, fontSize: 15),
+                                                      children: [
+                                                        TextSpan(
+                                                          text: "Prijavite se!",
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.bold,
+                                                            decoration: TextDecoration.underline,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),

@@ -38,6 +38,7 @@ namespace eSalon.Services.RezervacijaStateMachine
                 throw new UserException("Rezervacija nije pronađena");
 
             entity.StateMachine = "ponistena";
+            entity.TerminZatvoren = false;
             await Context.SaveChangesAsync(cancellationToken);
 
             return Mapper.Map<Model.Rezervacija>(entity);

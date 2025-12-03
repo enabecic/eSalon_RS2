@@ -249,35 +249,30 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         if (isLoading)
           const Center(child: CircularProgressIndicator())
         else if (promocije.isEmpty)
-           Padding(
+          Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
-              child: Container(
-                width: 300,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(97, 158, 158, 158),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 7,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.local_offer, 
+                    size: 40,
+                    color: Color.fromARGB(255, 76, 72, 72),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
                     jeTrenutna
                         ? "Trenutno nema aktivnih promocija."
                         : "Trenutno nema budućih promocija.",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      color: Colors.white,
+                      fontSize: 14,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           )

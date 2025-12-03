@@ -34,6 +34,9 @@ namespace eSalon.Services.Validator.Implementation
             if (rezervacija.DatumRezervacije.Date < DateTime.Now.Date)
                 throw new UserException("Datum rezervacije mora biti u budućnosti.");
 
+            if (rezervacija.DatumRezervacije.Date == DateTime.Now.Date && rezervacija.VrijemePocetka < DateTime.Now.TimeOfDay)
+                throw new UserException("Vrijeme početka rezervacije je već prošlo.");
+
             return Task.CompletedTask;
         }
     }

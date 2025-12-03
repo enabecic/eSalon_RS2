@@ -6,6 +6,8 @@ import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class PromocijaDetailsScreen extends StatefulWidget {
   final Promocija promocija;
@@ -36,15 +38,30 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
   }
 
   Future<void> _ucitajPodatke() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
+    if (!mounted) return;
 
-    await Future.wait([
-      _prepareImage(),
-      _provjeriAktivaciju(),
-    ]);
-
-    if (mounted) {
-      setState(() => _isLoading = false);
+    try {
+    if (!mounted) return;
+    await _provjeriAktivaciju();
+    if (!mounted) return;
+    await _prepareImage();
+    } catch (e) {
+     if (!mounted) return;
+        await QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Greška',
+          text: e.toString(),
+          confirmBtnText: 'OK',
+          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        );
+    }
+    finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -63,25 +80,38 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
   }
 
   Future<void> _provjeriAktivaciju() async {
-    if (AuthProvider.korisnikId == null) return;
-    if (!mounted) return;
-    final result = await _aktiviranaPromocijaProvider.get(filter: {
-      'KorisnikId': AuthProvider.korisnikId,
-      'PromocijaId': widget.promocija.promocijaId
-    });
+    try {
+      if (AuthProvider.korisnikId == null) return;
+      if (!mounted) return;
 
-    if (result.result.isNotEmpty) {
-      if (!mounted) return;
-      setState(() {
-        _jeAktivirana = true;
-        _aktiviranaPromocijaId = result.result.first.aktiviranaPromocijaId;
+      final result = await _aktiviranaPromocijaProvider.get(filter: {
+        'KorisnikId': AuthProvider.korisnikId,
+        'PromocijaId': widget.promocija.promocijaId
       });
-    } else {
+
       if (!mounted) return;
-      setState(() {
-        _jeAktivirana = false;
-        _aktiviranaPromocijaId = null;
-      });
+
+      if (result.result.isNotEmpty) {
+        setState(() {
+          _jeAktivirana = true;
+          _aktiviranaPromocijaId = result.result.first.aktiviranaPromocijaId;
+        });
+      } else {
+        setState(() {
+          _jeAktivirana = false;
+          _aktiviranaPromocijaId = null;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+        await QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Greška',
+          text: e.toString(),
+          confirmBtnText: 'OK',
+          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        );
     }
   }
 
@@ -93,26 +123,29 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           SnackBar(
             backgroundColor: Colors.red,
             duration: const Duration(milliseconds: 1500),
-            content: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              child: RichText(
-                text: const TextSpan(
-                  text: "Morate biti prijavljeni da biste aktivirali promociju. ",
-                  style: TextStyle(color: Colors.white, fontSize: 15),
-                  children: [
-                    TextSpan(
-                      text: "Prijavite se!",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
+            content: Center( 
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: const TextSpan(
+                    text: "Morate biti prijavljeni da biste aktivirali promociju. ",
+                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    children: [
+                      TextSpan(
+                        text: "Prijavite se!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -185,7 +218,7 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           ),
         ),
       );
-
+      if (!mounted) return;
       setState(() {
         _changed = true;
       });
@@ -517,6 +550,8 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           backgroundColor: const Color(0xFFF6F4F3),
           automaticallyImplyLeading: false,
           toolbarHeight: kToolbarHeight + 25,
+          surfaceTintColor: Colors.transparent,
+          forceMaterialTransparency: false,
           title: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 6.0),

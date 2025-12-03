@@ -351,18 +351,172 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
               if (AuthProvider.korisnikId != null &&
                   AuthProvider.korisnikId == widget.rezervacija?.frizerId) ...[
                 if (widget.rezervacija?.stateMachine == "kreirana") 
-                  ElevatedButton(
+                  Tooltip(
+                    message: "Molimo odobrite rezervaciju što prije kako bi klijent dobio potvrdu i mogao planirati svoj dolazak.",
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(20), 
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    textStyle: const TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.normal,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            title: const Text("Potvrda"),
+                            content: const Text(
+                              "Jeste li sigurni da želite odobriti rezervaciju?",
+                              textAlign: TextAlign.center,
+                            ),
+                            actionsAlignment: MainAxisAlignment.end,
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Ne",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Da",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          try {
+                            final provider = RezervacijaProvider();
+                            await provider.odobri(
+                              widget.rezervacija!.rezervacijaId!,
+                              widget.rezervacija!.frizerId!,
+                            );
+
+                            if (!mounted) return;
+
+                            await showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                title: const Text("Uspjeh"),
+                                content: const Text(
+                                  "Rezervacija je uspješno odobrena.",
+                                  textAlign: TextAlign.center,
+                                ),
+                                actionsAlignment: MainAxisAlignment.end,
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.deepPurple,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    child: const Text(
+                                      "OK",
+                                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (!mounted) return;
+                            Navigator.pop(context, true);
+                          } on UserException catch (e) {
+                            if (!mounted) return;
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: "Greška",
+                              text: e.toString(),
+                              confirmBtnText: 'OK',
+                              confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                              textColor: Colors.black,
+                              titleColor: Colors.black,
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: "Greška",
+                              text: "Greška pri odobravanju rezervacije.",
+                              confirmBtnText: 'OK',
+                              confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                              textColor: Colors.black,
+                              titleColor: Colors.black,
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                        foregroundColor: const Color.fromARGB(199, 0, 0, 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        fixedSize: const Size(190, 50),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text("Odobri rezervaciju"),
+                    ),
+                  ),
+                if (widget.rezervacija?.stateMachine == "odobrena") ...[
+                Tooltip(
+                  message: "Molimo označite rezervaciju kao završenu nakon termina.",
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20), 
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  textStyle: const TextStyle(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.normal,
+                  ),
+                  child: ElevatedButton(
                     onPressed: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          title: const Text("Potvrda"),
-                          content: const Text(
-                            "Jeste li sigurni da želite odobriti rezervaciju?",
-                            textAlign: TextAlign.center,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          actionsAlignment: MainAxisAlignment.end,
+                          title: const Text("Potvrda"),
+                          content: const Text("Jeste li sigurni da želite završiti rezervaciju?"),
+                          actionsAlignment: MainAxisAlignment.end, 
                           actions: [
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context, false),
@@ -402,37 +556,34 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
 
                       if (confirm == true) {
                         try {
-                          final provider = RezervacijaProvider();
-                          await provider.odobri(
-                            widget.rezervacija!.rezervacijaId!,
-                            widget.rezervacija!.frizerId!,
-                          );
-
+                          var provider = RezervacijaProvider();
+                          await provider.zavrsi(widget.rezervacija!.rezervacijaId!);
                           if (!mounted) return;
 
                           await showDialog(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              title: const Text("Uspjeh"),
-                              content: const Text(
-                                "Rezervacija je uspješno odobrena.",
-                                textAlign: TextAlign.center,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
+                              title: const Text("Uspjeh"),
+                              content: const Text("Rezervacija je uspješno završena."),
                               actionsAlignment: MainAxisAlignment.end,
                               actions: [
                                 ElevatedButton(
-                                  onPressed: () => Navigator.pop(context),
+                                  onPressed: () => Navigator.of(context).pop(),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepPurple,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   child: const Text(
                                     "OK",
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -440,7 +591,8 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                           );
 
                           if (!mounted) return;
-                          Navigator.pop(context, true);
+                          Navigator.pop(context, true); 
+
                         } on UserException catch (e) {
                           if (!mounted) return;
                           QuickAlert.show(
@@ -459,7 +611,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                             context: context,
                             type: QuickAlertType.error,
                             title: "Greška",
-                            text: "Greška pri odobravanju rezervacije.",
+                            text: "Greška pri završavanju rezervacije.",
                             confirmBtnText: 'OK',
                             confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
                             textColor: Colors.black,
@@ -472,249 +624,133 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                       backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                       foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       fixedSize: const Size(190, 50),
                       textStyle: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Text("Odobri rezervaciju"),
+                    child: const Text("Završi rezervaciju"),
                   ),
-                if (widget.rezervacija?.stateMachine == "odobrena") ...[
-                ElevatedButton(
-                  onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: const Text("Potvrda"),
-                        content: const Text("Jeste li sigurni da želite završiti rezervaciju?"),
-                        actionsAlignment: MainAxisAlignment.end, 
-                        actions: [
-                          ElevatedButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "Ne",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "Da",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirm == true) {
-                      try {
-                        var provider = RezervacijaProvider();
-                        await provider.zavrsi(widget.rezervacija!.rezervacijaId!);
-                        if (!mounted) return;
-
-                        await showDialog(
+                ),
+                const SizedBox(width: 10),
+                if (widget.rezervacija != null && sada.isBefore(datumVrijemeRezervacije)) ...[
+                  Tooltip(
+                    message: "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima, jer eSalon pazi na zadovoljstvo svojih klijenata.",
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(20), 
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    textStyle: const TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.normal,
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            title: const Text("Uspjeh"),
-                            content: const Text("Rezervacija je uspješno završena."),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            title: const Text("Potvrda"),
+                            content: const Text("Jeste li sigurni da želite otkazati rezervaciju?"),
                             actionsAlignment: MainAxisAlignment.end,
                             actions: [
                               ElevatedButton(
-                                onPressed: () => Navigator.of(context).pop(),
+                                onPressed: () => Navigator.pop(context, false),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.deepPurple,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
-                                  "OK",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                child: const Text("Ne", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
+                                child: const Text("Da", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
                         );
 
-                        if (!mounted) return;
-                        Navigator.pop(context, true); 
+                        if (confirm == true) {
+                          try {
+                            var provider = RezervacijaProvider();
+                            await provider.ponisti(widget.rezervacija!.rezervacijaId!);
+                            if (!mounted) return;
 
-                      } on UserException catch (e) {
-                        if (!mounted) return;
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.error,
-                          title: "Greška",
-                          text: e.toString(),
-                          confirmBtnText: 'OK',
-                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                          textColor: Colors.black,
-                          titleColor: Colors.black,
-                        );
-                      } catch (e) {
-                        if (!mounted) return;
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.error,
-                          title: "Greška",
-                          text: "Greška pri završavanju rezervacije.",
-                          confirmBtnText: 'OK',
-                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                          textColor: Colors.black,
-                          titleColor: Colors.black,
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 180, 140, 218),
-                    foregroundColor: const Color.fromARGB(199, 0, 0, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    fixedSize: const Size(190, 50),
-                    textStyle: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  child: const Text("Završi rezervaciju"),
-                ),
-                const SizedBox(width: 10),
-                if (widget.rezervacija != null && sada.isBefore(datumVrijemeRezervacije)) ...[
-                  ElevatedButton(
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          title: const Text("Potvrda"),
-                          content: const Text("Jeste li sigurni da želite otkazati rezervaciju?"),
-                          actionsAlignment: MainAxisAlignment.end,
-                          actions: [
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text("Ne", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text("Da", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true) {
-                        try {
-                          var provider = RezervacijaProvider();
-                          await provider.ponisti(widget.rezervacija!.rezervacijaId!);
-                          if (!mounted) return;
-
-                          await showDialog(
-                            context: context,
-                            builder: (BuildContext context) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              title: const Text("Uspjeh"),
-                              content: const Text("Rezervacija je uspješno otkazana."),
-                              actionsAlignment: MainAxisAlignment.end,
-                              actions: [
-                                ElevatedButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.deepPurple,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                            await showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                title: const Text("Uspjeh"),
+                                content: const Text("Rezervacija je uspješno otkazana."),
+                                actionsAlignment: MainAxisAlignment.end,
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.deepPurple,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
+                                    child: const Text("OK", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                                   ),
-                                  child: const Text("OK", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                ),
-                              ],
-                            ),
-                          );
+                                ],
+                              ),
+                            );
 
-                          if (!mounted) return;
-                          Navigator.pop(context, true);
+                            if (!mounted) return;
+                            Navigator.pop(context, true);
 
-                        } on UserException catch (e) {
-                          if (!mounted) return;
-                          QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.error,
-                            title: "Greška",
-                            text: e.toString(),
-                            confirmBtnText: 'OK',
-                            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                            textColor: Colors.black,
-                            titleColor: Colors.black,
-                          );
-                        } catch (e) {
-                          if (!mounted) return;
-                          QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.error,
-                            title: "Greška",
-                            text: "Greška pri otkazivanju rezervacije.",
-                            confirmBtnText: 'OK',
-                            confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                            textColor: Colors.black,
-                            titleColor: Colors.black,
-                          );
+                          } on UserException catch (e) {
+                            if (!mounted) return;
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: "Greška",
+                              text: e.toString(),
+                              confirmBtnText: 'OK',
+                              confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                              textColor: Colors.black,
+                              titleColor: Colors.black,
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: "Greška",
+                              text: "Greška pri otkazivanju rezervacije.",
+                              confirmBtnText: 'OK',
+                              confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                              textColor: Colors.black,
+                              titleColor: Colors.black,
+                            );
+                          }
                         }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[500],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[500],
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fixedSize: const Size(190, 50),
+                        textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
-                      fixedSize: const Size(190, 50),
-                      textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      child: const Text("Otkaži rezervaciju"),
                     ),
-                    child: const Text("Otkaži rezervaciju"),
                   ),
                 ],
                 ],

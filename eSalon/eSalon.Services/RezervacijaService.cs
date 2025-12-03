@@ -305,6 +305,7 @@ namespace eSalon.Services
                     r.FrizerId == rezervacija.FrizerId &&
                     r.DatumRezervacije.Date == rezervacija.DatumRezervacije.Date &&
                     !r.IsDeleted &&
+                     r.TerminZatvoren &&
                     (
                         (rezervacija.VrijemePocetka >= r.VrijemePocetka && rezervacija.VrijemePocetka < r.VrijemeKraja) ||
                         (vrijemeKraja > r.VrijemePocetka && vrijemeKraja <= r.VrijemeKraja) ||
@@ -318,6 +319,105 @@ namespace eSalon.Services
 
             return "Termin je slobodan.";
         }
+
+        public async Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datumRezervacije, int frizerId, CancellationToken cancellationToken = default)
+        {
+            var termini = await Context.Rezervacijas
+                .Where(r => r.DatumRezervacije.Date == datumRezervacije.Date
+                            && r.FrizerId == frizerId
+                            && !r.IsDeleted
+                            && r.TerminZatvoren)
+                .Select(r => new { r.VrijemePocetka, r.VrijemeKraja })
+                .ToListAsync(cancellationToken);
+
+            return termini.Select(r => (r.VrijemePocetka, r.VrijemeKraja ?? TimeSpan.Zero)).ToList();
+        }
+
+        public async Task<List<object>> GetKalendarAsync(int frizerId, int godina, int mjesec, CancellationToken cancellationToken = default)
+        {
+            List<object> rezultat = new List<object>();
+            int brojDana = DateTime.DaysInMonth(godina, mjesec);
+
+            TimeSpan minTrajanjeUsluge = TimeSpan.FromMinutes(10); 
+
+            for (int dan = 1; dan <= brojDana; dan++)
+            {
+                var date = new DateTime(godina, mjesec, dan);
+
+                if (date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    rezultat.Add(new { datum = date.ToString("yyyy-MM-dd"), status = "neradni_dan" });
+                    continue;
+                }
+
+                var termini = await GetZauzetiTerminiZaDatumAsync(date, frizerId, cancellationToken);
+
+                if (termini.Count == 0)
+                {
+                    rezultat.Add(new { datum = date.ToString("yyyy-MM-dd"), status = "slobodan" });
+                    continue;
+                }
+
+                var min = new TimeSpan(8, 0, 0);
+                var max = new TimeSpan(16, 0, 0);
+
+                bool fullBusy = ProvjeriPokrivenostDana(termini, min, max);
+
+                if (!fullBusy)
+                {
+
+                    bool postojiRupa = false;
+
+                    var sorted = termini.OrderBy(t => t.VrijemePocetka).ToList();
+                    TimeSpan trenutni = min;
+
+                    foreach (var (VrijemePocetka, VrijemeKraja) in sorted)
+                    {
+                        if ((VrijemePocetka - trenutni) >= minTrajanjeUsluge)
+                        {
+                            postojiRupa = true;
+                            break;
+                        }
+                        if (VrijemeKraja > trenutni)
+                            trenutni = VrijemeKraja;
+                    }
+
+                    if (!postojiRupa && (max - trenutni) >= minTrajanjeUsluge)
+                    {
+                        postojiRupa = true;
+                    }
+
+                    fullBusy = !postojiRupa;
+                }
+
+                rezultat.Add(new
+                {
+                    datum = date.ToString("yyyy-MM-dd"),
+                    status = fullBusy ? "zauzet" : "djelomicno"
+                });
+            }
+
+            return rezultat;
+        }
+
+        private bool ProvjeriPokrivenostDana(List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)> intervali, TimeSpan pocetakDana, TimeSpan krajDana)
+        {
+            var sorted = intervali.OrderBy(i => i.VrijemePocetka).ToList();
+            TimeSpan trenutni = pocetakDana;
+
+            foreach (var (VrijemePocetka, VrijemeKraja) in sorted)
+            {
+                if (VrijemePocetka > trenutni)
+                    return false; 
+
+                if (VrijemeKraja > trenutni)
+                    trenutni = VrijemeKraja;
+            }
+
+            return trenutni >= krajDana;
+        }
+
+
     }
 }
 

@@ -236,6 +236,8 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
             backgroundColor: const Color.fromARGB(255, 247, 244, 247),
             automaticallyImplyLeading: false,
             toolbarHeight: kToolbarHeight + 25,
+            surfaceTintColor: Colors.transparent,
+            forceMaterialTransparency: false,
             title: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(top: 6.0),
@@ -465,25 +467,24 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                 );
                 return InkWell(
                  onTap: _isLoadingFavorite ? null : () async {
-                    if (AuthProvider.korisnikId == null) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.red,
-                          duration: const Duration(milliseconds: 1500),
-                          content: GestureDetector(
+                  if (AuthProvider.korisnikId == null) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.red,
+                        duration: const Duration(milliseconds: 1500),
+                        content: Center( 
+                          child: GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(builder: (context) => const LoginPage()),
                               );
                             },
                             child: RichText(
+                              textAlign: TextAlign.center, 
                               text: const TextSpan(
-                                text:
-                                    "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15),
+                                text: "Morate biti prijavljeni da biste dodali uslugu u favorite. ",
+                                style: TextStyle(color: Colors.white, fontSize: 15),
                                 children: [
                                   TextSpan(
                                     text: "Prijavite se!",
@@ -498,9 +499,10 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                             ),
                           ),
                         ),
-                      );
-                      return;
-                    }
+                      ),
+                    );
+                    return;
+                  }
 
                     try {
                       if (!isFavorite) {
@@ -553,6 +555,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                           content: Center(
                             child: Text(
                               e.toString(),
+                              textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.normal,
@@ -587,26 +590,29 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         SnackBar(
           backgroundColor: Colors.red,
           duration: const Duration(milliseconds: 1500),
-          content: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
-            child: RichText(
-              text: const TextSpan(
-                text: "Morate biti prijavljeni da biste ocijenili uslugu.",
-                style: TextStyle(color: Colors.white, fontSize: 15),
-                children: [
-                  TextSpan(
-                    text: "Prijavite se!",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
+          content: Center( 
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              child: RichText(
+                textAlign: TextAlign.center, 
+                text: const TextSpan(
+                  text: "Morate biti prijavljeni da biste ocijenili uslugu. ",
+                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  children: [
+                    TextSpan(
+                      text: "Prijavite se!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -665,7 +671,12 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("$e"),
+          content: Center(
+            child: Text(
+              "$e",
+              textAlign: TextAlign.center,
+            ),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -828,35 +839,34 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   }
 
   Widget _buildOcijeni() {
-  return Column(
-    children: [
-      const SizedBox(height: 16),
-      Text(
-        _mojaOcjena > 0 ? "Vaša ocjena" : "Ocijenite uslugu",
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-      ),
-      const SizedBox(height: 8),
-      _isLoadingOcjenaUser
-          ? const CircularProgressIndicator()
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (i) {
-                final index = i + 1;
-                final isActive = index <= _mojaOcjena;
-                return GestureDetector(
-                  onTap: () => _spasiOcjenu(index),
-                  child: Icon(
-                    Icons.star,
-                    color: isActive ? Colors.yellow : Colors.grey,
-                    size: 32,
-                  ),
-                );
-              }),
-            ),
-    ],
-  );
-}
-
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Text(
+          _mojaOcjena > 0 ? "Vaša ocjena" : "Ocijenite uslugu",
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        _isLoadingOcjenaUser
+            ? const CircularProgressIndicator()
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) {
+                  final index = i + 1;
+                  final isActive = index <= _mojaOcjena;
+                  return GestureDetector(
+                    onTap: () => _spasiOcjenu(index),
+                    child: Icon(
+                      Icons.star,
+                      color: isActive ? Colors.yellow : Colors.grey,
+                      size: 32,
+                    ),
+                  );
+                }),
+              ),
+      ],
+    );
+  }
 
   Future<void> _handleArhivaAction(
     bool inArhiva,
@@ -869,26 +879,29 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         SnackBar(
           backgroundColor: Colors.red,
           duration: const Duration(milliseconds: 1500),
-          content: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
-            child: RichText(
-              text: const TextSpan(
-                text: "Morate biti prijavljeni da biste dodali uslugu u listu 'Želim probati'. ",
-                style: TextStyle(color: Colors.white, fontSize: 15),
-                children: [
-                  TextSpan(
-                    text: "Prijavite se!",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
+          content: Center( 
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              child: RichText(
+                textAlign: TextAlign.center, 
+                text: const TextSpan(
+                  text: "Morate biti prijavljeni da biste dodali uslugu u listu 'Želim probati'. ",
+                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  children: [
+                    TextSpan(
+                      text: "Prijavite se!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -956,6 +969,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
           content: Center(
             child: Text(
               e.toString(),
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.normal,

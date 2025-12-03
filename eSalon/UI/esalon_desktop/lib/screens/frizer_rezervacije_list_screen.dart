@@ -796,7 +796,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                           () {
                             if (AuthProvider.korisnikId == e.frizerId) {
                               if (e.stateMachine == "kreirana") {
-                                return "Klikni za detalje i da odobriš rezervaciju.";
+                                return "Klikni za detalje te onda odobri rezervaciju.";
                               } else if (e.stateMachine == "odobrena") {
                                 final sada = DateTime.now();
                                 final vrijemeParts = e.vrijemePocetka?.split(":");
@@ -812,9 +812,9 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                                 );
 
                                 if (sada.isAfter(datumVrijemeRezervacije)) {
-                                  return "Klikni za detalje i da završiš rezervaciju.";
+                                  return "Klikni za detalje te onda završi rezervaciju.";
                                 } else {
-                                  return "Klikni za detalje i da završiš/otkažeš rezervaciju.";
+                                  return "Klikni za detalje te onda završi/otkaži rezervaciju.";
                                 }
                               }
                             }

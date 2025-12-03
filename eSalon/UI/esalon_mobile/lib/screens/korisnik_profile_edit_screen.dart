@@ -80,6 +80,8 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
           backgroundColor: const Color(0xFFF6F4F3),
           automaticallyImplyLeading: false,
           toolbarHeight: kToolbarHeight + 25,
+          surfaceTintColor: Colors.transparent,
+          forceMaterialTransparency: false,
           title: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 6.0),

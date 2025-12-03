@@ -56,6 +56,8 @@ class _MasterScreenState extends State<MasterScreen> {
             automaticallyImplyLeading: false,
             centerTitle: false,
             toolbarHeight: kToolbarHeight + 25,
+            surfaceTintColor: Colors.transparent,
+            forceMaterialTransparency: false,
 
             title: SafeArea( 
               child: Padding(

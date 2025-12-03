@@ -55,6 +55,7 @@ namespace eSalon.Services.RezervacijaStateMachine
                     r.FrizerId == rezervacija.FrizerId &&
                     r.DatumRezervacije.Date == rezervacija.DatumRezervacije.Date &&
                     !r.IsDeleted &&
+                    r.TerminZatvoren &&
                     (
                         (rezervacija.VrijemePocetka >= r.VrijemePocetka && rezervacija.VrijemePocetka < r.VrijemeKraja) ||
                         (vrijemeKraja > r.VrijemePocetka && vrijemeKraja <= r.VrijemeKraja) ||

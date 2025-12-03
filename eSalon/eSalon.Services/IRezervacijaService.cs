@@ -22,6 +22,8 @@ namespace eSalon.Services
 
         Task<string> ProvjeriTerminAsync(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default);
 
+        Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datum, int frizerId, CancellationToken cancellationToken = default);
+        Task<List<object>> GetKalendarAsync(int frizerId, int godina, int mjesec, CancellationToken cancellationToken = default);
 
     }
 }

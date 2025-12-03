@@ -60,6 +60,8 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
     _tabController.addListener(() {
       if (_tabController.indexIsChanging == false) { 
         showbtn = false;
+        searchRequest.remove('DatumRezervacijeGTE');
+        searchRequest.remove('DatumRezervacijeLTE');
         _firstLoad();
       }
     });
@@ -283,7 +285,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
               child: _buildHeader(), 
             ),
             Container(
-              padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 7),
+              padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
               child: TabBar(
                 controller: _tabController,
                 tabs: const [
@@ -373,30 +375,181 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
 
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(2.0, 0.0, 2.0, 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Broj rezervacija: $total",
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Ukupan broj rezervacija: $total",
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Builder(
+                    builder: (scaffoldContext) {
+                      return IconButton(
+                        icon: Icon(
+                          (searchRequest['DatumRezervacijeGTE'] != null ||
+                                  searchRequest['DatumRezervacijeLTE'] != null)
+                              ? Icons.filter_alt
+                              : Icons.filter_list,
+                          color: (searchRequest['DatumRezervacijeGTE'] != null ||
+                                  searchRequest['DatumRezervacijeLTE'] != null)
+                              ? Colors.deepPurple
+                              : Colors.black87,
+                        ),
+                        onPressed: () async {
+                          DateTime? tempDatumOd = searchRequest['DatumRezervacijeGTE'];
+                          DateTime? tempDatumDo = searchRequest['DatumRezervacijeLTE'];
+                          if (!mounted) return;
+                          await showModalBottomSheet(
+                            context: scaffoldContext,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (context) {
+                              return StatefulBuilder(
+                                builder: (context, setModalState) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                      top: 16,
+                                      left: 16,
+                                      right: 16,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 12),
+                                          child: Center(
+                                            child: Text(
+                                              "Filteri",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        ListTile(
+                                          title: const Text("Datum od"),
+                                          subtitle: Text(tempDatumOd != null
+                                              ? formatDate(tempDatumOd.toString())
+                                              : "Odaberite datum"),
+                                          trailing: const Icon(Icons.calendar_today),
+                                          onTap: () async {
+                                            if (!mounted) return;
+                                            DateTime? selected = await showDatePicker(
+                                              context: context,
+                                              initialDate: tempDatumOd ?? DateTime.now(),
+                                              firstDate: DateTime(2000),
+                                              lastDate: DateTime(2100),
+                                            );
+                                            if (selected != null) {
+                                              setModalState(() {
+                                                tempDatumOd = selected;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                        ListTile(
+                                          title: const Text("Datum do"),
+                                          subtitle: Text(tempDatumDo != null
+                                              ? formatDate(tempDatumDo.toString())
+                                              : "Odaberite datum"),
+                                          trailing: const Icon(Icons.calendar_today),
+                                          onTap: () async {
+                                            if (!mounted) return;
+                                            DateTime? selected = await showDatePicker(
+                                              context: context,
+                                              initialDate: tempDatumDo ?? DateTime.now(),
+                                              firstDate: DateTime(2000),
+                                              lastDate: DateTime(2100),
+                                            );
+                                            if (selected != null) {
+                                              setModalState(() {
+                                                tempDatumDo = selected;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                setModalState(() {
+                                                  tempDatumOd = null;
+                                                  tempDatumDo = null;
+                                                });
+                                                setState(() {
+                                                  searchRequest.remove('DatumRezervacijeGTE');
+                                                  searchRequest.remove('DatumRezervacijeLTE');
+                                                });
+                                                _firstLoad();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text("Izbriši filter"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                if (tempDatumOd != null && tempDatumDo != null) {
+                                                  if (tempDatumOd!.isAfter(tempDatumDo!)) {
+                                                    Navigator.of(context).pop();
+                                                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Center(
+                                                          child: Text(
+                                                            "Datum od ne može biti nakon datuma do!",
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                        ),
+                                                        backgroundColor: Colors.red,
+                                                        duration: Duration(seconds: 2),
+                                                      ),
+                                                    );
+                                                    return;
+                                                  }
+                                                }
+                                                setState(() {
+                                                  searchRequest['DatumRezervacijeGTE'] = tempDatumOd;
+                                                  searchRequest['DatumRezervacijeLTE'] = tempDatumDo;
+                                                });
+                                                _firstLoad();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text("Filtriraj"),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
 
           if (zavrseneRezervacije!.isEmpty)
@@ -588,30 +741,181 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(2.0, 0.0, 2.0, 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Broj rezervacija: $total",
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Ukupan broj rezervacija: $total",
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Builder(
+                    builder: (scaffoldContext) {
+                      return IconButton(
+                        icon: Icon(
+                          (searchRequest['DatumRezervacijeGTE'] != null ||
+                                  searchRequest['DatumRezervacijeLTE'] != null)
+                              ? Icons.filter_alt
+                              : Icons.filter_list,
+                          color: (searchRequest['DatumRezervacijeGTE'] != null ||
+                                  searchRequest['DatumRezervacijeLTE'] != null)
+                              ? Colors.deepPurple
+                              : Colors.black87,
+                        ),
+                        onPressed: () async {
+                          DateTime? tempDatumOd = searchRequest['DatumRezervacijeGTE'];
+                          DateTime? tempDatumDo = searchRequest['DatumRezervacijeLTE'];
+                          if (!mounted) return;
+                          await showModalBottomSheet(
+                            context: scaffoldContext,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (context) {
+                              return StatefulBuilder(
+                                builder: (context, setModalState) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                                      top: 16,
+                                      left: 16,
+                                      right: 16,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 12),
+                                          child: Center(
+                                            child: Text(
+                                              "Filteri",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        ListTile(
+                                          title: const Text("Datum od"),
+                                          subtitle: Text(tempDatumOd != null
+                                              ? formatDate(tempDatumOd.toString())
+                                              : "Odaberite datum"),
+                                          trailing: const Icon(Icons.calendar_today),
+                                          onTap: () async {
+                                            if (!mounted) return;
+                                            DateTime? selected = await showDatePicker(
+                                              context: context,
+                                              initialDate: tempDatumOd ?? DateTime.now(),
+                                              firstDate: DateTime(2000),
+                                              lastDate: DateTime(2100),
+                                            );
+                                            if (selected != null) {
+                                              setModalState(() {
+                                                tempDatumOd = selected;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                        ListTile(
+                                          title: const Text("Datum do"),
+                                          subtitle: Text(tempDatumDo != null
+                                              ? formatDate(tempDatumDo.toString())
+                                              : "Odaberite datum"),
+                                          trailing: const Icon(Icons.calendar_today),
+                                          onTap: () async {
+                                            if (!mounted) return;
+                                            DateTime? selected = await showDatePicker(
+                                              context: context,
+                                              initialDate: tempDatumDo ?? DateTime.now(),
+                                              firstDate: DateTime(2000),
+                                              lastDate: DateTime(2100),
+                                            );
+                                            if (selected != null) {
+                                              setModalState(() {
+                                                tempDatumDo = selected;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                setModalState(() {
+                                                  tempDatumOd = null;
+                                                  tempDatumDo = null;
+                                                });
+                                                setState(() {
+                                                  searchRequest.remove('DatumRezervacijeGTE');
+                                                  searchRequest.remove('DatumRezervacijeLTE');
+                                                });
+                                                _firstLoad();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text("Izbriši filter"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                if (tempDatumOd != null && tempDatumDo != null) {
+                                                  if (tempDatumOd!.isAfter(tempDatumDo!)) {
+                                                    Navigator.of(context).pop();
+                                                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Center(
+                                                          child: Text(
+                                                            "Datum od ne može biti nakon datuma do!",
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                        ),
+                                                        backgroundColor: Colors.red,
+                                                        duration: Duration(seconds: 2),
+                                                      ),
+                                                    );
+                                                    return;
+                                                  }
+                                                }
+                                                setState(() {
+                                                  searchRequest['DatumRezervacijeGTE'] = tempDatumOd;
+                                                  searchRequest['DatumRezervacijeLTE'] = tempDatumDo;
+                                                });
+                                                _firstLoad();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text("Filtriraj"),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
 
           if (otkazaneRezervacije!.isEmpty)
