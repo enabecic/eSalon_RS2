@@ -102,38 +102,13 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
-      isFirstLoadRunning = true; 
     });
 
     try {
       if (!mounted) return;
-      final r = await ocjenaProvider.get();
-
-      if (AuthProvider.isSignedIn) {
-        page = 1;
-        if (!mounted) return;
-        final favoritResult = await uslugaFavoritProvider.get(
-          filter: searchRequest,
-          page: page,
-          pageSize: pageSize,
-        );
-
-        if (!mounted) return;
-        setState(() {
-          ocjenaResult = r;
-          favoritList = favoritResult.result;
-          total = favoritResult.count;
-          hasNextPage = (page * pageSize) < total;
-        });
-      } else {
-        if (!mounted) return;
-        setState(() {
-          ocjenaResult = r;
-          favoritList = [];
-          total = 0;
-          hasNextPage = false;
-        });
-      }
+      await _firstLoad();
+      if (!mounted) return;
+      await _initForm();
     } catch (e) {
       if (!mounted) return;
       await QuickAlert.show(
@@ -148,30 +123,55 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          isFirstLoadRunning = false;
         });
       }
     }
   }
 
-  Future<void> _refreshFavoritList() async {
+  Future<void> _initForm() async {
+    try {
+      if (!mounted) return;
+      final r = await ocjenaProvider.get();
+      if (!mounted) return;
+      setState(() {
+        ocjenaResult = r;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
+
+  Future<void> _firstLoad() async {
     if (!mounted) return;
+
     setState(() {
       isFirstLoadRunning = true;
+      page = 1;
+      hasNextPage = true;
+      isLoadMoreRunning = false;
     });
 
     try {
       if (AuthProvider.isSignedIn) {
-        //page = 1;
         if (!mounted) return;
         final favoritResult = await uslugaFavoritProvider.get(
           filter: searchRequest,
-          page: page, 
+          page: page,
           pageSize: pageSize,
         );
 
         if (!mounted) return;
+
         setState(() {
+
           favoritList = favoritResult.result;
           total = favoritResult.count;
           hasNextPage = (page * pageSize) < total;
@@ -186,6 +186,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+
       setState(() {
         hasNextPage = false;
       });
@@ -340,7 +341,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
           );
 
           if (result == true) {
-            await _refreshFavoritList();
+            await _loadInitialData();
           }
         } catch (e) {
           if (!mounted) return;
@@ -380,9 +381,9 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
         child: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: SizedBox(
-                width: 120,
+                width: 100,
                 height: 100,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -446,9 +447,8 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                             try {
                               if (!mounted) return;
                               await uslugaFavoritProvider.delete(e.favoritId!);
-                              if (!mounted) return;
-                              page=1;
-                              await _refreshFavoritList(); 
+                              if (!mounted) return; 
+                              await _firstLoad();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -610,7 +610,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          "Nemate usluga u favoritima!",
+                          "Nemate usluga u favoritima.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,

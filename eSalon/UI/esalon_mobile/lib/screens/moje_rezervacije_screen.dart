@@ -802,6 +802,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 5),
                                 Padding(
                                   padding: const EdgeInsets.all(1.0),
                                   child: Row(
@@ -811,7 +812,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                           "Ukupna cijena: ${formatNumber(e.ukupnaCijena)} KM",
                                           style: const TextStyle(
                                             fontSize: 15,
-                                            color: Color.fromARGB(255, 108, 108, 108),
+                                            color: Color.fromARGB(255, 56, 54, 54),
                                             fontWeight: FontWeight.w600,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -1317,6 +1318,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 5),
                                 Padding(
                                   padding: const EdgeInsets.all(1.0),
                                   child: Row(
@@ -1326,7 +1328,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                           "Ukupna cijena: ${formatNumber(e.ukupnaCijena)} KM",
                                           style: const TextStyle(
                                             fontSize: 15,
-                                            color: Color.fromARGB(255, 108, 108, 108),
+                                            color: Color.fromARGB(255, 56, 54, 54),
                                             fontWeight: FontWeight.w600,
                                             overflow: TextOverflow.ellipsis,
                                           ),

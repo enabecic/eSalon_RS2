@@ -103,6 +103,10 @@ class _UslugeScreenState extends State<UslugeScreen> {
   }
 
   Future<void> _loadUsluge() async {
+    if (!mounted) return;
+      setState(() {
+      _isLoadingUsluge = true;
+    });
     try {
       final filter = <String, dynamic>{
         'NazivOpisFTS': _searchController.text,
@@ -722,8 +726,8 @@ class _UslugeScreenState extends State<UslugeScreen> {
                       );
                       if (result == true) {
                         page = 1;
-                        _loadUsluge();
                         _loadFavoriti();
+                        _loadOcjene();
                       }
                     } catch (e) {
                       if (!context.mounted) return;

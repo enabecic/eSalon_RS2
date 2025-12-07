@@ -413,67 +413,83 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
               formatDate(p.datumKraja.toString()),
             ),
           if (_jeAktivirana && !_jeBuducaPromocija)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 0),
-            child: Row(
-              children: [
-                const Icon(Icons.lock_open_outlined, size: 20, color: Colors.black),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (p.kod != null && _showCode) {
-                        Clipboard.setData(ClipboardData(text: p.kod!));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Color.fromARGB(255, 138, 182, 140),
-                            content: Center(
-                              child: Text(
-                                "Kod kopiran u međuspremnik!",
-                                textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_open_outlined, size: 20, color: Colors.black),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min, 
+                      children: [
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (p.kod != null && _showCode) {
+                                Clipboard.setData(ClipboardData(text: p.kod!));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                    content: Center(
+                                      child: Text(
+                                        "Kod kopiran u međuspremnik!",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Text(
+                              _showCode ? (p.kod ?? "/") : "••••••",
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 2,
                               ),
                             ),
-                            duration: Duration(seconds: 1),
                           ),
-                        );
-                      }
-                    },
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          const TextSpan(
-                            text: "Kod: ",
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          TextSpan(
-                            text: _showCode ? (p.kod ?? "/") : "••••••",
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 4), 
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 18, color: Colors.black),
+                          padding: EdgeInsets.zero, 
+                          constraints: const BoxConstraints(), 
+                          onPressed: () {
+                            if (p.kod != null && _showCode) {
+                              Clipboard.setData(ClipboardData(text: p.kod!));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                                  content: Center(
+                                    child: Text(
+                                      "Kod kopiran u međuspremnik!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    _showCode ? Icons.visibility_off : Icons.visibility,
-                    size: 22,
-                    color: Colors.grey[700],
+                  IconButton(
+                    icon: Icon(
+                      _showCode ? Icons.visibility_off : Icons.visibility,
+                      size: 22,
+                      color: Colors.grey[700],
+                    ),
+                    onPressed: () => setState(() => _showCode = !_showCode),
                   ),
-                  onPressed: () => setState(() => _showCode = !_showCode),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 16),
           Text(
             "O promociji:",

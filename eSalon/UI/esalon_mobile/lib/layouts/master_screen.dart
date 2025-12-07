@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
+import 'package:esalon_mobile/screens/korpa_screen.dart';
 import 'package:esalon_mobile/screens/obavijesti_screen.dart';
 import 'package:esalon_mobile/screens/pocetni_screen.dart';
 import 'package:esalon_mobile/screens/promocija_screen.dart';
@@ -20,7 +21,7 @@ class _MasterScreenState extends State<MasterScreen> {
 
   final List<Widget> _pages = [
     const PocetniScreen(),
-    const Center(child: Text("Moje usluge (Korpa)")),
+    const KorpaScreen(),
     const KorisnikProfileScreen(),
     const UslugaFavoritScreen(),
     const UslugeScreen(),

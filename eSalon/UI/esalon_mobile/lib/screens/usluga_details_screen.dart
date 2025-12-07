@@ -7,6 +7,7 @@ import 'package:esalon_mobile/providers/arhiva_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
+import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/usluga.dart';
 import 'package:esalon_mobile/providers/utils.dart';
@@ -52,6 +53,10 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   int _mojaOcjena = 0; 
   bool _isLoadingOcjenaUser = true; 
 
+  RezervacijaCartProvider? _cartProvider;
+  bool _isLoadingKorpa = false;
+  bool _isInKorpa = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,7 +78,12 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
 
     ocjenaProvider = context.read<OcjenaProvider>();
     favoritProvider = context.read<FavoritProvider>();
-    arhivaProvider = context.read<ArhivaProvider>(); 
+    arhivaProvider = context.read<ArhivaProvider>();
+
+    if (AuthProvider.korisnikId != null) {
+      _cartProvider = RezervacijaCartProvider(AuthProvider.korisnikId!);
+      _checkIfInRezervacija();
+    } 
 
     _loadData();
     _loadOcjena();
@@ -223,6 +233,15 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
     }
+  }
+
+  Future<void> _checkIfInRezervacija() async {
+    if (_cartProvider == null) return;
+    if (!mounted) return;
+    final inRezervacija =
+      await _cartProvider!.isInRezervacija(widget.usluga.uslugaId!);
+    if (!mounted) return;
+    setState(() => _isInKorpa = inRezervacija);
   }
 
   @override
@@ -503,7 +522,6 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                     );
                     return;
                   }
-
                     try {
                       if (!isFavorite) {
                         if (!mounted) return;
@@ -646,9 +664,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
           'vrijednost': vrijednost,
         });
       }
-
       if (!mounted) return;
-
       setState(() {
         _mojaOcjena = vrijednost;
         _isLoadingOcjenaUser = false;
@@ -705,22 +721,104 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         SizedBox(
           height: 48,
           child: ElevatedButton.icon(
-            onPressed: () {
-              // logika za dodavanje u korpu
-            },
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            label: const Text(
-              "Dodaj u rezervaciju",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 210, 193, 214),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          onPressed: (_isLoadingKorpa || _isInKorpa)
+            ? null
+            : (AuthProvider.korisnikId == null
+              ? () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red,
+                    duration: const Duration(milliseconds: 1500),
+                    content: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => const LoginPage()),
+                          );
+                        },
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: const TextSpan(
+                            text: "Morate biti prijavljeni da biste dodali uslugu u rezervaciju. ",
+                            style: TextStyle(color: Colors.white, fontSize: 15),
+                            children: [
+                              TextSpan(
+                                text: "Prijavite se!",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+            : () async {
+                try {
+                  if (!mounted) return;
+                  setState(() => _isLoadingKorpa = true);
+                  if (!_isInKorpa) {
+                    if (!mounted) return;
+                    await _cartProvider!.addToRezervacijaList(widget.usluga);
+                    if (!mounted) return;
+                    setState(() => _isInKorpa = true);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                        duration: Duration(milliseconds: 1500),
+                        content: Center(child: Text("Uspješno dodano u korpu za rezervaciju.")),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red,
+                      duration: const Duration(milliseconds: 1800),
+                      content: Center(
+                        child: Text(
+                          e.toString(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  );
+                } finally {
+                  if (mounted) setState(() => _isLoadingKorpa = false);
+                }
+              }),
+            icon: _isLoadingKorpa
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(_isInKorpa ? Icons.shopping_bag : Icons.shopping_bag_outlined, color: Colors.black),
+             label: _isLoadingKorpa
+              ? const Text("Učitavanje...", style: TextStyle(color: Colors.black))
+              : Text(
+                  _isInKorpa ? "Već u rezervaciji" : "Dodaj u rezervaciju",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                if (_isInKorpa) return const Color.fromARGB(255, 210, 193, 214); 
+                if (states.contains(MaterialState.pressed)) return const Color.fromARGB(255, 210, 193, 214); 
+                return const Color.fromARGB(255, 210, 193, 214); 
+              }),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ),

@@ -107,6 +107,11 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
   }
   
   Future<void> _loadUsluge() async {
+    if (!mounted) return;
+      setState(() {
+      _isLoadingUsluge = true;
+    });
+
     try {
       final filter = <String, dynamic>{
         'NazivOpisFTS': _searchController.text,

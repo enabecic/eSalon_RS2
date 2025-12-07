@@ -427,9 +427,9 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(12.0),
                 child: SizedBox(
-                  width: 120,
+                  width: 100,
                   height: 100,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -638,7 +638,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          "Nemate usluga u listi 'Želim probati'!",
+                          "Nemate usluga u listi 'Želim probati'.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,

@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -32,10 +33,14 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
 
   bool isLoadMoreRunning = false;
   late final ScrollController scrollController;
+  final TextEditingController _searchController = TextEditingController();
 
   bool _isLoading = true; 
   bool _initialLoaded = false; 
   bool? _filterJePogledana; 
+
+  DateTime? _filterDatumOd;
+  DateTime? _filterDatumDo;
 
   @override
   void initState() {
@@ -105,6 +110,17 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
         final filter = {
         ...searchRequest, 
         if (_filterJePogledana != null) 'JePogledana': _filterJePogledana,
+        if (_searchController.text.isNotEmpty) 'Naslov': _searchController.text,
+        if (_filterDatumOd != null) 'DatumObavijestiGTE': _filterDatumOd,
+        if (_filterDatumDo != null)
+          'DatumObavijestiLTE': DateTime(
+              _filterDatumDo!.year,
+              _filterDatumDo!.month,
+              _filterDatumDo!.day,
+              23,
+              59,
+              59,
+            ),
         };
         if (!mounted) return;
         final obavijestResult = await obavijestProvider.get(
@@ -161,6 +177,9 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
       final filter = {
         ...searchRequest,
         if (_filterJePogledana != null) 'JePogledana': _filterJePogledana,
+        if (_searchController.text.isNotEmpty) 'Naslov': _searchController.text,
+        if (_filterDatumOd != null) 'DatumObavijestiGTE': _filterDatumOd,
+        if (_filterDatumDo != null) 'DatumObavijestiLTE': _filterDatumDo,
       };
       if (!mounted) return;
       final result = await obavijestProvider.get(
@@ -242,79 +261,171 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-    child: Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            height: 55,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade500, width: 1.5),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<bool?>(
-                value: _filterJePogledana,
-                hint: const Text("Odaberi opciju"),
-                isExpanded: true,
-                icon: const Icon(Icons.arrow_drop_down),
-                dropdownColor: Colors.white,
-                items: const [
-                  DropdownMenuItem(value: null, child: Text("Sve obavijesti")),
-                  DropdownMenuItem(value: true, child: Text("Stare obavijesti")),
-                  DropdownMenuItem(value: false, child: Text("Nove obavijesti")),
-                ],
-                onChanged: (value) {
-                  if (!mounted) return;
-                  setState(() {
-                    _filterJePogledana = value;
-                    page = 1;
-                    obavijestList.clear();
-                    hasNextPage = true;
-                  });
-                  _loadInitialData(); 
-                },
+  Future<void> _showDateFilterDialog() async {
+    DateTime? tempDatumOd = _filterDatumOd;
+    DateTime? tempDatumDo = _filterDatumDo;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                top: 16,
+                left: 16,
+                right: 16,
               ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Center(
+                      child: Text(
+                        "Filteri po datumu",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text("Datum od"),
+                    subtitle: Text(tempDatumOd != null
+                        ? DateFormat('dd.MM.yyyy').format(tempDatumOd!)
+                        : "Odaberite datum"),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      DateTime? selected = await showDatePicker(
+                        context: context,
+                        initialDate: tempDatumOd ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (selected != null) {
+                        setModalState(() {
+                          tempDatumOd = selected;
+                        });
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("Datum do"),
+                    subtitle: Text(tempDatumDo != null
+                        ? DateFormat('dd.MM.yyyy').format(tempDatumDo!)
+                        : "Odaberite datum"),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      DateTime? selected = await showDatePicker(
+                        context: context,
+                        initialDate: tempDatumDo ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (selected != null) {
+                        setModalState(() {
+                          tempDatumDo = selected;
+                        });
+                      }
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setModalState(() {
+                            tempDatumOd = null;
+                            tempDatumDo = null;
+                          });
+                          setState(() {
+                            _filterDatumOd = null;
+                            _filterDatumDo = null;
+                          });
+                          page = 1;
+                          _loadInitialData();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Izbriši filter"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (tempDatumOd != null && tempDatumDo != null) {
+                            if (tempDatumOd!.isAfter(tempDatumDo!)) {
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Center(
+                                    child: Text(
+                                      "Datum od ne može biti nakon datuma do!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                              return;
+                            }
+                          }
 
+                          setState(() {
+                            _filterDatumOd = tempDatumOd;
+                            _filterDatumDo = tempDatumDo;
+                          });
 
-Future<void> _markAsRead(Obavijest o) async {
-  if (!o.jePogledana) {
-    try {
-      if (!mounted) return;
-      await obavijestProvider.oznaciKaoProcitanu(o.obavijestId!);
-      if (!mounted) return;
-      setState(() {
-        o.jePogledana = true;
+                          page = 1;
+                          _loadInitialData();
 
-        if (_filterJePogledana == false) { 
-          obavijestList.remove(o);
-        }
-      });
-    } catch (e) {
-      if (!mounted) return;
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'Greška',
-        text: e.toString(),
-        confirmBtnText: 'OK',
-        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-      );
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Filtriraj"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _markAsRead(Obavijest o) async {
+    if (!o.jePogledana) {
+      try {
+        if (!mounted) return;
+        await obavijestProvider.oznaciKaoProcitanu(o.obavijestId!);
+        if (!mounted) return;
+        setState(() {
+          o.jePogledana = true;
+
+          if (_filterJePogledana == false) { 
+            obavijestList.remove(o);
+          }
+        });
+      } catch (e) {
+        if (!mounted) return;
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Greška',
+          text: e.toString(),
+          confirmBtnText: 'OK',
+          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+        );
+      }
     }
   }
-}
-
 
   Widget _buildObavijestiCards(Obavijest o) {
     return InkWell(
@@ -338,6 +449,7 @@ Future<void> _markAsRead(Obavijest o) async {
               content: Center(
                 child: Text(
                   e.toString(),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.normal,
@@ -349,7 +461,7 @@ Future<void> _markAsRead(Obavijest o) async {
         }
       },
       child: Container(
-        height: 105,
+        height: 110,
         decoration: BoxDecoration(
           color: o.jePogledana
       ? Colors.white
@@ -370,22 +482,36 @@ Future<void> _markAsRead(Obavijest o) async {
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      o.naslov,
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: Colors.black,
-                        fontWeight: o.jePogledana ? FontWeight.w500 : FontWeight.w600,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 1,
+                    Row(
+                      children: [
+                        Icon(
+                          o.jePogledana ? Icons.notifications_active_outlined : Icons.notifications_active,
+                          color: o.jePogledana 
+                              ? Colors.black87
+                              : Colors.black87,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            o.naslov,
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Colors.black,
+                              fontWeight: o.jePogledana ? FontWeight.w500 : FontWeight.w600,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
                     ),
-                     Text(
+                    Text(
                       formatirajDatum(o.datumObavijesti),
                       style: TextStyle(
                         fontSize: 13,
@@ -414,6 +540,118 @@ Future<void> _markAsRead(Obavijest o) async {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFiltersAndInfo() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade500, width: 1.5),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<bool?>(
+                      value: _filterJePogledana,
+                      hint: const Text("Odaberi opciju"),
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      dropdownColor: Colors.white,
+                      items: const [
+                        DropdownMenuItem(value: null, child: Text("Sve obavijesti")),
+                        DropdownMenuItem(value: true, child: Text("Stare obavijesti")),
+                        DropdownMenuItem(value: false, child: Text("Nove obavijesti")),
+                      ],
+                      onChanged: (value) {
+                        if (!mounted) return;
+                        setState(() {
+                          _filterJePogledana = value;
+                          page = 1;
+                          obavijestList.clear();
+                          hasNextPage = true;
+                        });
+                        _loadInitialData();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: "Pretraži po nazivu obavijesti...",
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchController.clear();
+                              page = 1;
+                              _loadInitialData();
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  ),
+                  onSubmitted: (value) {
+                    page = 1;
+                    _loadInitialData();
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Ukupan broj obavijesti: $total",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black87,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  (_filterDatumOd != null || _filterDatumDo != null)
+                      ? Icons.filter_alt
+                      : Icons.filter_list,
+                  color: (_filterDatumOd != null || _filterDatumDo != null)
+                      ? Colors.deepPurple
+                      : Colors.black87,
+                ),
+                onPressed: () => _showDateFilterDialog(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -490,8 +728,8 @@ Future<void> _markAsRead(Obavijest o) async {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
-                  const SizedBox(height: 10),
-                  _buildFilterRow(),
+                  const SizedBox(height: 25),
+                  _buildFiltersAndInfo(),
                 ],
               ),
             );
@@ -524,7 +762,7 @@ Future<void> _markAsRead(Obavijest o) async {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          "Nemate obavijesti za prikazati.",
+                          "Nema obavijesti za prikazati.",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
