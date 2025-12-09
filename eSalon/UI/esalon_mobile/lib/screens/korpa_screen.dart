@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/main.dart';
+import 'package:esalon_mobile/screens/rezervacija_odabir_frizera_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -297,7 +298,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
             children: [
               SizedBox(
                 width: 125,
-                height: 100,
+                height: 90,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 8), 
                   child: ClipRRect(
@@ -317,7 +318,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
-                      const SizedBox(height: 5), 
+                      const SizedBox(height: 10), 
                       Text(
                         usluga['naziv'] ?? "-",
                         style: const TextStyle(
@@ -395,7 +396,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
                   SizedBox(
                     height: 50,
                     width: 180,
-                    child: ElevatedButton.icon(
+                    child: ElevatedButton(
                       onPressed: () {
                         if (_usluge.isEmpty) {
                           if (!context.mounted) return;
@@ -412,27 +413,37 @@ class _KorpaScreenState extends State<KorpaScreen> {
                             ),
                           );
                         } else {
-                          // 
+                          if (!context.mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RezervacijaOdabirFrizeraScreen(),
+                            ),
+                          );
                         }
                       },
-                      icon: const Icon(Icons.shopping_bag, color: Colors.black),
-                      label: const Text(
-                        "Rezerviši",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 210, 193, 214),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                        elevation: 6,
                       ),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                            const Color.fromARGB(255, 210, 193, 214)),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Rezerviši",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                        elevation: MaterialStateProperty.all(6),
+                          SizedBox(width: 8),
+                          Icon(Icons.shopping_bag, color: Colors.black),
+                        ],
                       ),
                     ),
                   ),
