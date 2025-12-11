@@ -199,7 +199,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
   Widget _buildUslugaCard(Map<String, dynamic> usluga) {
     return Container(
       width: double.infinity,
-      height: 110,
+      height: 125,
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -297,8 +297,8 @@ class _KorpaScreenState extends State<KorpaScreen> {
           child: Row(
             children: [
               SizedBox(
-                width: 125,
-                height: 90,
+                width: 140,
+                height: 110,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 8), 
                   child: ClipRRect(
@@ -322,17 +322,26 @@ class _KorpaScreenState extends State<KorpaScreen> {
                       Text(
                         usluga['naziv'] ?? "-",
                         style: const TextStyle(
-                          fontSize: 17,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           overflow: TextOverflow.ellipsis,
                         ),
                         maxLines: 2,
                       ),
-                      const SizedBox(height: 5), 
+                      const SizedBox(height: 1), 
                       Text(
                         usluga['cijena'] != null ? '${formatNumber(usluga['cijena'])} KM' : "-",
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color.fromARGB(255, 56, 54, 54),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        usluga['trajanje'] != null ? '${usluga['trajanje']} min' : "-",
+                        style: const TextStyle(
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.grey,
                           overflow: TextOverflow.ellipsis,

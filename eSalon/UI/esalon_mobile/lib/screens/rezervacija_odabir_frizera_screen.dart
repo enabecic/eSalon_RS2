@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/providers/utils.dart';
+import 'package:esalon_mobile/screens/rezervacija_termina_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/korisnik.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
@@ -152,8 +153,8 @@ class _RezervacijaOdabirFrizeraScreenState extends State<RezervacijaOdabirFrizer
                                 child: Row(
                                   children: [
                                     SizedBox(
-                                      width: 90,
-                                      height: 90,
+                                      width: 95,
+                                      height: 95,
                                       child: Padding(
                                         padding: const EdgeInsets.all(12.0),
                                         child: _buildImage(frizer.slika),
@@ -216,14 +217,14 @@ class _RezervacijaOdabirFrizeraScreenState extends State<RezervacijaOdabirFrizer
                             onPressed: _odabraniFrizer == null
                                 ? null
                                 : () {
-                                  // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => RezervacijaTerminaScreen(
-                                    //       frizerId: _odabraniFrizer!.korisnikId!,
-                                    //     ),
-                                    //   ),
-                                    // );
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RezervacijaTerminaScreen(
+                                          frizerId: _odabraniFrizer!.korisnikId!,
+                                        ),
+                                      ),
+                                    );
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 210, 193, 214),

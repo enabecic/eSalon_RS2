@@ -67,8 +67,8 @@ namespace eSalon.API.Controllers
         [Authorize(Roles = "Klijent")]
         public async Task<IActionResult> ProvjeriTermin(RezervacijaInsertRequest request, CancellationToken cancellationToken = default)
         {
-            var poruka = await _rezervacijaService.ProvjeriTerminAsync(request, cancellationToken);
-            return Ok(poruka);
+            await _rezervacijaService.ProvjeriTerminAsync(request, cancellationToken);
+            return Ok();
         }
 
         [HttpGet("kalendar")]

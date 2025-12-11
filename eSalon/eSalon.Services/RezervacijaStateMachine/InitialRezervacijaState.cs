@@ -42,12 +42,23 @@ namespace eSalon.Services.RezervacijaStateMachine
             var ukupnoTrajanje = usluge.Sum(u => u.Trajanje);
             var vrijemeKraja = rezervacija.VrijemePocetka.Add(TimeSpan.FromMinutes(ukupnoTrajanje));
 
+            var pauzaPocetak = new TimeSpan(12, 0, 0);
+            var pauzaKraj = new TimeSpan(12, 30, 0);
+
+            bool ulaziUPauzu =
+                (rezervacija.VrijemePocetka < pauzaKraj && vrijemeKraja > pauzaPocetak);
+
+            if (ulaziUPauzu)
+            {
+                throw new UserException("Termin se ne može rezervisati jer frizer ima pauzu (12:00–12:30). Provjerite drugi termin.");
+            }
+
             var pocetakRadnogVremena = new TimeSpan(8, 0, 0); 
             var krajRadnogVremena = new TimeSpan(16, 0, 0);   
 
             if (rezervacija.VrijemePocetka < pocetakRadnogVremena || vrijemeKraja > krajRadnogVremena)
             {
-                throw new UserException("Usluge ne mogu stati u odabrani termin jer izlaze izvan radnog vremena (08:00 - 16:00).");
+                throw new UserException("Usluge ne mogu stati u odabrani termin jer izlaze izvan radnog vremena (08:00 - 16:00). Provjerite drugi termin.");
             }
 
             var kolidira = await Context.Rezervacijas
@@ -65,7 +76,7 @@ namespace eSalon.Services.RezervacijaStateMachine
 
             if (kolidira)
             {
-                throw new UserException("Odabrani termin nije dostupan za izabrane usluge.");
+                throw new UserException("Odabrani termin nije dostupan za izabrane usluge. Provjerite drugi termin.");
             }
 
             entity.VrijemeKraja = vrijemeKraja;

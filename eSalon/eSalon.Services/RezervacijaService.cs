@@ -280,7 +280,8 @@ namespace eSalon.Services
             return state.AllowedActions(rezervacija);
         }
 
-        public async Task<string> ProvjeriTerminAsync(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default)
+    
+        public async Task ProvjeriTerminAsync(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default)
         {
             await _rezervacijaValidator.ValidateInsertAsync(rezervacija, cancellationToken);
 
@@ -294,11 +295,20 @@ namespace eSalon.Services
             var ukupnoTrajanje = usluge.Sum(u => u.Trajanje);
             var vrijemeKraja = rezervacija.VrijemePocetka.Add(TimeSpan.FromMinutes(ukupnoTrajanje));
 
+            var pauzaPocetak = new TimeSpan(12, 0, 0);
+            var pauzaKraj = new TimeSpan(12, 30, 0);
+
+            bool ulaziUPauzu =
+                (rezervacija.VrijemePocetka < pauzaKraj && vrijemeKraja > pauzaPocetak);
+
+            if (ulaziUPauzu)
+                throw new UserException("Termin se ne može rezervisati jer frizer ima pauzu (12:00–12:30). Provjerite drugi termin.");
+
             var pocetakRadnogVremena = new TimeSpan(8, 0, 0);
             var krajRadnogVremena = new TimeSpan(16, 0, 0);
 
             if (rezervacija.VrijemePocetka < pocetakRadnogVremena || vrijemeKraja > krajRadnogVremena)
-                throw new UserException("Odabrani termin izlazi izvan radnog vremena frizera (08:00 - 16:00).");
+                throw new UserException("Odabrani termin izlazi izvan radnog vremena frizera (08:00 - 16:00). Provjerite drugi termin.");
 
             var kolidira = await Context.Rezervacijas
                 .Where(r =>
@@ -315,9 +325,8 @@ namespace eSalon.Services
                 .AnyAsync(cancellationToken);
 
             if (kolidira)
-                throw new UserException("Odabrani termin nije dostupan za izabrane usluge.");
+                throw new UserException("Odabrani termin nije dostupan za izabrane usluge. Provjerite drugi termin.");
 
-            return "Termin je slobodan.";
         }
 
         public async Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datumRezervacije, int frizerId, CancellationToken cancellationToken = default)
@@ -330,7 +339,13 @@ namespace eSalon.Services
                 .Select(r => new { r.VrijemePocetka, r.VrijemeKraja })
                 .ToListAsync(cancellationToken);
 
-            return termini.Select(r => (r.VrijemePocetka, r.VrijemeKraja ?? TimeSpan.Zero)).ToList();
+            var rezultat = termini
+                .Select(r => (r.VrijemePocetka, r.VrijemeKraja ?? TimeSpan.Zero))
+                .ToList();
+
+            rezultat.Add((new TimeSpan(12, 0, 0), new TimeSpan(12, 30, 0)));
+
+            return rezultat;
         }
 
         public async Task<List<object>> GetKalendarAsync(int frizerId, int godina, int mjesec, CancellationToken cancellationToken = default)
@@ -338,7 +353,9 @@ namespace eSalon.Services
             List<object> rezultat = new List<object>();
             int brojDana = DateTime.DaysInMonth(godina, mjesec);
 
-            TimeSpan minTrajanjeUsluge = TimeSpan.FromMinutes(10); 
+            TimeSpan minTrajanjeUsluge = TimeSpan.FromMinutes(10);
+            var pauzaPocetak = new TimeSpan(12, 0, 0);
+            var pauzaKraj = new TimeSpan(12, 30, 0);
 
             for (int dan = 1; dan <= brojDana; dan++)
             {
@@ -352,7 +369,11 @@ namespace eSalon.Services
 
                 var termini = await GetZauzetiTerminiZaDatumAsync(date, frizerId, cancellationToken);
 
-                if (termini.Count == 0)
+                var terminiBezPauze = termini
+                    .Where(t => !(t.VrijemePocetka == pauzaPocetak && t.VrijemeKraja == pauzaKraj))
+                    .ToList();
+
+                if (terminiBezPauze.Count == 0)
                 {
                     rezultat.Add(new { datum = date.ToString("yyyy-MM-dd"), status = "slobodan" });
                     continue;
@@ -373,6 +394,9 @@ namespace eSalon.Services
 
                     foreach (var (VrijemePocetka, VrijemeKraja) in sorted)
                     {
+                        if (VrijemePocetka == pauzaPocetak && VrijemeKraja == pauzaKraj)
+                            continue;
+
                         if ((VrijemePocetka - trenutni) >= minTrajanjeUsluge)
                         {
                             postojiRupa = true;

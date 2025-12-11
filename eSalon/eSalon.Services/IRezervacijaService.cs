@@ -20,7 +20,7 @@ namespace eSalon.Services
 
         Task<List<string>> AllowedActionsAsync(int rezervacijaId, CancellationToken cancellationToken = default);
 
-        Task<string> ProvjeriTerminAsync(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default);
+        Task ProvjeriTerminAsync(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default);
 
         Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datum, int frizerId, CancellationToken cancellationToken = default);
         Task<List<object>> GetKalendarAsync(int frizerId, int godina, int mjesec, CancellationToken cancellationToken = default);
