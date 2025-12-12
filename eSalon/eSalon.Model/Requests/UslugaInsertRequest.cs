@@ -22,7 +22,7 @@ namespace eSalon.Model.Requests
         public decimal Cijena { get; set; }
 
         [Required(ErrorMessage = "Trajanje je obavezno.")]
-        [Range(10, 300, ErrorMessage = "Trajanje mora biti između 10 i 300.")]
+        [Range(10, 120, ErrorMessage = "Trajanje mora biti između 10 i 120.")]
         public int Trajanje { get; set; }
 
         public byte[]? Slika { get; set; }

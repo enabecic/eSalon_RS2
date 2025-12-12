@@ -4,6 +4,7 @@ import 'package:esalon_mobile/providers/arhiva_provider.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
+import 'package:esalon_mobile/providers/nacin_placanja_provider.dart';
 import 'package:esalon_mobile/providers/obavijest_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
@@ -35,7 +36,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => StavkeRezervacijeProvider()),
         ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
         ChangeNotifierProvider(create: (_) => ObavijestProvider()),
-
+        ChangeNotifierProvider(create: (_) => NacinPlacanjaProvider()),
+        
       ],
       child: const MyApp(),
     ),

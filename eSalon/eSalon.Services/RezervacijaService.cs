@@ -327,6 +327,35 @@ namespace eSalon.Services
             if (kolidira)
                 throw new UserException("Odabrani termin nije dostupan za izabrane usluge. Provjerite drugi termin.");
 
+            if (!string.IsNullOrWhiteSpace(rezervacija.KodPromocije))
+            {
+                var aktivirana = await Context.AktiviranaPromocijas
+                    .Include(x => x.Promocija)
+                    .FirstOrDefaultAsync(x =>
+                        x.KorisnikId == rezervacija.KorisnikId &&
+                        x.Promocija != null &&
+                        !x.Promocija.IsDeleted &&
+                        x.Promocija.Kod == rezervacija.KodPromocije &&
+                        x.Aktivirana &&
+                        !x.Iskoristena &&
+                        !x.IsDeleted,
+                        cancellationToken);
+
+                if (aktivirana == null)
+                    throw new UserException("Kod nije validan, nije aktiviran ili je već iskorišten.");
+
+                var danas = DateTime.Now;
+                if (aktivirana.Promocija.DatumPocetka > danas || aktivirana.Promocija.DatumKraja < danas)
+                    throw new UserException("Promocija nije aktivna u ovom periodu.");
+
+                var uslugaPromocijeID = aktivirana.Promocija.UslugaId;
+                var stavkeUslugeIds = rezervacija.StavkeRezervacije.Select(x => x.UslugaId).ToList();
+
+                if (!stavkeUslugeIds.Contains(uslugaPromocijeID))
+                    throw new UserException("Promocija se ne može primijeniti na odabrane usluge.");
+            }
+
+
         }
 
         public async Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datumRezervacije, int frizerId, CancellationToken cancellationToken = default)

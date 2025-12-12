@@ -12,7 +12,7 @@ String formatNumber(dynamic) {
 }
 
 Image imageFromString(String input) {
-  return Image.memory(base64Decode(input));
+  return Image.memory(base64Decode(input),fit: BoxFit.cover,);
 }
 
 String formatDate(String date) {

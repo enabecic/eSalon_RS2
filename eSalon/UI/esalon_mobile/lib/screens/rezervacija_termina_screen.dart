@@ -1,6 +1,7 @@
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
+import 'package:esalon_mobile/screens/rezervacija_placanje_kod_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -49,11 +50,11 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
     }
   }
 
-  Future<void> _saveRezervaciju() async {
-    if (_isSaving) return; 
+  Future<bool> _saveRezervaciju() async {
+    if (_isSaving) return false;
 
     if (_selectedDay == null || _selectedSlot == null) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.red,
@@ -67,15 +68,16 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           ),
         ),
       );
-      return;
+      return false;
     }
 
-    if (rezervacijaCartProvider == null) return;
+    if (rezervacijaCartProvider == null) return false;
+
     try {
-      if (!mounted) return;
+      if (!mounted) return false;
       usluge = await rezervacijaCartProvider!.getRezervacijaList();
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
         await QuickAlert.show(
           context: context,
           type: QuickAlertType.error,
@@ -84,11 +86,11 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           confirmBtnText: 'OK',
           confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
         );
-      return;
+      return false;
     }
 
     if (usluge.isEmpty) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.red,
@@ -102,7 +104,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           ),
         ),
       );
-      return;
+      return false;
     }
 
     final request = {
@@ -112,13 +114,15 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
       "vrijemePocetka": "${_selectedSlot!.hour.toString().padLeft(2, '0')}:${_selectedSlot!.minute.toString().padLeft(2, '0')}:00",
       "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
     };
-    if (!mounted) return;
+    if (!mounted) return false;
     setState(() => _isSaving = true);
     try {
-      if (!mounted) return;
+      if (!mounted) return false;
       await rezervacijaProvider.provjeriTermin(request);
+      return true; 
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
@@ -132,6 +136,8 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           ),
         ),
       );
+
+      return false;
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -631,16 +637,16 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
   void _navigateToPlacanje() {
     if (_selectedDay == null || _selectedSlot == null) return;
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (_) => RezervacijaPlacanjeKodScreen(
-    //       frizerId: widget.frizerId,
-    //       datumRezervacije: _selectedDay!,
-    //       vrijemePocetka: _selectedSlot!,
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RezervacijaPlacanjeKodScreen(
+          frizerId: widget.frizerId,
+          datumRezervacije: _selectedDay!,
+          vrijemePocetka: _selectedSlot!,
+        ),
+      ),
+    );
   }
 
   Widget _buildDaljeButton() {
@@ -660,8 +666,11 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
                 ? null
                 : () async {
                     if (!mounted) return;
-                    await _saveRezervaciju(); 
-                    _navigateToPlacanje();    
+                    bool ok = await _saveRezervaciju();
+
+                    if (ok) {
+                      _navigateToPlacanje(); 
+                    }
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: (_selectedDay != null && _selectedSlot != null && !_isSaving)
