@@ -1,6 +1,7 @@
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
+import 'package:esalon_mobile/providers/utils.dart';
 import 'package:esalon_mobile/screens/rezervacija_placanje_kod_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,9 +48,32 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
     _loadZauzetiTermini();
     if (AuthProvider.korisnikId != null) {
       rezervacijaCartProvider = RezervacijaCartProvider(AuthProvider.korisnikId!);
+      _loadUsluge();
     }
   }
 
+  Future<void> _loadUsluge() async {
+    if (rezervacijaCartProvider == null) return;
+
+    try {
+      if (!mounted) return;
+      final lista = await rezervacijaCartProvider!.getRezervacijaList();
+      if (!mounted) return;
+      setState(() {
+        usluge = lista;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    }
+  }
   Future<bool> _saveRezervaciju() async {
     if (_isSaving) return false;
 
@@ -72,22 +96,6 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
     }
 
     if (rezervacijaCartProvider == null) return false;
-
-    try {
-      if (!mounted) return false;
-      usluge = await rezervacijaCartProvider!.getRezervacijaList();
-    } catch (e) {
-      if (!mounted) return false;
-        await QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Greška',
-          text: e.toString(),
-          confirmBtnText: 'OK',
-          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-        );
-      return false;
-    }
 
     if (usluge.isEmpty) {
       if (!mounted) return false;
@@ -224,6 +232,26 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.coffee,
+                  size: 18,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "Pauza: 12:00 - 12:30",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Wrap(
             spacing: 13,
             runSpacing: 13,
@@ -528,15 +556,76 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           ),
         ],
       ),
-      alignment: Alignment.center, 
-      child: const Text(
-        "Odaberite početak termina",
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Odaberite početak termina",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          if (_selectedDay != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.event, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  formatirajDatumSaDanom(_selectedDay!),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          if (_selectedSlot != null) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.schedule, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  "${formatTime24(_selectedSlot!)} - ${formatTime24(calculateEndTime())}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
+  }
+
+  TimeOfDay calculateEndTime() {
+    if (_selectedSlot == null || usluge.isEmpty) {
+      return _selectedSlot!;
+    }
+
+    int totalMinutes = 0;
+    for (var u in usluge.values) {
+      totalMinutes += (u['trajanje'] ?? 0) as int;
+    }
+
+    int startMinutes =
+        _selectedSlot!.hour * 60 + _selectedSlot!.minute;
+
+    int endMinutes = startMinutes + totalMinutes;
+
+    int endHour = endMinutes ~/ 60;
+    int endMinute = endMinutes % 60;
+
+    return TimeOfDay(hour: endHour, minute: endMinute);
   }
 
   @override
@@ -623,6 +712,21 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
               const SizedBox(height: 16),
               _buildSlotsHeader(),
               _buildSlotsBox(),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  "*Napomena: Ako odaberete više usluga čije ukupno trajanje prelazi vrijeme dostupnih termina, "
+                  "molimo da tada rezervaciju rezervišete u više manjih termina.",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ],
           ),
         ),

@@ -84,4 +84,25 @@ class RezervacijaProvider extends BaseProvider<Rezervacija> {
     }
   }
 
+  Future<({int uslugaId, double popust})> getPopustByKod(String kod) async {
+    final url =
+        "${BaseProvider.baseUrl}Rezervacija/popust-by-kod?kodPromocije=$kod";
+    final uri = Uri.parse(url);
+    final headers = createHeaders();
+
+    final response = await http.get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      final data = jsonDecode(response.body);
+
+      return (
+        uslugaId: data['uslugaId'] as int,
+        popust: (data['popust'] as num).toDouble(),
+      );
+    } else {
+      final data = jsonDecode(response.body);
+      throw UserException(data['message'] ?? "Greška pri dohvaćanju popusta.");
+    }
+  }
+
 }

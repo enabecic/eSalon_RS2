@@ -346,7 +346,7 @@ namespace eSalon.Services
 
                 var danas = DateTime.Now;
                 if (aktivirana.Promocija.DatumPocetka > danas || aktivirana.Promocija.DatumKraja < danas)
-                    throw new UserException("Promocija nije aktivna u ovom periodu.");
+                    throw new UserException("Kod nije validan jer promocija nije aktivna u ovom periodu.");
 
                 var uslugaPromocijeID = aktivirana.Promocija.UslugaId;
                 var stavkeUslugeIds = rezervacija.StavkeRezervacije.Select(x => x.UslugaId).ToList();
@@ -470,6 +470,21 @@ namespace eSalon.Services
             return trenutni >= krajDana;
         }
 
+        public async Task<(int UslugaId, decimal Popust)?> GetPopustByKodAsync(string kodPromocije, CancellationToken cancellationToken = default)
+        {
+            var promocija = await Context.Promocijas
+                .Where(p => p.Kod == kodPromocije && !p.IsDeleted)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (promocija == null)
+                throw new UserException("Promocija nije pronađena.");
+
+            var danas = DateTime.Now.Date; 
+            if (promocija.DatumPocetka.Date > danas || promocija.DatumKraja.Date < danas)
+                throw new UserException("Promocija nije aktivna u ovom periodu.");
+
+            return (promocija.UslugaId, promocija.Popust);
+        }
 
     }
 }

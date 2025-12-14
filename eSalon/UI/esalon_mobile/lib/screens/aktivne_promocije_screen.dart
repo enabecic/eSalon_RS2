@@ -25,9 +25,10 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
   late AktiviranaPromocijaProvider _aktiviranaProvider;
   List<Promocija> _aktivnePromocije = [];
   List<AktiviranaPromocija> _aktiviranePromocije = [];
+  int get total => _filteredList.length;
   int page = 1;
   final int pageSize = 10;
-  int total = 0;
+  //int total = 0;
   bool isFirstLoadRunning = false;
   bool isLoadMoreRunning = false;
   bool hasNextPage = true;
@@ -45,7 +46,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
   String _sortDirection = 'asc'; 
   bool _isLoadingPromocije = true;
   bool _loadingAktiviranePromocije = true;
-
+  
   @override
   void initState() {
     super.initState();
@@ -119,7 +120,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
       if (!mounted) return;
       setState(() {
         _aktivnePromocije = result.result;
-        total = _filteredList.length;
+        //total = _filteredList.length;
         hasNextPage = (page * pageSize) < result.count;
       });
     } catch (e) {
@@ -212,7 +213,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         setState(() {
           _aktivnePromocije.addAll(result.result);
 
-          total = _filteredList.length;
+          //total = _filteredList.length;
           hasNextPage = (page * pageSize) < result.count;
         });
       });
@@ -353,7 +354,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         if (!mounted) return; 
         setState(() {
           _aktiviranePromocije.add(novi);
-          total = _filteredList.length;
+          //total = _filteredList.length;
         });
 
         _showSnack("Uspješno aktivirana promocija.");
@@ -365,7 +366,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         if (!mounted) return; 
         setState(() {
           _aktiviranePromocije.removeWhere((p) => p.aktiviranaPromocijaId == idToDelete);
-          total = _filteredList.length;
+          //total = _filteredList.length;
         });
 
         _showSnack("Uspješno deaktivirana promocija.");
@@ -469,7 +470,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
         if (!mounted) return; 
         setState(() {
           _selectedTabIndex = index;
-          total = _filteredList.length;
+          //total = _filteredList.length;
         });
       },
       child: Container(

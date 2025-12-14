@@ -3,6 +3,7 @@ import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/nacin_placanja_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
+import 'package:esalon_mobile/screens/rezervacija_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -125,6 +126,16 @@ class _RezervacijaPlacanjeKodScreenState
     try {
       if (!mounted) return false;
       await rezervacijaProvider.provjeriTermin(request);
+
+      if (_kodUnos != null && _kodUnos!.isNotEmpty) {
+        if (!mounted) return false;
+        final popustResult = await rezervacijaProvider.getPopustByKod(_kodUnos!);
+        if (!mounted) return false;
+        await rezervacijaCartProvider!.primijeniPopust(
+          uslugaId: popustResult.uslugaId,
+          popust: popustResult.popust,
+        );
+      }
       return true; 
     } catch (e) {
       if (!mounted) return false;
@@ -479,18 +490,19 @@ class _RezervacijaPlacanjeKodScreenState
   void _navigateToDetalji() {
     if (_selectedNacinPlacanjaId == null) return;
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (_) => RezervacijaDetailsScreen(
-    //       frizerId: widget.frizerId,
-    //       datumRezervacije: widget.datumRezervacije,
-    //       vrijemePocetka: widget.vrijemePocetka,
-    //       nacinPlacanjaId: _selectedNacinPlacanjaId!,
-    //       kodPromocije: _kodUnos?.isEmpty ?? true ? null : _kodUnos,
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RezervacijaDetailsScreen(
+          frizerId: widget.frizerId,
+          datumRezervacije: widget.datumRezervacije,
+          vrijemePocetka: widget.vrijemePocetka,
+          nacinPlacanjaId: _selectedNacinPlacanjaId!,
+          kodPromocije: _kodUnos?.isEmpty ?? true ? null : _kodUnos,
+          rezervacijaCartProvider: rezervacijaCartProvider!, 
+        ),
+      ),
+    );
   }
 
   Widget _buildDaljeButton() {

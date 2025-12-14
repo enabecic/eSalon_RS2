@@ -199,7 +199,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
   Widget _buildUslugaCard(Map<String, dynamic> usluga) {
     return Container(
       width: double.infinity,
-      height: 125,
+      height: 145,
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -296,29 +296,36 @@ class _KorpaScreenState extends State<KorpaScreen> {
           },
           child: Row(
             children: [
-              SizedBox(
-                width: 140,
-                height: 110,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8), 
+                  padding: const EdgeInsets.fromLTRB(12, 12, 0, 12),
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                    child: usluga['slika'] != null && usluga['slika'] is String
-                        ? imageFromString(usluga['slika'])
-                        : Image.asset(
-                            "assets/images/praznaUsluga.png",
-                            fit: BoxFit.cover, 
-                          ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 100,
+                      height: 140,
+                      child: (usluga['slika'] != null && usluga['slika'] is String && usluga['slika'].isNotEmpty)
+                          ? FittedBox(
+                              fit: BoxFit.cover,
+                              child: imageFromString(usluga['slika']),
+                            )
+                          : Image.asset(
+                              "assets/images/praznaUsluga.png",
+                              fit: BoxFit.cover,
+                            ),
+                    ),
                   ),
                 ),
               ),
+              const SizedBox(width: 5),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start, 
                     children: [
-                      const SizedBox(height: 10), 
+                      const SizedBox(height: 6),
                       Text(
                         usluga['naziv'] ?? "-",
                         style: const TextStyle(
@@ -328,7 +335,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
                         ),
                         maxLines: 2,
                       ),
-                      const SizedBox(height: 1), 
+                      const SizedBox(height: 6),
                       Text(
                         usluga['cijena'] != null ? '${formatNumber(usluga['cijena'])} KM' : "-",
                         style: const TextStyle(
@@ -338,6 +345,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         usluga['trajanje'] != null ? '${usluga['trajanje']} min' : "-",
                         style: const TextStyle(

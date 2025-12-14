@@ -71,6 +71,19 @@ namespace eSalon.API.Controllers
             return Ok();
         }
 
+        [HttpGet("popust-by-kod")]
+        [Authorize(Roles = "Klijent")]
+        public async Task<ActionResult<object>> GetPopustByKod([FromQuery] string kodPromocije, CancellationToken cancellationToken)
+        {
+            var result = await _rezervacijaService.GetPopustByKodAsync(kodPromocije, cancellationToken);
+
+            return Ok(new
+            {
+                UslugaId = result.Value.UslugaId,
+                Popust = result.Value.Popust
+            });
+        }
+
         [HttpGet("kalendar")]
         [Authorize(Roles = "Klijent")]
         public async Task<IActionResult> GetKalendar([FromQuery] int frizerId, [FromQuery] int godina, [FromQuery] int mjesec, CancellationToken cancellationToken)

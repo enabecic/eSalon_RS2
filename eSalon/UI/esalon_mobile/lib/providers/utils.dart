@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 String formatNumber(dynamic) {
@@ -31,4 +31,19 @@ String formatirajDatum(DateTime? dt) {
   String sati = dt.hour.toString().padLeft(2, '0');
   String minute = dt.minute.toString().padLeft(2, '0');
   return "$dan.$mjesec.$godina $sati:$minute";
+}
+
+String formatirajDatumSaDanom(DateTime dt) {
+  const dani = [
+    'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'
+  ];
+  String danSedmice = dani[dt.weekday - 1];
+  String datum = "${dt.day.toString().padLeft(2,'0')}.${dt.month.toString().padLeft(2,'0')}.${dt.year}";
+  return "$danSedmice, $datum";
+}
+
+String formatTime24(TimeOfDay t) {
+  final h = t.hour.toString().padLeft(2, '0');
+  final m = t.minute.toString().padLeft(2, '0');
+  return "$h:$m";
 }

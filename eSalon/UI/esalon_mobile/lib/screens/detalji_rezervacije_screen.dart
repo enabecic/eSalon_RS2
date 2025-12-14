@@ -242,7 +242,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
                       fontSize: 16,
                       color: Colors.black,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   );
                 },
@@ -296,7 +296,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.3),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -327,6 +327,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 6),
                   Text(
                     e.uslugaNaziv ?? '',
                     style: const TextStyle(
@@ -334,7 +335,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
                       fontSize: 16,
                       color: Colors.black,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),

@@ -24,6 +24,7 @@ namespace eSalon.Services
 
         Task<List<(TimeSpan VrijemePocetka, TimeSpan VrijemeKraja)>> GetZauzetiTerminiZaDatumAsync(DateTime datum, int frizerId, CancellationToken cancellationToken = default);
         Task<List<object>> GetKalendarAsync(int frizerId, int godina, int mjesec, CancellationToken cancellationToken = default);
+        Task<(int UslugaId, decimal Popust)?> GetPopustByKodAsync(string kodPromocije, CancellationToken cancellationToken = default);
 
     }
 }

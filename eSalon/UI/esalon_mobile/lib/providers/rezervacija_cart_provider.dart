@@ -6,6 +6,10 @@ import 'package:esalon_mobile/models/usluga.dart';
 class RezervacijaCartProvider with ChangeNotifier {
   final int? userId;
   static const String _cartKeyPrefix = 'rezervacija_';
+  int? _popustUslugaId;
+  double _popustIznos = 0.0;
+  int? get popustUslugaId => _popustUslugaId;
+  double get popustIznos => _popustIznos;
 
   RezervacijaCartProvider(this.userId);
 
@@ -86,12 +90,29 @@ class RezervacijaCartProvider with ChangeNotifier {
     return lista.containsKey(uslugaId.toString());
   }
 
+  Future<void> primijeniPopust({ required int uslugaId, required double popust, }) async {
+    _popustUslugaId = uslugaId;
+    _popustIznos = popust;
+    notifyListeners();
+  }
+
+  void ukloniPopust() {
+    _popustUslugaId = null;
+    _popustIznos = 0.0;
+    notifyListeners();
+  }
+
   Future<double> izracunajUkupnuCijenu() async {
     final lista = await getRezervacijaList(); 
     double total = 0.0;
 
-    for (var usluga in lista.values) {
-      total += (usluga['cijena'] as num).toDouble();
+    for (var u in lista.values) {
+      double cijena = (u['cijena'] as num).toDouble();
+
+      if (_popustUslugaId != null && u['id'] == _popustUslugaId) {
+        cijena = cijena - (cijena * _popustIznos / 100);
+      }
+      total += cijena;
     }
     return total;
   }
