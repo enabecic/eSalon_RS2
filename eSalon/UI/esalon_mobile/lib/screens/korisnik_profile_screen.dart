@@ -1,3 +1,4 @@
+import 'package:esalon_mobile/providers/obavijest_provider.dart';
 import 'package:esalon_mobile/screens/korisnik_profile_edit_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -382,6 +383,11 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 AuthProvider.password = null;
                 AuthProvider.uloge = null;
                 AuthProvider.isSignedIn = false;
+                
+                if (!mounted) return;
+                final obavijestProvider = context.read<ObavijestProvider>();
+                obavijestProvider.resetNeprocitane();
+    
                 if (!mounted) return;
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const LoginPage()),

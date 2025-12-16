@@ -1,4 +1,5 @@
 import 'package:esalon_mobile/layouts/master_screen.dart';
+import 'package:esalon_mobile/models/nacin_placanja.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/korisnik_provider.dart';
 import 'package:esalon_mobile/providers/nacin_placanja_provider.dart';
@@ -14,7 +15,6 @@ class RezervacijaDetailsScreen extends StatefulWidget {
   final int frizerId;
   final DateTime datumRezervacije;
   final TimeOfDay vrijemePocetka;
-  final int nacinPlacanjaId;
   final String? kodPromocije;
   final RezervacijaCartProvider rezervacijaCartProvider;
 
@@ -23,7 +23,6 @@ class RezervacijaDetailsScreen extends StatefulWidget {
     required this.frizerId,
     required this.datumRezervacije,
     required this.vrijemePocetka,
-    required this.nacinPlacanjaId,
     this.kodPromocije,
      required this.rezervacijaCartProvider,
   });
@@ -47,7 +46,13 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
 
   late NacinPlacanjaProvider nacinPlacanjaProvider;
   String nacinPlacanjaNaziv = ""; 
-  bool _isLoadingPlacanje = true;
+
+  bool _placanjeOdabrano = false; 
+  List<NacinPlacanja> _naciniPlacanja = [];
+  bool _isLoadingPlacanja = true;
+  int? _selectedNacinPlacanjaId;
+   
+  final Map<int, Image> _cachedImages = {}; 
 
   @override
   void initState() {
@@ -59,26 +64,22 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       rezervacijaCartProvider = widget.rezervacijaCartProvider;
       _loadUsluge();
       _loadFrizer();
-      _loadNacinPlacanja(); 
+      _loadPlacanja();
     }
   }
 
-  Future<void> _loadNacinPlacanja() async {
-    if (widget.nacinPlacanjaId == 0) return;
+  Future<void> _loadPlacanja() async {
     if (!mounted) return;
-    setState(() => _isLoadingPlacanje = true);
+    setState(() => _isLoadingPlacanja = true);
 
     try {
       if (!mounted) return;
-      final nacin =  await nacinPlacanjaProvider.getById(widget.nacinPlacanjaId);
+      final data = await nacinPlacanjaProvider.get();
       if (!mounted) return;
       setState(() {
-        nacinPlacanjaNaziv = nacin.naziv ?? "";
-        _isLoadingPlacanje = false;
+        _naciniPlacanja = data.result;
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoadingPlacanje = false);
       if (!mounted) return;
         await QuickAlert.show(
           context: context,
@@ -88,6 +89,8 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           confirmBtnText: 'OK',
           confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
         );
+    } finally {
+      if (mounted) setState(() => _isLoadingPlacanja = false);
     }
   }
 
@@ -150,6 +153,24 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
   Future<bool> _saveRezervaciju() async {
     if (_isSaving) return false;
 
+    if (_selectedNacinPlacanjaId == null) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          duration: Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              'Molimo odaberite način plaćanja.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      );
+      return false;
+    }
+
     if (usluge.isEmpty) {
       if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +195,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       "datumRezervacije": widget.datumRezervacije.toIso8601String(),
       "vrijemePocetka":
           "${widget.vrijemePocetka.hour.toString().padLeft(2, '0')}:${widget.vrijemePocetka.minute.toString().padLeft(2, '0')}:00",
-      "nacinPlacanjaId": widget.nacinPlacanjaId,
+      "nacinPlacanjaId": _selectedNacinPlacanjaId,
       "kodPromocije": widget.kodPromocije?.isEmpty ?? true ? null : widget.kodPromocije,
       "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
     };
@@ -224,8 +245,84 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
     }
   }
 
+  Widget _buildNaciniPlacanja() {
+    if (_isLoadingPlacanja) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return Column(
+      children: _naciniPlacanja.map((nacin) {
+        bool isSelected = _selectedNacinPlacanjaId == nacin.nacinPlacanjaId;
+
+        IconData icon = Icons.payments;
+        if ((nacin.naziv ?? "").toLowerCase().contains("gotovina")) {
+          icon = Icons.attach_money;
+        } else if ((nacin.naziv ?? "").toLowerCase().contains("paypal")) {
+          icon = Icons.credit_card;
+        }
+
+        return GestureDetector(
+          onTap: () {
+            if (!mounted) return;
+            setState(() {
+              _selectedNacinPlacanjaId = nacin.nacinPlacanjaId;
+              _placanjeOdabrano = true;
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color.fromARGB(255, 247, 238, 250)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 30, color: Colors.black87),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    nacin.naziv ?? "",
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if ((nacin.naziv ?? "").toLowerCase().contains("paypal"))
+                  const Text(
+                    '>',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildZavrsiButton() {
-    bool canClick = !_isSaving && !_isLoadingUsluge && !_isLoadingFrizer && !_isLoadingPlacanje;
+    bool canClick = !_isSaving && !_isLoadingUsluge && !_isLoadingFrizer && !_isLoadingPlacanja && _placanjeOdabrano;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -370,11 +467,6 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
             "Frizer:",
             _isLoadingFrizer ? "Učitavanje..." : frizerImePrezime,
             Icons.person_outline
-          ),
-          _buildInfoRow(
-            "Način plaćanja:",
-            _isLoadingPlacanje ? "Učitavanje..." : nacinPlacanjaNaziv,
-            Icons.payment
           ),
           const SizedBox(height: 8),
           const Padding(
@@ -532,6 +624,23 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       final popust = rezervacijaCartProvider?.popustIznos ?? 0;
       snizenaCijena = punaCijena - (punaCijena * popust / 100);
     }
+
+    Image imgWidget;
+
+    if (u['slika'] != null && u['slika'].isNotEmpty) {
+      if (_cachedImages.containsKey(u['id'])) {
+        imgWidget = _cachedImages[u['id']]!;
+      } else {
+        imgWidget = imageFromString(u['slika']); 
+        _cachedImages[u['id']] = imgWidget;
+      }
+    } else {
+      imgWidget = Image.asset(
+        "assets/images/praznaUsluga.png",
+        fit: BoxFit.cover,
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -555,15 +664,10 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
             child: SizedBox(
               width: 100,
               height: 120,
-              child: (u['slika'] != null && u['slika'].isNotEmpty)
-                  ? FittedBox(
-                      fit: BoxFit.cover,
-                      child: imageFromString(u['slika']), 
-                    )
-                  : Image.asset(
-                      "assets/images/praznaUsluga.png",
-                      fit: BoxFit.cover,
-                    ),
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: imgWidget,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -682,13 +786,41 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
               _buildHeader(),
               const SizedBox(height: 20),
               _buildInfoBox(),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Odaberite način plaćanja:",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildNaciniPlacanja(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildZavrsiButton(),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: _buildZavrsiButton(),
       ),
     );
   }

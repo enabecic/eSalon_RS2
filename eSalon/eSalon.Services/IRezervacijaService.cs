@@ -16,7 +16,7 @@ namespace eSalon.Services
 
         Task<Rezervacija> ZavrsiAsync(int rezervacijaId, CancellationToken cancellationToken = default);
 
-        Task<Rezervacija> PonistiAsync(int rezervacijaId, CancellationToken cancellationToken = default);
+        Task<Rezervacija> PonistiAsync(int rezervacijaId, int korisnikId, CancellationToken cancellationToken = default);
 
         Task<List<string>> AllowedActionsAsync(int rezervacijaId, CancellationToken cancellationToken = default);
 

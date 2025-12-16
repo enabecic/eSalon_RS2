@@ -1,3 +1,5 @@
+import 'package:esalon_mobile/providers/auth_provider.dart';
+import 'package:esalon_mobile/providers/obavijest_provider.dart';
 import 'package:esalon_mobile/screens/korisnik_profile_screen.dart';
 import 'package:esalon_mobile/screens/korpa_screen.dart';
 import 'package:esalon_mobile/screens/obavijesti_screen.dart';
@@ -8,6 +10,7 @@ import 'package:esalon_mobile/screens/usluga_arhiva_screen.dart';
 import 'package:esalon_mobile/screens/usluga_favorit_screen.dart';
 import 'package:esalon_mobile/screens/usluge_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({super.key});
@@ -30,6 +33,19 @@ class _MasterScreenState extends State<MasterScreen> {
     const UslugaArhivaScreen(),
     const ObavijestiScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (AuthProvider.isSignedIn) {
+        context
+            .read<ObavijestProvider>()
+            .ucitajBrojNeprocitanih(AuthProvider.korisnikId!);
+      }
+    });
+  }
 
   void _onBottomNavTapped(int index) {
     setState(() {
@@ -135,7 +151,44 @@ class _MasterScreenState extends State<MasterScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.notifications_active_outlined),
-                title: const Text('Obavijesti'),
+                title: Row(
+                  children: [
+                    const Text('Obavijesti'),
+                    const SizedBox(width: 8),
+                    Consumer<ObavijestProvider>(
+                      builder: (context, provider, _) {
+                        if (provider.neprocitane == 0) return const SizedBox();
+
+                        final count = provider.neprocitane;
+                        final displayText = count > 99 ? '99+' : count.toString();
+
+                        return Transform.translate(
+                          offset: const Offset(0, -5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
+                            child: Text(
+                              displayText,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 onTap: () => _onDrawerItemTapped(8),
               ),
             ],

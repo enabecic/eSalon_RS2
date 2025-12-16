@@ -18,12 +18,14 @@ namespace eSalon.Services.RezervacijaStateMachine
     {
         private readonly IRezervacijaValidator _rezervacijaValidator;
         private readonly ICodeGenerator _codeGenerator;
+        private readonly IObavijestService _obavijestService;
 
         public InitialRezervacijaState(ESalonContext context, IMapper mapper, IServiceProvider serviceProvider, 
-            IRezervacijaValidator rezervacijaValidator, ICodeGenerator codeGenerator, IUslugaValidator uslugaValidator) : base(context, mapper, serviceProvider)
+            IRezervacijaValidator rezervacijaValidator, ICodeGenerator codeGenerator, IUslugaValidator uslugaValidator, IObavijestService obavijestService) : base(context, mapper, serviceProvider)
         {
             _codeGenerator = codeGenerator;
             _rezervacijaValidator = rezervacijaValidator;
+            _obavijestService = obavijestService;
         }
 
         public override async Task<Model.Rezervacija> Insert(RezervacijaInsertRequest rezervacija, CancellationToken cancellationToken = default)
@@ -100,9 +102,9 @@ namespace eSalon.Services.RezervacijaStateMachine
                 if (aktivirana == null)
                     throw new UserException("Kod nije validan, nije aktiviran ili je već iskorišten.");
 
-                var danas = DateTime.Now;
-                if (aktivirana.Promocija.DatumPocetka > danas || aktivirana.Promocija.DatumKraja < danas)
-                    throw new UserException("Promocija nije aktivna u ovom periodu.");
+                var danas = DateTime.Now.Date;
+                if (aktivirana.Promocija.DatumPocetka.Date > danas || aktivirana.Promocija.DatumKraja.Date < danas)
+                    throw new UserException("Kod nije validan jer promocija nije aktivna u ovom periodu.");
 
                 var uslugaPromocijeID = aktivirana.Promocija.UslugaId;
                 var stavkeUslugeIds = rezervacija.StavkeRezervacije.Select(x => x.UslugaId).ToList();
@@ -200,6 +202,25 @@ namespace eSalon.Services.RezervacijaStateMachine
 
 
                 await Context.SaveChangesAsync(cancellationToken);
+
+            var frizer = await Context.Korisniks
+                .FirstOrDefaultAsync(f => f.KorisnikId == entity.FrizerId && !f.IsDeleted, cancellationToken);
+
+            if (frizer != null)
+            {
+                var obavijest = new ObavijestInsertRequest
+                {
+                    KorisnikId = entity.FrizerId,
+                    Naslov = "Nova rezervacija",
+                    Sadrzaj =
+                        $"Poštovanje {frizer.Ime},\n\n" +
+                        $"Kreirana je nova rezervacija #{entity.Sifra} za datum {entity.DatumRezervacije:dd.MM.yyyy}.\n" +
+                        "Molimo odobrite rezervaciju što prije kako bi klijent dobio potvrdu i mogao planirati svoj dolazak.\n\n" +
+                        "Hvala,\nVaš eSalon tim"
+                };
+
+                await _obavijestService.InsertAsync(obavijest, cancellationToken);
+            }
 
             return Mapper.Map<Model.Rezervacija>(entity);
         }

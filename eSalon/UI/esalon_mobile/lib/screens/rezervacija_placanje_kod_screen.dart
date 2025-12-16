@@ -1,6 +1,4 @@
-import 'package:esalon_mobile/models/nacin_placanja.dart';
 import 'package:esalon_mobile/providers/auth_provider.dart';
-import 'package:esalon_mobile/providers/nacin_placanja_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
 import 'package:esalon_mobile/screens/rezervacija_details_screen.dart';
@@ -29,13 +27,7 @@ class RezervacijaPlacanjeKodScreen extends StatefulWidget {
 class _RezervacijaPlacanjeKodScreenState
     extends State<RezervacijaPlacanjeKodScreen> {
 
-  bool _placanjeOdabrano = false; 
-  late NacinPlacanjaProvider _placanjaProvider;
   late RezervacijaProvider rezervacijaProvider;
-  List<NacinPlacanja> _naciniPlacanja = [];
-  bool _isLoadingPlacanja = true;
-
-  int? _selectedNacinPlacanjaId;
   String? _kodUnos;
 
   bool _isSaving = false;
@@ -46,9 +38,7 @@ class _RezervacijaPlacanjeKodScreenState
   @override
   void initState() {
     super.initState();
-    _placanjaProvider = context.read<NacinPlacanjaProvider>();
     rezervacijaProvider = context.read<RezervacijaProvider>();
-    _loadPlacanja();
     if (AuthProvider.korisnikId != null) {
       rezervacijaCartProvider = RezervacijaCartProvider(AuthProvider.korisnikId!);
     }
@@ -57,24 +47,6 @@ class _RezervacijaPlacanjeKodScreenState
 
   Future<bool> _saveRezervaciju() async {
     if (_isSaving) return false;
-
-    if (_selectedNacinPlacanjaId == null) {
-      if (!mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.red,
-          duration: Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              'Molimo odaberite način plaćanja.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      );
-      return false;
-    }
 
     if (rezervacijaCartProvider == null) return false;
 
@@ -117,7 +89,6 @@ class _RezervacijaPlacanjeKodScreenState
       "frizerId": widget.frizerId,
       "datumRezervacije": widget.datumRezervacije.toIso8601String(),
       "vrijemePocetka": "${widget.vrijemePocetka.hour.toString().padLeft(2, '0')}:${widget.vrijemePocetka.minute.toString().padLeft(2, '0')}:00",
-      "nacinPlacanjaId": _selectedNacinPlacanjaId,
       "kodPromocije": _kodUnos?.isEmpty ?? true ? null : _kodUnos,
       "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
     };
@@ -156,107 +127,6 @@ class _RezervacijaPlacanjeKodScreenState
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
-  }
-
-  Future<void> _loadPlacanja() async {
-    try {
-      if (!mounted) return;
-      final data = await _placanjaProvider.get();
-      if (!mounted) return;
-      setState(() {
-        _naciniPlacanja = data.result;
-      });
-    } 
-    catch (e) {
-      if (!mounted) return;
-        await QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: 'Greška',
-          text: e.toString(),
-          confirmBtnText: 'OK',
-          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-        );
-    }
-    finally {
-      if (mounted) setState(() => _isLoadingPlacanja = false);
-    }
-  }
-
-  Widget _buildNaciniPlacanja() {
-    if (_isLoadingPlacanja) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return Column(
-      children: _naciniPlacanja.map((nacin) {
-        bool isSelected = _selectedNacinPlacanjaId == nacin.nacinPlacanjaId;
-
-        IconData icon = Icons.payments; 
-        if ((nacin.naziv ?? "").toLowerCase().contains("gotovina")) {
-          icon = Icons.attach_money;
-        } 
-        else if ((nacin.naziv ?? "").toLowerCase().contains("paypal")) {
-          icon = Icons.credit_card;
-        } 
-        return GestureDetector(
-          onTap: () {
-            if (!mounted) return;
-            setState(() {
-              _selectedNacinPlacanjaId = nacin.nacinPlacanjaId;
-              _placanjeOdabrano = true;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 14),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color.fromARGB(255, 247, 238, 250)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 7,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(icon, size: 30, color: Colors.black87),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    nacin.naziv ?? "",
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if ((nacin.naziv ?? "").toLowerCase().contains("paypal"))
-                  const Text(
-                    '>',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
   }
 
   @override
@@ -318,36 +188,6 @@ class _RezervacijaPlacanjeKodScreenState
             children: [
               _buildHeader(),
               const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Odaberite način plaćanja:",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildNaciniPlacanja(),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
               _buildKodInput(),
             ],
           ),
@@ -374,7 +214,7 @@ class _RezervacijaPlacanjeKodScreenState
           children: [
             Flexible(
               child: Text(
-                "Iskoristite popust i platite",
+                "Unesite kod promocije",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 19,
@@ -386,7 +226,7 @@ class _RezervacijaPlacanjeKodScreenState
             ),
             SizedBox(width: 8),
             Icon(
-              Icons.payment,
+              Icons.local_offer,
               color: Colors.black,
               size: 28,
             ),
@@ -414,6 +254,7 @@ class _RezervacijaPlacanjeKodScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 10),
           const Text(
             "Imate kod? Iskoristite ga i ostvarite popust!",
             style: TextStyle(
@@ -464,12 +305,17 @@ class _RezervacijaPlacanjeKodScreenState
                     ? IconButton(
                         icon: const Icon(Icons.clear, color: Colors.black45, size: 20),
                         onPressed: () {
+                          
                           if (!mounted) return;
                           setState(() {
                             _kodController.clear();
                             _kodUnos = '';
                           });
+                          if (_kodUnos == null || _kodUnos!.isEmpty) {
+                            rezervacijaCartProvider?.ukloniPopust();
+                          }
                         },
+                        
                       )
                     : null,
               ),
@@ -478,18 +324,19 @@ class _RezervacijaPlacanjeKodScreenState
                 setState(() {
                   _kodUnos = value;
                 });
+                if (value.isEmpty) {
+                  rezervacijaCartProvider?.ukloniPopust();
+                }
               },
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   void _navigateToDetalji() {
-    if (_selectedNacinPlacanjaId == null) return;
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -497,7 +344,6 @@ class _RezervacijaPlacanjeKodScreenState
           frizerId: widget.frizerId,
           datumRezervacije: widget.datumRezervacije,
           vrijemePocetka: widget.vrijemePocetka,
-          nacinPlacanjaId: _selectedNacinPlacanjaId!,
           kodPromocije: _kodUnos?.isEmpty ?? true ? null : _kodUnos,
           rezervacijaCartProvider: rezervacijaCartProvider!, 
         ),
@@ -518,7 +364,7 @@ class _RezervacijaPlacanjeKodScreenState
           height: 50,
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: (!_placanjeOdabrano || _isSaving)
+            onPressed: (_isSaving)
                 ? null
                 : () async {
                     if (!mounted) return;
@@ -528,7 +374,7 @@ class _RezervacijaPlacanjeKodScreenState
                     }
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: (_placanjeOdabrano && !_isSaving)
+              backgroundColor: (!_isSaving)
                   ? const Color(0xFFD2C1D6)
                   : Colors.grey,
               shape: RoundedRectangleBorder(

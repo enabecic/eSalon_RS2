@@ -18,10 +18,12 @@ namespace eSalon.Services
     {
         private readonly IVrstaUslugeValidator _vrstaUslugeValidator;
         private readonly IUslugaValidator _uslugaValidator;
-        public UslugaService(ESalonContext context, IMapper mapper, IVrstaUslugeValidator vrstaUslugeValidator, IUslugaValidator uslugaValidator ) : base(context, mapper)
+        private readonly IObavijestService _obavijestService;
+        public UslugaService(ESalonContext context, IMapper mapper, IVrstaUslugeValidator vrstaUslugeValidator, IUslugaValidator uslugaValidator, IObavijestService obavijestService) : base(context, mapper)
         {
             _vrstaUslugeValidator = vrstaUslugeValidator;
             _uslugaValidator = uslugaValidator;
+            _obavijestService = obavijestService;
         }
 
         public override IQueryable<Usluga> AddFilter(UslugaSearchObject search, IQueryable<Usluga> query)
@@ -120,13 +122,38 @@ namespace eSalon.Services
         public override async Task BeforeDeleteAsync(Usluga entity, CancellationToken cancellationToken)
         {
             bool uUpotrebi = await Context.Promocijas.AnyAsync(x => x.UslugaId == entity.UslugaId && !x.IsDeleted &&
-             x.DatumPocetka <= DateTime.Now && x.DatumKraja >= DateTime.Now, cancellationToken);
-            
+             x.DatumPocetka.Date <= DateTime.Now.Date && x.DatumKraja.Date >= DateTime.Now.Date, cancellationToken);
+
             if (uUpotrebi)
             {
                 throw new UserException("Usluga je trenutno u aktivnoj promociji i ne može biti obrisana dok promocija ne istekne.");
             }
+
             await base.BeforeDeleteAsync(entity, cancellationToken);
+
         }
+
+        public override async Task AfterInsertAsync(UslugaInsertRequest request, Usluga entity, CancellationToken cancellationToken = default)
+        {
+            await base.AfterInsertAsync(request, entity, cancellationToken);
+
+            var klijenti = await Context.Korisniks
+                .Where(k => !k.IsDeleted && k.KorisniciUloges.Any(u => u.Uloga.Naziv == "Klijent"))
+                .ToListAsync(cancellationToken);
+
+            foreach (var klijent in klijenti)
+            {
+                var obavijest = new ObavijestInsertRequest
+                {
+                    KorisnikId = klijent.KorisnikId,
+                    Naslov = "Nova usluga u eSalonu",
+                    Sadrzaj = $"Pozdrav {klijent.Ime},\n\nNova usluga '{entity.Naziv}' je sada dostupna u našem salonu. " +
+                              $"Dođite i isprobajte je!\n\nVaš eSalon tim"
+                };
+
+                await _obavijestService.InsertAsync(obavijest, cancellationToken);
+            }
+        }
+
     }
 }

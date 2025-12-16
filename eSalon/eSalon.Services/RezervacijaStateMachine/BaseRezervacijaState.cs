@@ -39,7 +39,7 @@ namespace eSalon.Services.RezervacijaStateMachine
             await Task.CompletedTask;
             throw new UserException("Metoda nije dozvoljena.");
         }
-        public virtual async Task<Model.Rezervacija> Ponistena(int rezervacijaId, CancellationToken cancellationToken = default)
+        public virtual async Task<Model.Rezervacija> Ponistena(int rezervacijaId, int korisnikId, CancellationToken cancellationToken = default)
         {
             await Task.CompletedTask;
             throw new UserException("Metoda nije dozvoljena.");

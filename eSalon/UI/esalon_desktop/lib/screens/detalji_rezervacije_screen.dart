@@ -169,6 +169,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
         ),
       );
     }
+    final bool dozvoljenoPonistavanje = (widget.rezervacija?.nacinPlacanjaNaziv?.toLowerCase() ?? '') == "gotovina";
     final sada = DateTime.now();
     final vrijemeParts = widget.rezervacija!.vrijemePocetka?.split(":");
     final hour = int.tryParse(vrijemeParts?[0] ?? "0") ?? 0;
@@ -638,7 +639,9 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                 const SizedBox(width: 10),
                 if (widget.rezervacija != null && sada.isBefore(datumVrijemeRezervacije)) ...[
                   Tooltip(
-                    message: "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima, jer eSalon pazi na zadovoljstvo svojih klijenata.",
+                    message: dozvoljenoPonistavanje
+                      ? "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima, jer eSalon pazi na zadovoljstvo svojih klijenata."
+                      : "Rezervacija se može otkazati samo ako je plaćena gotovinom.",
                     decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(20), 
@@ -649,7 +652,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                       fontWeight: FontWeight.normal,
                     ),
                     child: ElevatedButton(
-                      onPressed: () async {
+                      onPressed: dozvoljenoPonistavanje ? () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
@@ -739,7 +742,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                             );
                           }
                         }
-                      },
+                      }: null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[500],
                         foregroundColor: Colors.black,

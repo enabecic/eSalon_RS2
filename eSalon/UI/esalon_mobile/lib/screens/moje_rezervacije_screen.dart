@@ -765,7 +765,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                 child: FittedBox(
                                   fit: BoxFit.fill,
                                   child: Image.asset(
-                                    "assets/images/praznaUsluga.png",
+                                    "assets/images/rezervacija.png",
                                     fit: BoxFit.fill,
                                   ),
                                 ),
@@ -1281,7 +1281,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
                                 child: FittedBox(
                                   fit: BoxFit.fill,
                                   child: Image.asset(
-                                    "assets/images/praznaUsluga.png",
+                                    "assets/images/rezervacija.png",
                                     fit: BoxFit.fill,
                                   ),
                                 ),

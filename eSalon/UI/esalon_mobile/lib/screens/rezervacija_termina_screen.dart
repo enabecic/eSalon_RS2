@@ -559,13 +559,14 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "Odaberite početak termina",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          if (_selectedSlot == null)
+            const Text(
+              "Odaberite početak termina",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
 
           if (_selectedDay != null) ...[
             const SizedBox(height: 8),

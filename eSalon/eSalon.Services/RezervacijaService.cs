@@ -181,25 +181,6 @@ namespace eSalon.Services
                 if (rezervacija.AktiviranaPromocija != null)
                     result[i].AktiviranaPromocijaNaziv = rezervacija.AktiviranaPromocija.Promocija.Naziv;
 
-
-
-    // result[i].StavkeRezervacijes = list[i].StavkeRezervacijes
-    //.Where(sr => !sr.IsDeleted && sr.Usluga != null && !sr.Usluga.IsDeleted)
-    //.Select(sr => new Model.StavkeRezervacije
-    //{
-    //    StavkeRezervacijeId = sr.StavkeRezervacijeId,
-    //    RezervacijaId = sr.RezervacijaId,
-    //    UslugaId = sr.UslugaId,
-    //    Cijena = sr.Cijena,
-    //    UslugaNaziv = sr.Usluga.Naziv,
-    //    Trajanje = sr.Usluga.Trajanje,
-    //    OriginalnaCijena = sr.Usluga.Cijena,
-    //    Slika = sr.Usluga.Slika,
-    //   // ImaPopust = sr.Cijena.HasValue && sr.Cijena < sr.Usluga.Cijena
-    //}).ToList();
-
-
-
             }
             return new PagedResult<Model.Rezervacija>
             {
@@ -256,7 +237,7 @@ namespace eSalon.Services
             return await state.Zavrsena(rezervacijaId, cancellationToken);
         }
 
-        public async Task<Model.Rezervacija> PonistiAsync(int rezervacijaId, CancellationToken cancellationToken = default)
+        public async Task<Model.Rezervacija> PonistiAsync(int rezervacijaId, int korisnikId, CancellationToken cancellationToken = default)
         {
             var rezervacija = await Context.Rezervacijas.FindAsync(new object[] { rezervacijaId }, cancellationToken)
                  ?? throw new UserException("Pogrešan ID rezervacije.");
@@ -265,7 +246,7 @@ namespace eSalon.Services
                 throw new UserException("State nije definiran za ovu rezervaciju.");
 
             var state = _baseRezervacijaState.CreateState(rezervacija.StateMachine);
-            return await state.Ponistena(rezervacijaId, cancellationToken);
+            return await state.Ponistena(rezervacijaId, korisnikId, cancellationToken);
         }
 
         public async Task<List<string>> AllowedActionsAsync(int rezervacijaId, CancellationToken cancellationToken = default)
@@ -344,9 +325,10 @@ namespace eSalon.Services
                 if (aktivirana == null)
                     throw new UserException("Kod nije validan, nije aktiviran ili je već iskorišten.");
 
-                var danas = DateTime.Now;
-                if (aktivirana.Promocija.DatumPocetka > danas || aktivirana.Promocija.DatumKraja < danas)
+                var danas = DateTime.Now.Date;
+                if (aktivirana.Promocija.DatumPocetka.Date > danas || aktivirana.Promocija.DatumKraja.Date < danas)
                     throw new UserException("Kod nije validan jer promocija nije aktivna u ovom periodu.");
+
 
                 var uslugaPromocijeID = aktivirana.Promocija.UslugaId;
                 var stavkeUslugeIds = rezervacija.StavkeRezervacije.Select(x => x.UslugaId).ToList();
