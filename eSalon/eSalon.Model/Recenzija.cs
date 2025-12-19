@@ -22,6 +22,9 @@ namespace eSalon.Model
 
         public string? KorisnickoIme { get; set; }
         public string? NazivUsluge { get; set; }
+        public int BrojOdgovora { get; set; }
+        public bool JeLajkOdKorisnika { get; set; } = false;
+        public bool JeDislajkOdKorisnika { get; set; } = false;
 
     }
 }

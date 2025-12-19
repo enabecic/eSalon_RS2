@@ -47,3 +47,20 @@ String formatTime24(TimeOfDay t) {
   final m = t.minute.toString().padLeft(2, '0');
   return "$h:$m";
 }
+
+String formatDatumRecenzije(DateTime datum) {
+  final now = DateTime.now();
+  final difference = now.difference(datum);
+
+  if (difference.inHours < 24) {
+    if (difference.inHours < 1) {
+      return '${difference.inMinutes}min';
+    }
+    return '${difference.inHours}h';
+  }
+
+  return '${datum.day.toString().padLeft(2, '0')}.'
+         '${datum.month.toString().padLeft(2, '0')}.'
+         '${datum.year}';
+}
+

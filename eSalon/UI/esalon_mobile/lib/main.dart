@@ -8,6 +8,8 @@ import 'package:esalon_mobile/providers/nacin_placanja_provider.dart';
 import 'package:esalon_mobile/providers/obavijest_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/promocija_provider.dart';
+import 'package:esalon_mobile/providers/recenzija_odgovor_provider.dart';
+import 'package:esalon_mobile/providers/recenzija_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
 import 'package:esalon_mobile/providers/stavke_rezervacije_provider.dart';
 import 'package:esalon_mobile/providers/uloga_provider.dart';
@@ -37,7 +39,9 @@ void main() {
         ChangeNotifierProvider(create: (_) => RezervacijaProvider()),
         ChangeNotifierProvider(create: (_) => ObavijestProvider()),
         ChangeNotifierProvider(create: (_) => NacinPlacanjaProvider()),
-        
+        ChangeNotifierProvider(create: (_) => RecenzijaProvider()),
+        ChangeNotifierProvider(create: (_) => RecenzijaOdgovorProvider()),
+
       ],
       child: const MyApp(),
     ),

@@ -35,6 +35,15 @@ namespace eSalon.API.Controllers
             return Ok();
         }
 
+        [HttpGet("ReakcijeKorisnika/{korisnikId}/{recenzijaId}")]
+        [Authorize(Roles = "Klijent")]
+        public async Task<ActionResult<Dictionary<int, bool?>>> GetReakcijeKorisnika(int korisnikId, int recenzijaId, CancellationToken cancellationToken = default)
+        {
+            var result = await _recenzijaOdgovorService.GetReakcijeKorisnikaAsync(korisnikId, recenzijaId, cancellationToken);
+            return Ok(result);
+        }
+
+
         [HttpGet]
         [Authorize(Roles = "Klijent,Admin,Frizer")]
         public override Task<PagedResult<RecenzijaOdgovor>> GetList([FromQuery] RecenzijaOdgovorSearchObject searchObject, CancellationToken cancellationToken = default)

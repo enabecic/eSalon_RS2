@@ -12,6 +12,6 @@ namespace eSalon.Services
 {
     public interface IAktiviranaPromocijaService : ICRUDServiceAsync<AktiviranaPromocija, AktiviranaPromocijaSearchObject, AktiviranaPromocijaInsertRequest, AktiviranaPromocijaUpdateRequest>
     {
-        Task OznaciKaoIskoristenuAsync(int korisnikId, int promocijaId, CancellationToken cancellationToken = default);
+       
     }
 }

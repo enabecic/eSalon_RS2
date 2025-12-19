@@ -44,15 +44,15 @@ class _MasterScreenState extends State<MasterScreen> {
 
     _loadNepregledaneObavijesti();
 
-    // Timer za periodično provjeravanje novih obavijesti
-    Timer.periodic(const Duration(seconds: 5), (timer) {//
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      _loadNepregledaneObavijesti();
-    });
-    //
+    // // Timer za periodično provjeravanje novih obavijesti
+    // Timer.periodic(const Duration(seconds: 5), (timer) {//
+    //   if (!mounted) {
+    //     timer.cancel();
+    //     return;
+    //   }
+    //   _loadNepregledaneObavijesti();
+    // });
+    // //
 
   }
 

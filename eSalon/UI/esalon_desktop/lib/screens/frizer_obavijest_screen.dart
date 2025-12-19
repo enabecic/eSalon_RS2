@@ -37,7 +37,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
   Future<void> _loadObavijesti() async {
     if (!mounted) return;
     setState(() => isLoadMoreRunning = true);
-
+    if (!mounted) return;
     var result = await obavijestProvider.get(
       filter: <String, dynamic>{
         'KorisnikId': AuthProvider.korisnikId,
@@ -68,7 +68,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
         scrollController.position.maxScrollExtent - 200) {
       setState(() => isLoadMoreRunning = true);
       page++;
-
+      if (!mounted) return;
       var result = await obavijestProvider.get(
         filter: <String, dynamic>{
           'KorisnikId': AuthProvider.korisnikId,
@@ -95,16 +95,18 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
   Future<void> _markAsRead(Obavijest o) async {
     if (!o.jePogledana) { 
       try {
+        if (!mounted) return;
         await obavijestProvider.oznaciKaoProcitanu(o.obavijestId);
         if (!mounted) return;
 
-        setState(() {
-          o.jePogledana = true;
-
-          if (_filterJePogledana == false) {
-            obavijesti.remove(o);
-          }
-        });
+        if (_filterJePogledana == false) {
+          if (!mounted) return;
+          await _loadObavijesti();
+        } else {
+          setState(() {
+            o.jePogledana = true;
+          });
+        }
 
         widget.onObavijestRead?.call();//
       } catch (e) {

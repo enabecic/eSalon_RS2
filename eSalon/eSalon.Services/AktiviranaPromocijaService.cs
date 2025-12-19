@@ -186,20 +186,5 @@ namespace eSalon.Services
             await base.BeforeDeleteAsync(entity, cancellationToken);
         }
 
-        public async Task OznaciKaoIskoristenuAsync(int korisnikId, int promocijaId, CancellationToken cancellationToken = default)
-        {
-            var aktiviranaPromocija = await Context.AktiviranaPromocijas
-         .FirstOrDefaultAsync(x => x.KorisnikId == korisnikId && x.PromocijaId == promocijaId && !x.IsDeleted, cancellationToken);
-
-            if (aktiviranaPromocija == null)
-               // throw new KeyNotFoundException("Aktivirana promocija nije pronađena.");
-                throw new UserException("Aktivirana promocija nije pronađena.");
-
-            if (aktiviranaPromocija.Iskoristena)
-                throw new UserException("Promocija je već označena kao iskorištena.");
-
-            aktiviranaPromocija.Iskoristena = true;
-            await Context.SaveChangesAsync(cancellationToken);
-        }
     }
 }

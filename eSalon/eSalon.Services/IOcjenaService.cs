@@ -12,6 +12,6 @@ namespace eSalon.Services
 {
     public interface IOcjenaService : ICRUDServiceAsync<Ocjena, OcjenaSearchObject, OcjenaInsertRequest, OcjenaUpdateRequest>
     {
-        Task<double> GetProsjekOcjenaAsync(int uslugaId, CancellationToken cancellationToken = default);
+       
     }
 }

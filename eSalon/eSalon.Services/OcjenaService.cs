@@ -85,18 +85,5 @@ namespace eSalon.Services
             await base.BeforeInsertAsync(request, entity, cancellationToken);
         }
 
-        public async Task<double> GetProsjekOcjenaAsync(int uslugaId, CancellationToken cancellationToken = default)
-        {
-            var ocjene = await Context.Ocjenas
-                .Where(x => x.UslugaId == uslugaId)
-                .ToListAsync(cancellationToken);
-
-            if (ocjene.Count == 0)
-            {
-                throw new UserException("Nema ocjena za datu uslugu!");
-            }
-
-            return ocjene.Average(x => x.Vrijednost);
-        }
     }
 }

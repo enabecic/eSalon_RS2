@@ -182,6 +182,9 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
       hour,
       minute,
     );
+    final razlikaUDanima = datumVrijemeRezervacije.difference(sada).inDays;
+    final bool mozeOtkazati = dozvoljenoPonistavanje && razlikaUDanima >= 3; 
+
     return Padding(
       padding:const EdgeInsets.all(5),
       child: Column(
@@ -361,7 +364,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     textStyle: const TextStyle(
                       color: Colors.white, 
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                     ),
                     child: ElevatedButton(
                       onPressed: () async {
@@ -505,7 +508,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   textStyle: const TextStyle(
                     color: Colors.white, 
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.w600,
                   ),
                   child: ElevatedButton(
                     onPressed: () async {
@@ -639,9 +642,11 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                 const SizedBox(width: 10),
                 if (widget.rezervacija != null && sada.isBefore(datumVrijemeRezervacije)) ...[
                   Tooltip(
-                    message: dozvoljenoPonistavanje
-                      ? "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima, jer eSalon pazi na zadovoljstvo svojih klijenata."
-                      : "Rezervacija se može otkazati samo ako je plaćena gotovinom.",
+                    message: !dozvoljenoPonistavanje
+                      ? "Rezervacija se može otkazati samo ako je plaćena gotovinom."
+                      : razlikaUDanima < 3
+                          ? "Rezervaciju je moguće otkazati najkasnije 3 dana prije termina."
+                          : "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima i to 3 dana prije termina i ako se plaća gotovinom.",
                     decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(20), 
@@ -649,10 +654,10 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     textStyle: const TextStyle(
                       color: Colors.white, 
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                     ),
                     child: ElevatedButton(
-                      onPressed: dozvoljenoPonistavanje ? () async {
+                      onPressed: mozeOtkazati ? () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(

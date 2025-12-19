@@ -113,6 +113,19 @@ namespace eSalon.Services
 
             var result = Mapper.Map<List<Model.Recenzija>>(list);
 
+            var recenzijaIds = list.Select(x => x.RecenzijaId).ToList();
+
+            var odgovoriCount = await Context.RecenzijaOdgovors
+                .Where(o => recenzijaIds.Contains(o.RecenzijaId) && !o.IsDeleted)
+                .GroupBy(o => o.RecenzijaId)
+                .Select(g => new
+                {
+                    RecenzijaId = g.Key,
+                    Count = g.Count()
+                })
+                .ToDictionaryAsync(x => x.RecenzijaId, x => x.Count, cancellationToken);
+
+
             for (int i = 0; i < result.Count; i++)
             {
                 var korisnik = list[i].Korisnik;
@@ -124,6 +137,11 @@ namespace eSalon.Services
                 if (usluga is null) continue;
 
                 result[i].NazivUsluge = usluga.Naziv;
+
+                result[i].BrojOdgovora =
+                    odgovoriCount.TryGetValue(result[i].RecenzijaId, out var brojOdgovora)
+                        ? brojOdgovora
+                        : 0;
 
             }
 
@@ -289,5 +307,27 @@ namespace eSalon.Services
 
             await base.BeforeDeleteAsync(entity, cancellationToken);
         }
+
+        public async Task<Dictionary<int, bool?>> GetReakcijeKorisnikaAsync(int korisnikId, int uslugaId, CancellationToken cancellationToken = default)
+        {
+            var recenzijeIds = await Context.Recenzijas
+                .Where(r => r.UslugaId == uslugaId && !r.IsDeleted)
+                .Select(r => r.RecenzijaId)
+                .ToListAsync(cancellationToken);
+
+            var reakcije = await Context.RecenzijaReakcijas
+                .Where(r => r.KorisnikId == korisnikId
+                            && recenzijeIds.Contains(r.RecenzijaId)
+                            && !r.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            var result = recenzijeIds.ToDictionary(
+                id => id,
+                id => reakcije.FirstOrDefault(r => r.RecenzijaId == id)?.JeLajk
+            );
+
+            return result;
+        }
+
     }
 }

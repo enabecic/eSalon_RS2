@@ -8,6 +8,7 @@ import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
+import 'package:esalon_mobile/screens/recenzije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/usluga.dart';
 import 'package:esalon_mobile/providers/utils.dart';
@@ -901,7 +902,14 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    //
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecenzijeScreen(
+                          uslugaId: widget.usluga.uslugaId!,
+                        ),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 210, 209, 210),

@@ -256,5 +256,26 @@ namespace eSalon.Services
 
             await Context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<Dictionary<int, bool?>> GetReakcijeKorisnikaAsync(int korisnikId, int recenzijaId, CancellationToken cancellationToken = default)
+        {
+            var odgovoriIds = await Context.RecenzijaOdgovors
+        .Where(r => r.RecenzijaId == recenzijaId && !r.IsDeleted)
+        .Select(r => r.RecenzijaOdgovorId)
+        .ToListAsync(cancellationToken);
+
+            var reakcije = await Context.RecenzijaOdgovorReakcijas
+                .Where(r => r.KorisnikId == korisnikId
+                            && odgovoriIds.Contains(r.RecenzijaOdgovorId)
+                            && !r.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            var result = odgovoriIds.ToDictionary(
+                id => id,
+                id => reakcije.FirstOrDefault(r => r.RecenzijaOdgovorId == id)?.JeLajk
+            );
+
+            return result;
+        }
     }
 }

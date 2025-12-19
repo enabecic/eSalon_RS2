@@ -406,13 +406,14 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
         if (!mounted) return;
         await obavijestProvider.oznaciKaoProcitanu(o.obavijestId!);
         if (!mounted) return;
-        setState(() {
-          o.jePogledana = true;
-
-          if (_filterJePogledana == false) { 
-            obavijestList.remove(o);
-          }
-        });
+        if (_filterJePogledana == false) {
+          if (!mounted) return;
+          _loadInitialData();
+        } else {
+          setState(() {
+            o.jePogledana = true;
+          });
+        }
       } catch (e) {
         if (!mounted) return;
         QuickAlert.show(

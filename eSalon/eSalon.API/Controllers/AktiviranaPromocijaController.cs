@@ -19,15 +19,6 @@ namespace eSalon.API.Controllers
             _aktiviranaPromocijaService=aktiviranaPromocijaService;
         }
 
-        [HttpPut("Iskoristi")]
-        [Authorize(Roles = "Klijent")]
-        public async Task<ActionResult> OznačiKaoIskoritenuAsync([FromQuery] int korisnikId, [FromQuery] int promocijaId, CancellationToken cancellationToken)
-        {
-            await _aktiviranaPromocijaService.OznaciKaoIskoristenuAsync(korisnikId, promocijaId, cancellationToken);
-            return Ok();
-        }
-
-
         [HttpGet]
         [Authorize(Roles = "Admin,Klijent")]
         public override Task<PagedResult<AktiviranaPromocija>> GetList([FromQuery] AktiviranaPromocijaSearchObject searchObject, CancellationToken cancellationToken = default)

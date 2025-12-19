@@ -14,5 +14,7 @@ namespace eSalon.Services
     {
         Task ToggleLikeAsync(int recenzijaId, int korisnikId, CancellationToken cancellationToken = default);
         Task ToggleDislikeAsync(int recenzijaId, int korisnikId, CancellationToken cancellationToken = default);
+        Task<Dictionary<int, bool?>> GetReakcijeKorisnikaAsync(int korisnikId, int uslugaId, CancellationToken cancellationToken = default);
+
     }
 }

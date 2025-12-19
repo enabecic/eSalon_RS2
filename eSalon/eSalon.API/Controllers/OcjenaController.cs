@@ -19,15 +19,6 @@ namespace eSalon.API.Controllers
             _ocjenaService = ocjenaService;
         }
 
-        [HttpGet("Prosjek/{uslugaId}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<double>> GetProsjekOcjena(int uslugaId, CancellationToken cancellationToken)
-        {
-            var prosjek = await _ocjenaService.GetProsjekOcjenaAsync(uslugaId, cancellationToken);
-            return Ok(prosjek);
-        }
-
-
         [HttpGet]
         [AllowAnonymous]
         public override Task<PagedResult<Ocjena>> GetList([FromQuery] OcjenaSearchObject searchObject, CancellationToken cancellationToken = default)
