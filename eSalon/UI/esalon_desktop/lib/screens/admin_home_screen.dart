@@ -72,11 +72,17 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     if (AuthProvider.korisnikId == null) return;
 
     try {
+      if (!mounted) return;
       final korisniciResult = await korisnikProvider.get();
+      if (!mounted) return;
       final rezervacijaResult = await rezervacijaProvider.get();
+      if (!mounted) return;
       final arhivaResult = await arhivaProvider.get();
+      if (!mounted) return;
       final recenzijaResult = await recenzijaProvider.get();
+      if (!mounted) return;
       final usluge = await uslugaProvider.get();
+      if (!mounted) return;
       final recenzijaOdgovorResult = await recenzijaOdgovorProvider.get();
 
       rezervacije = rezervacijaResult;
@@ -96,7 +102,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       setState(() {
         isLoading = false;
       });
-
+      if (!mounted) return;
       await QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
@@ -237,6 +243,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                        onPressed: () async {
+                        if (!mounted) return;
                         await _promptSaveReport();
                       },
                     style: ElevatedButton.styleFrom(
@@ -515,7 +522,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       if (renderObject == null || renderObject is! RenderRepaintBoundary) return null;
 
       RenderRepaintBoundary boundary = renderObject;
+      if (!mounted) return null;
       final image = await boundary.toImage(pixelRatio: 3.0);
+      if (!mounted) return null;
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
@@ -527,6 +536,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
 
   Future<void> _promptSaveReport() async {
+    if (!mounted) return;
     bool? potvrda = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -568,6 +578,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
 
     if (potvrda == true) {
+      if (!mounted) return;
       await _exportPdf(); 
     }
   }
@@ -585,6 +596,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final int zbirRecenzija = brojRecenzija + brojRecenzijaOdgovor;
 
     try{
+      if (!mounted) return;
       final chartImageBytes = await _captureChartImage();   
       if (!mounted) return;   
       pdf.addPage(
@@ -632,7 +644,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
         ),
       );
-
+      if (!mounted) return;
       final dir = await getApplicationDocumentsDirectory();
       if (!mounted) return;
       final vrijeme = DateTime.now();
@@ -640,6 +652,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       String path =
             '${dir.path}/Izvjestaj-Dana-${formatDateTimeForFilename(vrijeme.toString())}.pdf';
         File file = File(path);
+        if (!mounted) return;
         file.writeAsBytes(await pdf.save());
         
       if (!mounted) return;

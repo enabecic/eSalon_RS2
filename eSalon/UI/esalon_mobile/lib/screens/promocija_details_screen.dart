@@ -92,11 +92,13 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
       if (!mounted) return;
 
       if (result.result.isNotEmpty) {
+        if (!mounted) return;
         setState(() {
           _jeAktivirana = true;
           _aktiviranaPromocijaId = result.result.first.aktiviranaPromocijaId;
         });
       } else {
+        if (!mounted) return;
         setState(() {
           _jeAktivirana = false;
           _aktiviranaPromocijaId = null;
@@ -176,7 +178,7 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           ),
         ),
       );
-
+      if (!mounted) return;
       setState(() {
         _changed = true;
       });
@@ -272,6 +274,13 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(

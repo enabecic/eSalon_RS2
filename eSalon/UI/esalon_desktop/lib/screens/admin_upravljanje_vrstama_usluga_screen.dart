@@ -106,16 +106,19 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
           const SizedBox(width: 10),
           ElevatedButton(
             onPressed: () async {
+              if (!mounted) return;
               var result = await Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => const AdminUrediDodajVrstuUslugeScreen(),
               ));
               if (result == true) {
+                if (!mounted) return;
                 final refreshed = await _vrstaUslugeProvider.get(
                   filter: {'Naziv': _source.nazivFilter},
                   page: 1,
                   pageSize: _source.pageSize,
                 );
                 int lastPage = (refreshed.count / _source.pageSize).ceil();
+                if (!mounted) return;
                 await _source.reset(targetPage: lastPage);
                 if (!mounted) return;
                 await showDialog(
@@ -229,6 +232,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
   if (!context.mounted) return;
   
   try {
+    if (!context.mounted) return;
     await  reset(targetPage: page);
   } catch (e) {
     if (!context.mounted) return;
@@ -260,10 +264,12 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
       }),
       onSelectChanged: (selected) async {
         if (selected == true) {
+          if (!context.mounted) return;
           var result = await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => AdminUrediDodajVrstuUslugeScreen(vrstaUsluge: item),
           ));
           if (result == true) {
+            if (!context.mounted) return;
             await reset(targetPage: page); 
             if (!context.mounted) return;
             await showDialog(
@@ -337,6 +343,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
         DataCell(
           ElevatedButton(
             onPressed: () async {
+              if (!context.mounted) return;
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
@@ -375,7 +382,9 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
 
               if (confirm == true) {
                 try {
+                  if (!context.mounted) return;
                   await provider.delete(item.vrstaId!);
+                  if (!context.mounted) return;
                   await reset(targetPage: page); 
                   if (!context.mounted) return;
                   await showDialog(
@@ -436,12 +445,13 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
   Future<void> reset({int? targetPage}) async {
     final newPage = targetPage ?? page;
-
+    if (!context.mounted) return;
     final result = await provider.get(
       filter: {'Naziv': nazivFilter},
       page: newPage,
@@ -453,6 +463,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
 
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
+      if (!context.mounted) return;
       final fallbackResult = await provider.get(
         filter: {'Naziv': nazivFilter},
         page: fallbackPage,
@@ -469,6 +480,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
     count = newCount;
 
     setNextView(startIndex: (page - 1) * pageSize);
+    if (!context.mounted) return;
     await Future.delayed(const Duration(milliseconds: 100)); 
     notifyListeners();
   }
@@ -483,6 +495,7 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
     };
 
     try {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
       final result =
           await provider.get(filter: filter, page: page, pageSize: pageSize);
       data = result.result;

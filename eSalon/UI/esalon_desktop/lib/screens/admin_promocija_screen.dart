@@ -124,12 +124,14 @@ class _AdminUpravljanjeUslugamaScreenState
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () async {
+                  if (!mounted) return;
                   var result = await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const AdminPromocijaDetails(),
                     ),
                   );
                   if (result == true) {
+                    if (!mounted) return;
                     final refreshed = await _promocijaProvider.get(
                       filter: {
                         'NazivOpisFTS': _source.nazivFilter,
@@ -144,6 +146,7 @@ class _AdminUpravljanjeUslugamaScreenState
                       pageSize: _source.pageSize,
                     );
                     int lastPage = (refreshed.count / _source.pageSize).ceil();
+                    if (!mounted) return;
                     await _source.reset(targetPage: lastPage);
                     if (!mounted) return;
                     await showDialog(
@@ -418,6 +421,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
     if (!context.mounted) return;
 
     try {
+      if (!context.mounted) return;
       await reset(targetPage: page);
     } catch (e) {
       if (!context.mounted) return;
@@ -449,10 +453,12 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
       }),
       onSelectChanged: (selected) async {
         if (selected == true) {
+          if (!context.mounted) return;
           var result = await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => AdminPromocijaDetails(promocija: item),
           ));
           if (result == true) {
+            if (!context.mounted) return;
             await reset(targetPage: page); 
             if (!context.mounted) return;
             await showDialog(
@@ -552,6 +558,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
         DataCell(
           ElevatedButton(
             onPressed: () async {
+              if (!context.mounted) return;
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (dialogContext) => AlertDialog(
@@ -587,7 +594,9 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
 
               if (confirm == true) {
                 try {
+                  if (!context.mounted) return;
                   await provider.delete(item.promocijaId!);
+                  if (!context.mounted) return;
                   await reset(targetPage: page);
                   if (!context.mounted) return;
                   await showDialog(
@@ -643,12 +652,13 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
   Future<void> reset({int? targetPage}) async {
     final newPage = targetPage ?? page;
-
+    if (!context.mounted) return;
     final result = await provider.get(
       filter: {
         'NazivOpisFTS': nazivFilter,
@@ -667,6 +677,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
 
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
+      if (!context.mounted) return;
       final fallbackResult = await provider.get(
         filter: {
           'NazivOpisFTS': nazivFilter,
@@ -690,6 +701,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
     count = newCount;
 
     setNextView(startIndex: (page - 1) * pageSize);
+    if (!context.mounted) return;
     await Future.delayed(const Duration(milliseconds: 100)); 
     notifyListeners();
   }
@@ -709,6 +721,7 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
     };
 
     try {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
       final result =
           await provider.get(filter: filter, page: page, pageSize: pageSize);
       data = result.result;

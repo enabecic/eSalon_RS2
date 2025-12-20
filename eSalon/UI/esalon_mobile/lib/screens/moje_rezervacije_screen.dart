@@ -97,6 +97,7 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
   void _firstLoad() async {
     if (!mounted) return;
     bool isAktivneTab = _tabController.index == 0;
+    if (!mounted) return;
     setState(() {
       if (isAktivneTab) {
         isAktivneLoading = true;
@@ -332,6 +333,13 @@ class _MojeRezervacijeScreenState extends State<MojeRezervacijeScreen>
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(

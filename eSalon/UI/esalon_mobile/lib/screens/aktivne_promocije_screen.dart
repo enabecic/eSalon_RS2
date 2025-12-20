@@ -502,6 +502,13 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -858,6 +865,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          if (!mounted) return;
                           setState(() {
                             _popustFilter = null;
                             _orderBy = 'DatumKraja';
@@ -871,6 +879,7 @@ class _AktivnePromocijeScreenState extends State<AktivnePromocijeScreen> {
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          if (!mounted) return;
                           setState(() {
                             _popustFilter = tempPopust;                           
                           });

@@ -42,6 +42,7 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
     if (!context.mounted) return;
 
     try {
+      if (!mounted) return;
       final result = await _ulogaProvider.get();
       if (!mounted) return;
       setState(() {
@@ -253,6 +254,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
     if (!context.mounted) return;
 
     try {
+      if (!context.mounted) return;
       await reset(targetPage: page);
     } catch (e) {
       if (!context.mounted) return;
@@ -270,6 +272,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
@@ -279,7 +282,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
       'KorisnickoIme': korisnickoImeFilter,
       if (ulogaIdFilter != null) 'UlogaId': ulogaIdFilter,
     };
-
+    if (!context.mounted) return;
     final result = await provider.get(
       filter: filter,
       page: newPage,
@@ -291,6 +294,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
 
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
+      if (!context.mounted) return;
       final fallbackResult = await provider.get(
         filter: filter,
         page: fallbackPage,
@@ -307,6 +311,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
     count = newCount;
 
     setNextView(startIndex: (page - 1) * pageSize);
+    if (!context.mounted) return;
     await Future.delayed(const Duration(milliseconds: 100));
     notifyListeners();
   }
@@ -326,11 +331,13 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
         return null;
       }),
       onSelectChanged: (_) async {
+        if (!context.mounted) return;
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => KorisniciDetailsScreen(korisnik: item),
           ),
         );
+        if (!context.mounted) return;
         await reset();
       },
       cells: [
@@ -369,11 +376,13 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
           children: [
             ElevatedButton(
               onPressed: () async {
+                if (!context.mounted) return;
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => KorisniciDetailsScreen(korisnik: item),
                   ),
                 );
+                if (!context.mounted) return;
                 await reset();
               },
               style: ElevatedButton.styleFrom(
@@ -403,6 +412,7 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
     };
 
     try {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
       final result =
           await provider.get(filter: filter, page: page, pageSize: pageSize);
       data = result.result;

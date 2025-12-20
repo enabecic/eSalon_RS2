@@ -26,6 +26,8 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
   bool _isConfirmPasswordHidden = true;
 
   Map<String, dynamic> _initialValue = {};
+  bool _isSaving = false;
+  bool _isDeactivating = false;
 
   @override
   void initState() {
@@ -176,6 +178,13 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -381,7 +390,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-                onPressed: () async {
+                 onPressed: _isSaving ? null : () async {
                   if (!mounted) return;
                   final potvrda = await showDialog<bool>(
                     context: context,
@@ -423,14 +432,25 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                           await _save();
                         }
                       },
-              icon: const Icon(Icons.check, color: Colors.black),
-              label: const Text(
-                "Sačuvaj",
-                style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600),
-              ),
+              icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.check, color: Colors.black),
+              label: _isSaving
+                ? const SizedBox.shrink()
+                : const Text(
+                    "Sačuvaj",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),
+                  ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 210, 193, 214),
                 shape: RoundedRectangleBorder(
@@ -443,15 +463,26 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton.icon(
-              onPressed: _onDeaktivirajPressed,
-              icon: const Icon(Icons.block, color: Colors.black),
-              label: const Text(
-                "Deaktiviraj profil",
-                style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600),
-              ),
+              onPressed: _isDeactivating ? null : _onDeaktivirajPressed,
+              icon: _isDeactivating
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.block, color: Colors.black),
+            label: _isDeactivating
+                ? const SizedBox.shrink()
+                : const Text(
+                    "Deaktiviraj profil",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),
+                  ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 210, 209, 210),
                 shape: RoundedRectangleBorder(
@@ -506,6 +537,9 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
               ),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
+
+                if (!mounted) return;
+                  setState(() => _isDeactivating = true);
 
                 try {
                   if (AuthProvider.korisnikId == null) throw UserException("KorisnikId je null.");
@@ -562,6 +596,9 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                     ),
                   );
                 }
+                finally {
+                  if (mounted) setState(() => _isDeactivating = false);
+                }
               },
             ),
           ],
@@ -587,6 +624,8 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       request['lozinka'] = formValues['lozinka'];
       request['lozinkaPotvrda'] = formValues['lozinkaPotvrda'];
     }
+    if (!mounted) return;
+    setState(() => _isSaving = true);
 
     try {
       if (!mounted) return;
@@ -632,6 +671,9 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
           ),
         ),
       );
+    }
+    finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 }

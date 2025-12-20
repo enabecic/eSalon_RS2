@@ -64,6 +64,7 @@ class _AdminPromocijaDetailsState
   }
 
   Future<void> _loadUsluga() async {
+    if (!mounted) return;
     uslugaResult = await uslugaProvider.get();
     if (!mounted) return;
     setState(() {});
@@ -393,6 +394,7 @@ class _AdminPromocijaDetailsState
                             onTap: widget.promocija != null
                                 ? null
                                 : () async {
+                                  if (!mounted) return;
                                     final pickedDate = await showDatePicker(
                                       context: context,
                                       initialDate: field.value ?? DateTime.now(),
@@ -481,6 +483,7 @@ class _AdminPromocijaDetailsState
                           builder: (FormFieldState<DateTime?> field) {
                             return GestureDetector(
                               onTap: () async {
+                                if (!mounted) return;
                                 final pickedDate = await showDatePicker(
                                   context: context,
                                   initialDate: field.value ?? DateTime.now(),
@@ -609,6 +612,7 @@ class _AdminPromocijaDetailsState
               onTap: () async {
                 var isValid = _formKey.currentState!.saveAndValidate();
                 if (isValid) {
+                  if (!mounted) return;
                   final potvrda = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -675,8 +679,10 @@ class _AdminPromocijaDetailsState
                     }
                       try {
                         if (widget.promocija == null) {
+                          if (!mounted) return;
                           await _provider.insert(req);
                         } else {
+                          if (!mounted) return;
                           await _provider.update(widget.promocija!.promocijaId!, req);
                         }
                         if (!mounted) return;

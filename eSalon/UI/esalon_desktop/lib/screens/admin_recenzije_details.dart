@@ -176,6 +176,7 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                         width: 190,
                         child: ElevatedButton(
                           onPressed: () async {
+                            if (!context.mounted) return;
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) => AlertDialog(
@@ -225,9 +226,11 @@ class AdminRecenzijeDetailsScreen extends StatelessWidget {
                               try {
                                 if (isRecenzija) {
                                   final provider = RecenzijaProvider();
+                                  if (!context.mounted) return;
                                   await provider.delete(item.recenzijaId!);
                                 } else {
                                   final provider = RecenzijaOdgovorProvider();
+                                  if (!context.mounted) return;
                                   await provider.delete(item.recenzijaOdgovorId!);
                                 }
                                 if (!context.mounted) return;

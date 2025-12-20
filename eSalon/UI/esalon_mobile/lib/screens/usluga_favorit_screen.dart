@@ -293,6 +293,13 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -331,6 +338,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
       onTap: () async {
         if (!mounted) return;
         try {
+          if (!mounted) return;
           final usluga = await uslugaProvider.getById(e.uslugaId!);
           if (!mounted) return;
           final result = await Navigator.push(
@@ -341,6 +349,7 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
           );
 
           if (result == true) {
+            if (!mounted) return;
             await _loadInitialData();
           }
         } catch (e) {

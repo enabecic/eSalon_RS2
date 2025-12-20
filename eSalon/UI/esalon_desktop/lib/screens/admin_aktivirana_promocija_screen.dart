@@ -267,6 +267,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
     if (!context.mounted) return;
 
     try {
+      if (!context.mounted) return;
       await reset(targetPage: page);
     } catch (e) {
       if (!context.mounted) return;
@@ -299,6 +300,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
 
       onSelectChanged: (selected) async {
         if (selected == true) {
+          if (!context.mounted) return;
           await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => AdminAktiviranaPromocijaDetails(aktiviranaPromocija: item),
           ));
@@ -391,12 +393,13 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
   Future<void> reset({int? targetPage}) async {
     final newPage = targetPage ?? page;
-
+    if (!context.mounted) return;
     final result = await provider.get(
       filter: {
         'KorisnikImePrezime': korisnikImePrezimeFilter,
@@ -412,6 +415,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
 
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
+      if (!context.mounted) return;
       final fallbackResult = await provider.get(
         filter: {
           'KorisnikImePrezime': korisnikImePrezimeFilter,
@@ -432,6 +436,7 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
     count = newCount;
 
     setNextView(startIndex: (page - 1) * pageSize);
+    if (!context.mounted) return;
     await Future.delayed(const Duration(milliseconds: 100)); 
     notifyListeners();
   }

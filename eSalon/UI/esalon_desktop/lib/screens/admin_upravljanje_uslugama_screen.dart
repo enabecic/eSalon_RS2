@@ -239,6 +239,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     if (AuthProvider.korisnikId == null) return; 
     if (!context.mounted) return; 
     try {
+      if (!context.mounted) return;
       await reset(targetPage: page);
     } catch (e) {
       if (!context.mounted) return;
@@ -270,11 +271,13 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
       }),
       onSelectChanged: (selected) async {
         if (selected == true) {
+          if (!context.mounted) return;
           var result = await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => AdminUrediDodajUsluguScreen(usluga: item),
           ));
           
           if (result == true) {
+            if (!context.mounted) return;
             await reset(targetPage: page); 
             if (!context.mounted) return;
             await showDialog(
@@ -370,6 +373,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
         DataCell(
           ElevatedButton(
             onPressed: () async {
+              if (!context.mounted) return;
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
@@ -408,7 +412,9 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
 
               if (confirm == true) {
                 try {
+                  if (!context.mounted) return;
                   await provider.delete(item.uslugaId!);
+                  if (!context.mounted) return;
                   await reset(targetPage: page); 
                   if (!context.mounted) return;
                   await showDialog(
@@ -469,12 +475,13 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
   Future<void> reset({int? targetPage}) async {
     final newPage = targetPage ?? page;
-
+    if (!context.mounted) return;
     final result = await provider.get(
       filter: {'NazivOpisFTS': nazivFilter},
       page: newPage,
@@ -486,6 +493,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
 
     if (newData.isEmpty && newPage > 1) {
       final fallbackPage = newPage - 1;
+      if (!context.mounted) return;
       final fallbackResult = await provider.get(
         filter: {'NazivOpisFTS': nazivFilter},
         page: fallbackPage,
@@ -502,6 +510,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     count = newCount;
 
     setNextView(startIndex: (page - 1) * pageSize);
+    if (!context.mounted) return;
     await Future.delayed(const Duration(milliseconds: 100)); 
     notifyListeners();
   }
@@ -516,6 +525,7 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     };
 
     try {
+      if (!context.mounted) return RemoteDataSourceDetails(0, []);
       final result =
           await provider.get(filter: filter, page: page, pageSize: pageSize);
       data = result.result;

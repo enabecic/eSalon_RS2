@@ -232,6 +232,13 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -264,7 +271,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
   Future<void> _showDateFilterDialog() async {
     DateTime? tempDatumOd = _filterDatumOd;
     DateTime? tempDatumDo = _filterDatumDo;
-
+    if (!mounted) return;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -303,6 +310,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                         : "Odaberite datum"),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
+                      if (!mounted) return;
                       DateTime? selected = await showDatePicker(
                         context: context,
                         initialDate: tempDatumOd ?? DateTime.now(),
@@ -323,6 +331,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                         : "Odaberite datum"),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
+                      if (!mounted) return;
                       DateTime? selected = await showDatePicker(
                         context: context,
                         initialDate: tempDatumDo ?? DateTime.now(),
@@ -345,6 +354,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                             tempDatumOd = null;
                             tempDatumDo = null;
                           });
+                          if (!mounted) return;
                           setState(() {
                             _filterDatumOd = null;
                             _filterDatumDo = null;
@@ -375,7 +385,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                               return;
                             }
                           }
-
+                          if (!mounted) return;
                           setState(() {
                             _filterDatumOd = tempDatumOd;
                             _filterDatumDo = tempDatumDo;
@@ -410,6 +420,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
           if (!mounted) return;
           _loadInitialData();
         } else {
+          if (!mounted) return;
           setState(() {
             o.jePogledana = true;
           });

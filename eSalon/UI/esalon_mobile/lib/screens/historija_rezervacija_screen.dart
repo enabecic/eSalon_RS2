@@ -93,6 +93,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
   void _firstLoad() async {
     if (!mounted) return;
     bool isZavrseneTab = _tabController.index == 0;
+    if (!mounted) return;
     setState(() {
       if (isZavrseneTab) {
         isZavrseneLoading = true;
@@ -335,6 +336,13 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -495,6 +503,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                                                   tempDatumOd = null;
                                                   tempDatumDo = null;
                                                 });
+                                                if (!mounted) return;
                                                 setState(() {
                                                   searchRequest.remove('DatumRezervacijeGTE');
                                                   searchRequest.remove('DatumRezervacijeLTE');
@@ -524,6 +533,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                                                     return;
                                                   }
                                                 }
+                                                if (!mounted) return;
                                                 setState(() {
                                                   searchRequest['DatumRezervacijeGTE'] = tempDatumOd;
                                                   searchRequest['DatumRezervacijeLTE'] = tempDatumDo;
@@ -862,6 +872,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                                                   tempDatumOd = null;
                                                   tempDatumDo = null;
                                                 });
+                                                if (!mounted) return;
                                                 setState(() {
                                                   searchRequest.remove('DatumRezervacijeGTE');
                                                   searchRequest.remove('DatumRezervacijeLTE');
@@ -891,6 +902,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                                                     return;
                                                   }
                                                 }
+                                                if (!mounted) return;
                                                 setState(() {
                                                   searchRequest['DatumRezervacijeGTE'] = tempDatumOd;
                                                   searchRequest['DatumRezervacijeLTE'] = tempDatumDo;

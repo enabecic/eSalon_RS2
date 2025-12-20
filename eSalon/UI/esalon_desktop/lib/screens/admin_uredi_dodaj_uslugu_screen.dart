@@ -67,12 +67,14 @@ class _AdminUrediDodajUsluguScreenState
   }
 
   Future<void> _loadUsluge() async {
+    if (!mounted) return;
     _uslugaResult = await _provider.get();
     if (!mounted) return;
     setState(() {}); 
   }
 
   Future<void> _loadVrsteUsluga() async {
+    if (!mounted) return;
     vrstaUslugeResult = await vrstaUslugeProvider.get();
     if (!mounted) return;
     setState(() {});
@@ -527,6 +529,7 @@ class _AdminUrediDodajUsluguScreenState
               onTap: () async {
                 var isValid = _formKey.currentState!.saveAndValidate();
                 if (isValid) {
+                  if (!mounted) return;
                   final potvrda = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -582,8 +585,10 @@ class _AdminUrediDodajUsluguScreenState
 
                     try {
                       if (widget.usluga == null) {
+                        if (!mounted) return;
                         await _provider.insert(req);
                       } else {
+                        if (!mounted) return;
                         await _provider.update(widget.usluga!.uslugaId!, req);
                       }
                       if (!mounted) return;
@@ -624,9 +629,11 @@ class _AdminUrediDodajUsluguScreenState
   }
 
   void getImage() async {
+    if (!mounted) return;
     var result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.single.path != null) {
       _image = File(result.files.single.path!);
+      if (!mounted) return;
       final bytes = await _image!.readAsBytes();
       _base64Image = base64Encode(bytes);
       _imageProvider = MemoryImage(bytes);

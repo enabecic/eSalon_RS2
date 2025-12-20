@@ -51,7 +51,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
         'orderBy': 'DatumPocetka',
         'sortDirection': 'asc',
       };
-
+      if (!mounted) return;
       final resultPromocije = await _promocijaProvider.get(filter: filterPromocije);
 
       List<Promocija> aktivnePromocije = resultPromocije.result;
@@ -61,6 +61,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
           'KorisnikId': AuthProvider.korisnikId,
           'Iskoristena': true,
         };
+        if (!mounted) return;
         final resultAktivirane = await _aktiviranaPromocijaProvider.get(filter: filterAktivirane);
 
         final aktiviraneIds = resultAktivirane.result.map((e) => e.promocijaId).toList();
@@ -69,7 +70,7 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
             .where((p) => !aktiviraneIds.contains(p.promocijaId))
             .toList();
       }
-
+      if (!mounted) return;
       setState(() {
         _trenutnoAktivne = aktivnePromocije.take(2).toList();
       });
@@ -167,6 +168,13 @@ class _PromocijaScreenState extends State<PromocijaScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(

@@ -51,6 +51,7 @@ class _FrizerUslugeDetailsScreenState
   }
 
   Future<void> _loadVrsteUsluga() async {
+    if (!mounted) return; 
     vrstaUslugeResult = await vrstaUslugeProvider.get();
     if (!mounted) return;
     setState(() {});
@@ -331,9 +332,11 @@ class _FrizerUslugeDetailsScreenState
   }
 
   void getImage() async {
+    if (!mounted) return; 
     var result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.single.path != null) {
       _image = File(result.files.single.path!);
+      if (!mounted) return; 
       final bytes = await _image!.readAsBytes();
       _base64Image = base64Encode(bytes);
       _imageProvider = MemoryImage(bytes);

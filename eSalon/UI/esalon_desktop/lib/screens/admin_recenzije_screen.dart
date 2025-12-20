@@ -243,6 +243,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
     if (!context.mounted) return;
 
     try {
+      if (!context.mounted) return;
       await reset(targetPage: page);
     } catch (e) {
       if (!context.mounted) return;
@@ -260,6 +261,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
   }
 
   void filterServerSide() async {
+    if (!context.mounted) return;
     await reset(targetPage: 1);
   }
 
@@ -272,6 +274,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
 
     try {
       if (tip == PrikazTipa.recenzije) {
+        if (!context.mounted) return;
         final result = await recenzijaProvider.get(
           filter: filter,
           page: newPage,
@@ -280,6 +283,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
         data = result.result;
         count = result.count;
       } else {
+        if (!context.mounted) return;
         final result = await odgovorProvider.get(
           filter: filter,
           page: newPage,
@@ -326,11 +330,13 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
       }),
       onSelectChanged: (selected) async {
         if (selected == true) {
+          if (!context.mounted) return;
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => AdminRecenzijeDetailsScreen(item: item),
             ),
           );
+          if (!context.mounted) return;
           await reset(); 
         }
       },
@@ -379,11 +385,13 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
             onPressed: () async {
+              if (!context.mounted) return;
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => AdminRecenzijeDetailsScreen(item: item),
                 ),
               );
+              if (!context.mounted) return;
               await reset(); 
             },
             child: const Text("Detalji"),
@@ -403,6 +411,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
 
     try{
       if (tip == PrikazTipa.recenzije) {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         final result = await recenzijaProvider.get(
           filter: filter,
           page: page,
@@ -411,6 +420,7 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
         data = result.result;
         count = result.count;
       } else {
+        if (!context.mounted) return RemoteDataSourceDetails(0, []);
         final result = await odgovorProvider.get(
           filter: filter,
           page: page,

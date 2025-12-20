@@ -27,6 +27,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
 
   bool _isHidden = true;
   bool _isHiddenConfirm = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -38,9 +39,11 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
 
   Future<void> _loadKorisnikUloga() async {
     try {
+      if (!mounted) return;
       final result = await _ulogaProvider.get();
       final korisnikUloga =
           result.result.firstWhere((x) => x.naziv == "Klijent");
+      if (!mounted) return;
       setState(() {
         _korisnikUlogaId =korisnikUloga.ulogaId;
       });
@@ -219,6 +222,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                     ? Icons.visibility_off
                                     : Icons.visibility),
                                 onPressed: () {
+                                  if (!mounted) return;
                                   setState(() {
                                     _isHidden = !_isHidden;
                                   });
@@ -251,6 +255,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                     ? Icons.visibility_off
                                     : Icons.visibility),
                                 onPressed: () {
+                                  if (!mounted) return;
                                   setState(() {
                                     _isHiddenConfirm = !_isHiddenConfirm;
                                   });
@@ -271,67 +276,60 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                           SizedBox(
                             width: double.infinity,
                             height: 45,
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                final potvrda = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text("Registracija"),
-                                    content: const Text(
-                                        "Da li ste sigurni da želite kreirati račun?"),
-                                    actions: [
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.deepPurple,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
+                            child: ElevatedButton(
+                              onPressed: _isSaving
+                                  ? null
+                                  : () async {
+                                    if (!mounted) return;
+                                      final potvrda = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text("Registracija"),
+                                          content: const Text(
+                                              "Da li ste sigurni da želite kreirati račun?"),
+                                          actions: [
+                                            TextButton(
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.deepPurple,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                              onPressed: () => Navigator.of(context).pop(false),
+                                              child: const Text(
+                                                "Ne",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                            TextButton(
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.deepPurple,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                              onPressed: () => Navigator.of(context).pop(true),
+                                              child: const Text(
+                                                "Da",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                        child: const Text(
-                                          "Ne",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.deepPurple,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                        ),
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        child: const Text(
-                                          "Da",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                      );
 
-                                if (potvrda == true) {
-                                  await _save();
-                                }
-                              },
-                              icon: const Icon(Icons.check,
-                                  color: Colors.white, size: 20),
-                              label: const Text(
-                                "Kreirajte račun",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                                      if (potvrda == true) {
+                                        if (!mounted) return;
+                                        await _save();
+                                      }
+                                    },
                               style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.resolveWith<Color>(
-                                        (states) {
+                                    MaterialStateProperty.resolveWith<Color>((states) {
                                   if (states.contains(MaterialState.hovered)) {
                                     return Colors.deepPurple;
                                   }
@@ -346,9 +344,32 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                 padding: MaterialStateProperty.all(
                                   const EdgeInsets.symmetric(horizontal: 16),
                                 ),
-                                shadowColor:
-                                    MaterialStateProperty.all(Colors.black54),
+                                shadowColor: MaterialStateProperty.all(Colors.black54),
                               ),
+                              child: _isSaving
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check, color: Colors.white, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "Kreirajte račun",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -398,6 +419,8 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
   Future<void> _save() async {
     final isValid = _formKey.currentState?.saveAndValidate() ?? false;
     if (!isValid) return;
+    if (!mounted) return;
+    setState(() => _isSaving = true);
 
     final formValues = Map<String, dynamic>.from(_formKey.currentState!.value);
 
@@ -413,6 +436,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
     };
 
     try {
+      if (!mounted) return;
       await _korisnikProvider.insert(request);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -447,6 +471,9 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
         textColor: Colors.black,
         titleColor: Colors.black,
       );
+    }
+    finally {
+      if (mounted) setState(() => _isSaving = false); 
     }
   }
 }

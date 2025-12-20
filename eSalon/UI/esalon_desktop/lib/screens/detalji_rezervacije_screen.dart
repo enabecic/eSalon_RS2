@@ -41,9 +41,11 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
     searchRequest = {
       'rezervacijaId': widget.rezervacija!.rezervacijaId,
     };
+    if (!mounted) return;
     stavkeRezervacijeResult = await stavkeRezervacijeProvider.get(
       filter: searchRequest,
     );
+    if (!mounted) return;
     korisnikResult = await korisniciProvider.get();
     if (!mounted) return;
     setState(() {});
@@ -368,6 +370,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     ),
                     child: ElevatedButton(
                       onPressed: () async {
+                        if (!mounted) return;
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
@@ -418,6 +421,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                         if (confirm == true) {
                           try {
                             final provider = RezervacijaProvider();
+                            if (!mounted) return;
                             await provider.odobri(
                               widget.rezervacija!.rezervacijaId!,
                               widget.rezervacija!.frizerId!,
@@ -512,6 +516,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                   ),
                   child: ElevatedButton(
                     onPressed: () async {
+                      if (!mounted) return;
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
@@ -561,6 +566,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                       if (confirm == true) {
                         try {
                           var provider = RezervacijaProvider();
+                          if (!mounted) return;
                           await provider.zavrsi(widget.rezervacija!.rezervacijaId!);
                           if (!mounted) return;
 
@@ -658,6 +664,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     ),
                     child: ElevatedButton(
                       onPressed: mozeOtkazati ? () async {
+                        if (!mounted) return;
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
@@ -693,6 +700,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                         if (confirm == true) {
                           try {
                             var provider = RezervacijaProvider();
+                            if (!mounted) return;
                             await provider.ponisti(widget.rezervacija!.rezervacijaId!);
                             if (!mounted) return;
 

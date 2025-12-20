@@ -53,6 +53,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
   int? _selectedNacinPlacanjaId;
    
   final Map<int, Image> _cachedImages = {}; 
+  double _ukupnaCijena = 0.0;
 
   @override
   void initState() {
@@ -134,6 +135,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       setState(() {
         usluge = lista;
         _isLoadingUsluge = false; 
+        _updateUkupnaCijena();
       });
     } catch (e) {
       if (!mounted) return;
@@ -150,6 +152,66 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
     }
   }
 
+  Future<bool> _saveGotovina() async {
+    if (!mounted) return false;
+    setState(() => _isSaving = true);
+
+    try {
+      final request = {
+        "korisnikId": AuthProvider.korisnikId,
+        "frizerId": widget.frizerId,
+        "datumRezervacije": widget.datumRezervacije.toIso8601String(),
+        "vrijemePocetka":
+            "${widget.vrijemePocetka.hour.toString().padLeft(2, '0')}:${widget.vrijemePocetka.minute.toString().padLeft(2, '0')}:00",
+        "nacinPlacanjaId": _selectedNacinPlacanjaId,
+        "kodPromocije": widget.kodPromocije?.isEmpty ?? true ? null : widget.kodPromocije,
+        "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
+      };
+      if (!mounted) return false;
+      await rezervacijaProvider.insert(request);
+      if (!mounted) return false;
+      await rezervacijaCartProvider?.clearRezervacijaList();
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color.fromARGB(255, 138, 182, 140),
+          duration: Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              "Uspješno kreirana rezervacija.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      );
+      return true;
+    } catch (e) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 1800),
+          content: Center(
+            child: Text(
+              e.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      );
+      return false;
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<bool> _savePaypal() async {
+    // 
+    return false; //
+  }
+  
   Future<bool> _saveRezervaciju() async {
     if (_isSaving) return false;
 
@@ -189,59 +251,17 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       return false;
     }
 
-    final request = {
-      "korisnikId": AuthProvider.korisnikId,
-      "frizerId": widget.frizerId,
-      "datumRezervacije": widget.datumRezervacije.toIso8601String(),
-      "vrijemePocetka":
-          "${widget.vrijemePocetka.hour.toString().padLeft(2, '0')}:${widget.vrijemePocetka.minute.toString().padLeft(2, '0')}:00",
-      "nacinPlacanjaId": _selectedNacinPlacanjaId,
-      "kodPromocije": widget.kodPromocije?.isEmpty ?? true ? null : widget.kodPromocije,
-      "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
-    };
-    if (!mounted) return false;
-    setState(() => _isSaving = true);
+    final odabraniNacin = _naciniPlacanja.firstWhere((x) => x.nacinPlacanjaId == _selectedNacinPlacanjaId,);
+    final nazivPlacanja = (odabraniNacin.naziv ?? "").toLowerCase();
 
-    try {
+    if (nazivPlacanja == "gotovina") {
       if (!mounted) return false;
-      await rezervacijaProvider.insert(request);
+      return await _saveGotovina();
+    } else if (nazivPlacanja.contains("paypal")) {
       if (!mounted) return false;
-
-      await rezervacijaCartProvider?.clearRezervacijaList();
-      if (!mounted) return false;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Color.fromARGB(255, 138, 182, 140),
-          duration: Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              "Uspješno kreirana rezervacija.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      );
-      return true;
-    } catch (e) {
-      if (!mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 1800),
-          content: Center(
-            child: Text(
-              e.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      );
+      return await _savePaypal();
+    } else {
       return false;
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -339,7 +359,6 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
             onPressed: canClick
                 ? () async {
                     if (!mounted) return;
-
                     final potvrda = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -514,14 +533,14 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                "Ukupna cijena: ${getUkupnaCijena().toStringAsFixed(2)} KM",
+                "Ukupna cijena: ${_ukupnaCijena.toStringAsFixed(2)} KM",
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
               ),
-            ),
+            )
           ]
         ],
       ),
@@ -601,7 +620,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
     return TimeOfDay(hour: endHour, minute: endMinute);
   }
 
-  double getUkupnaCijena() {
+  void _updateUkupnaCijena() {
     double total = 0;
     for (var u in usluge.values) {
       double cijena = (u['cijena'] ?? 0).toDouble();
@@ -611,7 +630,10 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       }
       total += cijena;
     }
-    return total;
+    if (!mounted) return;
+    setState(() {
+      _ukupnaCijena = total;
+    });
   }
 
   Widget _buildUslugaRow(Map<String, dynamic> u) {
@@ -832,6 +854,13 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: const Center(
         child: Row(
@@ -839,7 +868,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           children: [
             Flexible(
               child: Text(
-                "Detalji rezervacije",
+                "Pregled rezervacije",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 19,

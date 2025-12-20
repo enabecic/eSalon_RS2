@@ -125,6 +125,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     if (AuthProvider.korisnikId == null) return; 
 
     try {
+      if (!mounted) return; 
       stavkeRezervacijeResult = await stavkeRezervacijeProvider.get();
       if (!mounted) return;
       setState(() {});
@@ -147,6 +148,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     if (!mounted) return;
     if (AuthProvider.korisnikId == null) return; 
     try {
+      if (!mounted) return; 
       var result = await korisnikProvider.get();
 
       frizeri = result.result
@@ -177,7 +179,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
 
     try {
       bool isAktivneTab = _tabController.index == 0;
-
+      if (!mounted) return;
       setState(() {
         if (isAktivneTab) {
           rezervacijeAktivne = [];
@@ -195,7 +197,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
       searchRequest['stateMachine'] = isAktivneTab
           ? ['kreirana', 'odobrena']
           : ['zavrsena', 'ponistena'];
-
+      if (!mounted) return; 
       var rezervacijaResult = await rezervacijaProvider.get(
         filter: searchRequest,
         page: 1,
@@ -254,7 +256,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         searchRequest['stateMachine'] = isAktivneTab
             ? ['kreirana', 'odobrena']
             : ['zavrsena', 'ponistena'];
-
+        if (!mounted) return; 
         var result = await rezervacijaProvider.get(
           filter: searchRequest,
           page: page,
@@ -286,12 +288,14 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         }
       } catch (e) {
         debugPrint('Greška prilikom učitavanja: $e');
-      } finally {
-        if (!mounted) return; 
-        if (isAktivneTab) {
-          setState(() => isLoadMoreRunningAktivne = false);
-        } else {
-          setState(() => isLoadMoreRunningHistorija = false);
+      }
+      finally {
+        if (mounted) {
+          if (isAktivneTab) {
+            setState(() => isLoadMoreRunningAktivne = false);
+          } else {
+            setState(() => isLoadMoreRunningHistorija = false);
+          }
         }
       }
     }
@@ -471,6 +475,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                   },
                   child: InkWell(
                     onTap: () async {
+                      if (!mounted) return; 
                       DateTime? pickedDate = await showDatePicker(
                         context: context,
                         initialDate: DateTime.now(),
@@ -639,6 +644,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                   } else {
                     _lastScrollOffsetHistorija = scrollControllerHistorija.offset;
                   }
+                  if (!mounted) return; 
                   final result = await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => DetaljiRezervacijeScreen(rezervacija: e),
@@ -646,7 +652,8 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                   );
 
                   if (result == true) {
-                    _tabController.index = _lastActiveTab;      
+                    _tabController.index = _lastActiveTab; 
+                    if (!mounted) return;      
                     await _reloadCurrentTab();                  
                     if (_lastActiveTab == 0) {
                       scrollControllerRezervacije.jumpTo(_lastScrollOffsetAktivne); 
@@ -874,6 +881,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         isLoadMoreRunningAktivne = true;
       });
       searchRequest['stateMachine'] = ['kreirana', 'odobrena'];
+      if (!mounted) return; 
       var result = await rezervacijaProvider.get(
         filter: searchRequest,
         pageSize: limit,
@@ -902,7 +910,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
     searchRequest['stateMachine'] = isAktivneTab
         ? ['kreirana', 'odobrena']
         : ['zavrsena', 'ponistena'];
-
+    if (!mounted) return; 
     var result = await rezervacijaProvider.get(
       filter: searchRequest,
       page: 1,
@@ -1155,6 +1163,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
 
   DateTime? datumGTE;
   Future<void> _selectDate(BuildContext context) async {
+    if (!mounted) return; 
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: datumGTE ?? DateTime.now(),
@@ -1293,7 +1302,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
         datumGte.toIso8601String().split('T')[0];
 
     scrollControllerHistorija.jumpTo(0); 
-
+    if (!mounted) return; 
     var result = await rezervacijaProvider.get(
       filter: searchRequest,
       pageSize: limit,

@@ -82,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   AutovalidateMode _autoValidate = AutovalidateMode.disabled;
+  bool _isLoggingIn = false;
 
   @override
   void initState() {
@@ -202,9 +203,10 @@ class _LoginPageState extends State<LoginPage> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                onPressed: () async {
+                                onPressed: _isLoggingIn ? null : () async {
                                     setState(() {
                                       _autoValidate = AutovalidateMode.onUserInteraction;
+                                      _isLoggingIn = true;
                                     });
                                  if (_formKey.currentState?.validate() ?? false) {
                
@@ -266,9 +268,33 @@ class _LoginPageState extends State<LoginPage> {
                                         titleColor: Colors.black,
                                       );
                                     }
+                                    finally {
+                                      if (mounted) {
+                                        setState(() {
+                                          _isLoggingIn = false;
+                                        });
+                                      }
+                                    }
+                                  }
+                                  else {
+                                    setState(() {
+                                      _isLoggingIn = false;
+                                    });
                                   }
                                 },
-                                child: const Text("Prijava"),
+                                child: _isLoggingIn
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Prijava",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                               ),
                             ),
                             const SizedBox(height: 20),

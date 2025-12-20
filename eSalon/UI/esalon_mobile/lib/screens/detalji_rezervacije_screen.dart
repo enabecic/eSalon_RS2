@@ -39,6 +39,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
 
     try {
       final filter = {'RezervacijaId': widget.rezervacija.rezervacijaId};
+      if (!mounted) return;
       final result = await _stavkeProvider.get(filter: filter);
       if (!mounted) return;
       setState(() {
@@ -145,6 +146,13 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.15), 
+          blurRadius: 8, 
+          offset: const Offset(0, 4), 
+        ),
+      ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, 
@@ -258,6 +266,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
     return GestureDetector(
       onTap: () async {
         try {
+          if (!mounted) return;
           final uslugaDetalji = await uslugaProvider.getById(e.uslugaId!);
           if (!mounted) return;
 

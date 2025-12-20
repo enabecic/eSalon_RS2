@@ -59,12 +59,14 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   }
 
   Future _initForm() async {
+    if (!mounted) return;
     korisniciResult = await korisnikProvider.get();
     if (!mounted) return;
     setState(() {});
   }
 
    Future<void> _loadUloga() async {
+    if (!mounted) return;
     ulogeResult = await ulogeProvider.get();
     if (!mounted) return;
     setState(() {});
@@ -581,11 +583,13 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   String? _base64Image;
 
   void getImage() async {
+    if (!mounted) return;
     var result = await FilePicker.platform.pickFiles(type: FileType.image);
 
     if (result != null && result.files.single.path != null) {
       _image = File(result.files.single.path!);
       _base64Image = base64Encode(_image!.readAsBytesSync());
+      if (!mounted) return;
       final bytes = await _image!.readAsBytes();
       _imageProvider = MemoryImage(bytes);
       if (!mounted) return;
@@ -611,6 +615,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
             onTap: () async {
               var isValid = _formKey.currentState!.saveAndValidate();
               if (isValid) {
+                if (!mounted) return;
                 bool confirmAdd = await showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -656,7 +661,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   var req = Map.from(_formKey.currentState!.value);
                   req['slika'] = _base64Image;
                   req['uloge'] = [_formKey.currentState!.fields['uloge']?.value];
-
+                  if (!mounted) return;
                   await korisnikProvider.insert(req);
                   if (!mounted) return;
                   bool shouldPrint = await showDialog(
@@ -742,7 +747,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
 
   void createPdfFile(Map req) async {
     final pdf = pw.Document();
-
+    if (!mounted) return;
     final img = await rootBundle.load('assets/images/logo.png');
     final imageBytes = img.buffer.asUint8List();
     pw.Image image1 = pw.Image(pw.MemoryImage(imageBytes));
@@ -804,7 +809,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
         },
       ),
     );
-
+    if (!mounted) return;
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );

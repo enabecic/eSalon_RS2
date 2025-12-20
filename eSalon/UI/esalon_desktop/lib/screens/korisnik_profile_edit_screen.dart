@@ -65,10 +65,13 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
         );
         if (!mounted) return;
       Navigator.pop(context);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    } 
+    finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -471,6 +474,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                             Navigator.of(dialogContext).pop(); 
 
                             try {
+                              if (!mounted) return;
                               await _provider.deaktiviraj(AuthProvider.korisnikId!);
 
                               AuthProvider.username = null;
@@ -649,6 +653,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
     }
 
     try {
+      if (!mounted) return;
       await _provider.update(AuthProvider.korisnikId!, request);
 
       if (_promijeniLozinku &&
@@ -698,6 +703,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
   }
 
   void getImage() async {
+    if (!mounted) return;
     var result = await FilePicker.platform.pickFiles(type: FileType.image);
 
     if (result != null && result.files.single.path != null) {

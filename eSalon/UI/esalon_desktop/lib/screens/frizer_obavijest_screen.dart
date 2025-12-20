@@ -52,7 +52,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
     if (!mounted) return;
 
     List<Obavijest> filtered = result.result.map((e) => e).toList();
-
+    if (!mounted) return;
     setState(() {
       obavijesti = filtered;
       hasNextPage = filtered.length >= limit;
@@ -66,6 +66,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
 
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
+      if (!mounted) return;
       setState(() => isLoadMoreRunning = true);
       page++;
       if (!mounted) return;
@@ -83,7 +84,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
       if (!mounted) return;
 
       List<Obavijest> more = result.result.map((e) => e).toList();
-
+      if (!mounted) return;
       setState(() {
         obavijesti.addAll(more);
         hasNextPage = more.length >= limit;
@@ -103,6 +104,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
           if (!mounted) return;
           await _loadObavijesti();
         } else {
+          if (!mounted) return;
           setState(() {
             o.jePogledana = true;
           });
@@ -184,6 +186,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                     DropdownMenuItem(value: false, child: Text("Nepregledane")),
                   ],
                   onChanged: (value) {
+                    if (!mounted) return;
                     setState(() {
                       _filterJePogledana = value;
                     });
@@ -203,6 +206,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
               minimumSize: const Size(150, 63),
             ),
             onPressed: () {
+              if (!mounted) return;
               setState(() {
                 _filterJePogledana = null;
               });
@@ -245,6 +249,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                           },
                           child: InkWell(
                             onTap: () async {
+                              if (!mounted) return;
                               await _markAsRead(o);
                               if (!mounted) return;
                               Navigator.push(
