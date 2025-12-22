@@ -348,9 +348,14 @@ class _UslugaFavoritScreenState extends State<UslugaFavoritScreen> {
             ),
           );
 
-          if (result == true) {
-            if (!mounted) return;
-            await _loadInitialData();
+          if (result is Map) {
+            final changedFavorit = result['favorit'] ?? false;
+            final changedOcjena = result['ocjena'] ?? false;
+
+            if (changedFavorit || changedOcjena) {
+              if (!mounted) return;
+              await _loadInitialData();
+            }
           }
         } catch (e) {
           if (!mounted) return;

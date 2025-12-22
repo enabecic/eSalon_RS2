@@ -286,7 +286,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
                 ),
               );
               if (!mounted) return;
-              if (result == true) {
+              if (result is Map && result['korpa'] == true) {
                 await _fetchData();
               }
             } catch (e) {

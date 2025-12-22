@@ -568,10 +568,15 @@ class _PocetniScreenState extends State<PocetniScreen> {
                                 ),
                               );
 
-                              if (result == true) {
-                                page = 1;
-                                _loadFavoriti();
-                                _loadOcjene();
+                              if (result is Map) {
+                                page = 1; 
+
+                                if (result['favorit'] == true) {
+                                  _loadFavoriti();
+                                }
+                                if (result['ocjena'] == true) {
+                                  _loadOcjene();
+                                }
                               }
                             }catch (e) {
                               if (!context.mounted) return;

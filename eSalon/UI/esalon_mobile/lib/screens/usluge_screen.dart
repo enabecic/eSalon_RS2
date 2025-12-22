@@ -731,10 +731,15 @@ class _UslugeScreenState extends State<UslugeScreen> {
                           builder: (context) => UslugaDetailsScreen(usluga: uslugaDetalji),
                         ),
                       );
-                      if (result == true) {
-                        page = 1;
-                        _loadFavoriti();
-                        _loadOcjene();
+                      if (result is Map) {
+                        page = 1; 
+
+                        if (result['favorit'] == true) {
+                          _loadFavoriti(); 
+                        }
+                        if (result['ocjena'] == true) {
+                          _loadOcjene(); 
+                        }
                       }
                     } catch (e) {
                       if (!context.mounted) return;

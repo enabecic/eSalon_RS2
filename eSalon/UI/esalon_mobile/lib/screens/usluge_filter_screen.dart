@@ -790,10 +790,17 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                           builder: (context) => UslugaDetailsScreen(usluga: uslugaDetalji),
                         ),
                       );
-                      if (result == true) {
-                        page = 1;
-                        _loadFavoriti();
-                        _loadOcjene();
+
+                      if (result is Map) {
+                        page = 1; 
+
+                        if (result['favorit'] == true) {
+                          _loadFavoriti(); 
+                        }
+                        if (result['ocjena'] == true) {
+                          _loadOcjene();
+                        }
+
                         if (!mounted) return;
                         setState(() {
                           _changed = true;

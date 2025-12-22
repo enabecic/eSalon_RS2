@@ -17,6 +17,20 @@ namespace eSalon.API.Controllers
         {
         }
 
+
+        [AllowAnonymous]
+        [HttpGet("{uslugaId}/recommended")]
+        public Task<List<Model.Usluga>> Recommend(int uslugaId)
+        {
+            return (_service as IUslugaService).Recommend(uslugaId);
+        }
+        [AllowAnonymous]
+        [HttpGet("traindata")]
+        public void TrainData()
+        {
+            (_service as IUslugaService).TrainData();
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public override Task<PagedResult<Usluga>> GetList([FromQuery] UslugaSearchObject searchObject, CancellationToken cancellationToken = default)

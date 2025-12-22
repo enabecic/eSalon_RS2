@@ -366,9 +366,14 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
               ),
             );
 
-            if (result == true) {
-              if (!mounted) return;
-              await _loadInitialData();
+            if (result is Map) {
+              final changedArhiva = result['arhiva'] ?? false;
+              final changedOcjena = result['ocjena'] ?? false;
+
+              if (changedArhiva || changedOcjena) {
+                if (!mounted) return;
+                await _loadInitialData();
+              }
             }
 
           }catch (e) {

@@ -12,5 +12,7 @@ namespace eSalon.Services
 {
     public interface IUslugaService : ICRUDServiceAsync<Usluga, UslugaSearchObject, UslugaInsertRequest, UslugaUpdateRequest>
     {
+        Task<List<Model.Usluga>> Recommend(int id);
+        void TrainData();
     }
 }

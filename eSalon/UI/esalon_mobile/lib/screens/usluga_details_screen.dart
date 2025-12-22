@@ -8,6 +8,7 @@ import 'package:esalon_mobile/providers/auth_provider.dart';
 import 'package:esalon_mobile/providers/favorit_provider.dart';
 import 'package:esalon_mobile/providers/ocjena_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
+import 'package:esalon_mobile/providers/usluga_provider.dart';
 import 'package:esalon_mobile/screens/recenzije_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:esalon_mobile/models/usluga.dart';
@@ -49,7 +50,11 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   SearchResult<Favorit>? favoritResult;
 
   Image? _cachedImage;
-  bool _changed = false;
+
+  bool _changedFavorit = false;
+  bool _changedArhiva = false;
+  bool _changedOcjena = false;
+  bool _changedKorpa = false;
 
   int _mojaOcjena = 0; 
   bool _isLoadingOcjenaUser = true; 
@@ -57,6 +62,12 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   RezervacijaCartProvider? _cartProvider;
   bool _isLoadingKorpa = false;
   bool _isInKorpa = false;
+
+  late UslugaProvider uslugaProvider;
+  List<Usluga> _recommendedServices = [];
+  bool _isLoadingRecommended = false;
+
+  final Map<int, Image> _recommendedImageCache = {};
 
   @override
   void initState() {
@@ -80,6 +91,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     ocjenaProvider = context.read<OcjenaProvider>();
     favoritProvider = context.read<FavoritProvider>();
     arhivaProvider = context.read<ArhivaProvider>();
+    uslugaProvider = context.read<UslugaProvider>();
 
     if (AuthProvider.korisnikId != null) {
       _cartProvider = RezervacijaCartProvider(AuthProvider.korisnikId!);
@@ -90,6 +102,37 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     _loadOcjena();
     _loadUserOcjena();
     _loadArhivaResult();
+    _loadRecommended();
+  }
+
+  Future<void> _loadRecommended() async {
+    if (!mounted) return;
+    setState(() => _isLoadingRecommended = true);
+
+    try {
+      if (!mounted) return;
+      final result = await uslugaProvider.getRecommendedServices(widget.usluga.uslugaId!);
+
+      if (!mounted) return;
+      setState(() {
+        _recommendedServices = result;
+      });
+    } 
+    catch (e) {
+    if (!mounted) return;
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Greška',
+        text: e.toString(),
+        confirmBtnText: 'OK',
+        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+      );
+    } finally {
+       if (mounted) {
+         setState(() => _isLoadingRecommended = false);
+       }
+     }
   }
 
   Future<void> _loadData() async {
@@ -245,6 +288,196 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     setState(() => _isInKorpa = inRezervacija);
   }
 
+  Widget _buildRecommended() {
+    return Padding(
+      padding: const EdgeInsets.all(1),
+      child: Center(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Uz ${widget.usluga.naziv!} klijenti također rezervišu",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            _isLoadingRecommended
+            ? const Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: CircularProgressIndicator(),
+              )
+            :
+            _recommendedServices.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.content_cut,
+                            size: 40,
+                            color: Color.fromARGB(255, 76, 72, 72),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Nema preporučenih usluga",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(
+                      children: _recommendedServices.map((usluga) {
+                        return Card(
+                            color: Colors.white,
+                            surfaceTintColor: Colors.white,
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  buildRecommendedImage(usluga),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          usluga.naziv!,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 15,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${formatNumber(usluga.cijena)} KM',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.add_circle,
+                                      size: 38,
+                                      color: Color.fromARGB(255, 210, 193, 214),
+                                    ),
+                                    onPressed: () async {
+                                        try {
+                                          if (AuthProvider.korisnikId == null) {
+                                            if (!mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                backgroundColor: Colors.red,
+                                                duration: const Duration(milliseconds: 1500),
+                                                content: Center( 
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.of(context).push(
+                                                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                                                      );
+                                                    },
+                                                    child: RichText(
+                                                      textAlign: TextAlign.center, 
+                                                      text: const TextSpan(
+                                                        text: "Morate biti prijavljeni da biste dodali uslugu u rezervaciju. ",
+                                                        style: TextStyle(color: Colors.white, fontSize: 15),
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "Prijavite se!",
+                                                            style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              decoration: TextDecoration.underline,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+                                          if (!mounted) return;
+                                          await _cartProvider!.addToRezervacijaList(usluga);
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              backgroundColor:
+                                                  Color.fromARGB(255, 138, 182, 140),
+                                              duration: Duration(milliseconds: 500),
+                                              content: Center(
+                                                child: Text(
+                                                    "Uspješno dodano u korpu za rezervaciju."),
+                                              ),
+                                            ),
+                                          );
+                                          if (!mounted) return;
+                                          setState(() {
+                                            _changedKorpa = true;
+                                          });
+                                        } on Exception catch (e) {
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              backgroundColor: Colors.red,
+                                              duration: const Duration(seconds: 1),
+                                              content: Center(
+                                                child: Text(e.toString()),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        if (!mounted) return;
+                                        setState(() {});
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                        //),
+                          );
+                      }).toList(),
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -271,7 +504,12 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                         size: 40,
                       ),
                       onPressed: () {
-                        Navigator.pop(context, _changed);
+                        Navigator.pop(context, {
+                          'favorit': _changedFavorit,
+                          'arhiva': _changedArhiva,
+                          'ocjena': _changedOcjena,
+                          'korpa': _changedKorpa,
+                        });
                       },
                     ),
                     const Expanded(
@@ -329,6 +567,8 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
               const SizedBox(height: 24),
               _buildActionButtons(), 
               _buildOcijeni(),
+              const SizedBox(height: 5),
+              _buildRecommended(),
             ],
           ),
         ),
@@ -564,7 +804,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                       }
                       if (!mounted) return;
                       setState(() {
-                        _changed = true;
+                        _changedFavorit = true;
                       });
                       if (!mounted) return;
                        favoritResult = await favoritProvider.get(filter: {
@@ -676,7 +916,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       setState(() {
         _mojaOcjena = vrijednost;
         _isLoadingOcjenaUser = false;
-        _changed = true;
+        _changedOcjena = true;
       });
       if (!mounted) return;
       await _loadOcjena(); 
@@ -1057,7 +1297,8 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       }
       if (!mounted) return;
       setState(() {
-        _changed = true;
+        _changedArhiva = true;
+
       });
       if (!mounted) return;
       arhivaResult = await arhivaProvider.get(filter: {
@@ -1069,7 +1310,8 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       if (!mounted) return;
       setState(() {
         brojArhiviranja = broj;
-        _changed = true;
+        _changedArhiva = true;
+
       });
 
       setLocalState(() {}); 
@@ -1092,6 +1334,50 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         ),
       );
     }
+  }
+
+  Widget buildRecommendedImage(Usluga usluga) {
+    const double size = 70;
+    final borderRadius = BorderRadius.circular(10);
+
+    if (_recommendedImageCache.containsKey(usluga.uslugaId)) {
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: SizedBox(
+          width: 100,
+          height: size,
+          child: FittedBox(
+            fit: BoxFit.cover, 
+            child: _recommendedImageCache[usluga.uslugaId]!,
+          ),
+        ),
+      );
+    }
+
+    Image image;
+
+    if (usluga.slika != null && usluga.slika!.isNotEmpty) {
+      image = imageFromString(usluga.slika!);
+    } else {
+      image = Image.asset(
+        "assets/images/praznaUsluga.png",
+        fit: BoxFit.cover,
+      );
+    }
+
+    _recommendedImageCache[usluga.uslugaId!] = image;
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: SizedBox(
+        width: 100,
+        height: size,
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: image,
+        ),
+      ),
+    );
   }
 
   Widget _buildImage(String? slikaBase64) {
@@ -1126,4 +1412,3 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   }
 
 }
-

@@ -3,6 +3,7 @@ using eSalon.Model.Requests;
 using eSalon.Model.SearchObjects;
 using eSalon.Services.BaseServicesImplementation;
 using eSalon.Services.Database;
+using eSalon.Services.Recommender;
 using eSalon.Services.Validator.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,10 @@ namespace eSalon.Services
         private readonly IVrstaUslugeValidator _vrstaUslugeValidator;
         private readonly IUslugaValidator _uslugaValidator;
         private readonly IObavijestService _obavijestService;
-        public UslugaService(ESalonContext context, IMapper mapper, IVrstaUslugeValidator vrstaUslugeValidator, IUslugaValidator uslugaValidator, IObavijestService obavijestService) : base(context, mapper)
+        private readonly IRecommenderService recommendService;
+        public UslugaService(ESalonContext context, IMapper mapper, IVrstaUslugeValidator vrstaUslugeValidator, IUslugaValidator uslugaValidator, IObavijestService obavijestService, IRecommenderService recommenderService) : base(context, mapper)
         {
+            this.recommendService = recommenderService;
             _vrstaUslugeValidator = vrstaUslugeValidator;
             _uslugaValidator = uslugaValidator;
             _obavijestService = obavijestService;
@@ -153,6 +156,18 @@ namespace eSalon.Services
 
                 await _obavijestService.InsertAsync(obavijest, cancellationToken);
             }
+        }
+
+
+        public async Task<List<Model.Usluga>> Recommend(int id)
+        {
+            var usluge = await recommendService.GetRecommendedServices(id);
+
+            return usluge;
+        }
+        public void TrainData()
+        {
+            recommendService.TrainData();
         }
 
     }
