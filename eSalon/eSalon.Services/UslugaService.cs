@@ -20,13 +20,13 @@ namespace eSalon.Services
         private readonly IVrstaUslugeValidator _vrstaUslugeValidator;
         private readonly IUslugaValidator _uslugaValidator;
         private readonly IObavijestService _obavijestService;
-        private readonly IRecommenderService recommendService;
+        private readonly IRecommenderService _recommenderService;
         public UslugaService(ESalonContext context, IMapper mapper, IVrstaUslugeValidator vrstaUslugeValidator, IUslugaValidator uslugaValidator, IObavijestService obavijestService, IRecommenderService recommenderService) : base(context, mapper)
         {
-            this.recommendService = recommenderService;
             _vrstaUslugeValidator = vrstaUslugeValidator;
             _uslugaValidator = uslugaValidator;
             _obavijestService = obavijestService;
+            _recommenderService = recommenderService;
         }
 
         public override IQueryable<Usluga> AddFilter(UslugaSearchObject search, IQueryable<Usluga> query)
@@ -159,15 +159,13 @@ namespace eSalon.Services
         }
 
 
-        public async Task<List<Model.Usluga>> Recommend(int id)
+        public async Task<List<Model.Usluga>> Recommend(int usugaId)
         {
-            var usluge = await recommendService.GetRecommendedServices(id);
-
-            return usluge;
+            return await _recommenderService.GetRecommendedServices(usugaId);
         }
-        public void TrainData()
+        public async Task TrainData()
         {
-            recommendService.TrainData();
+            await _recommenderService.TrainData();
         }
 
     }

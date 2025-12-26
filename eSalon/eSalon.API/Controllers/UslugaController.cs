@@ -12,23 +12,26 @@ namespace eSalon.API.Controllers
     [Route("api/[controller]")]
     public class UslugaController : BaseCRUDControllerAsync<Model.Usluga, UslugaSearchObject, UslugaInsertRequest, UslugaUpdateRequest>
     {
+        private readonly IUslugaService _uslugaService;
         public UslugaController(IUslugaService service)
-      : base(service)
+        : base(service)
         {
+            _uslugaService = service;
         }
 
 
         [AllowAnonymous]
         [HttpGet("{uslugaId}/recommended")]
-        public Task<List<Model.Usluga>> Recommend(int uslugaId)
+        public async Task<List<Model.Usluga>> Recommend(int uslugaId)
         {
-            return (_service as IUslugaService).Recommend(uslugaId);
+            return await _uslugaService.Recommend(uslugaId);
         }
+
         [AllowAnonymous]
         [HttpGet("traindata")]
-        public void TrainData()
+        public async Task TrainData()
         {
-            (_service as IUslugaService).TrainData();
+            await _uslugaService.TrainData();
         }
 
         [HttpGet]

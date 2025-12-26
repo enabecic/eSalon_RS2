@@ -32,6 +32,9 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
 
   SearchResult<Korisnik>? korisniciResult;
   SearchResult<Uloga>? ulogeResult;
+
+  bool _isSaving = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -612,7 +615,9 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
             color: const Color.fromARGB(255, 180, 140, 218),
           ),
           child: InkWell(
-            onTap: () async {
+            onTap: _isSaving
+              ? null
+              : () async {
               var isValid = _formKey.currentState!.saveAndValidate();
               if (isValid) {
                 if (!mounted) return;
@@ -656,6 +661,8 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                 if (!confirmAdd) {
                   return; 
                 }
+
+                setState(() => _isSaving = true);
 
                 try {
                   var req = Map.from(_formKey.currentState!.value);
@@ -720,18 +727,31 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                     textColor: Colors.black,
                     titleColor: Colors.black,
                   );
-                }
-              }
-            },
-            child: const Center(
-              child: Text(
-                "Sačuvaj",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color.fromARGB(199, 0, 0, 0),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isSaving = false);
+                      }
+                    }
+                  }
+                },
+            child: Center(
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      "Sačuvaj",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color.fromARGB(199, 0, 0, 0),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ),

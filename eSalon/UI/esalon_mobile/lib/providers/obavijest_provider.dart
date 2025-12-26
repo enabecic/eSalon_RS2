@@ -9,14 +9,6 @@ class ObavijestProvider extends BaseProvider<Obavijest> {
   Obavijest fromJson(data) {
     return Obavijest.fromJson(data);
   }
-  int _neprocitane = 0;
-
-  int get neprocitane => _neprocitane;
-
-  void resetNeprocitane() {
-    _neprocitane = 0;
-    notifyListeners();
-  }
 
   Future<void> oznaciKaoProcitanu(int obavijestId) async {
     var url = "${BaseProvider.baseUrl}Obavijest/OznaciKaoProcitanu/$obavijestId";
@@ -35,24 +27,6 @@ class ObavijestProvider extends BaseProvider<Obavijest> {
       }
       throw UserException("Greška prilikom označavanja obavijesti: ${e.toString()}");
     }
-     if (_neprocitane > 0) {
-      _neprocitane--;
-      notifyListeners();
-    }
-  }
-
-  Future<void> ucitajBrojNeprocitanih(int korisnikId) async {
-    final result = await get(
-      filter: {
-        'KorisnikId': korisnikId,
-        'JePogledana': false,
-      },
-      page: 1,
-      pageSize: 1,
-    );
-
-    _neprocitane = result.count;
-    notifyListeners();
   }
 
 }

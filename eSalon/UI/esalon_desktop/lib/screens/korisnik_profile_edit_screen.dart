@@ -27,6 +27,9 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
   bool _isNewPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
+  bool _isSaving = false; 
+  bool _isDeactivating = false; 
+
   Map<String, dynamic> _initialValue = {};
   bool _isLoading = true;
   late Widget _profileImageWidget;
@@ -430,118 +433,129 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
             width: 190,
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return AlertDialog(
-                      title: const Text("Deaktivacija profila"),
-                      content: const Text("Da li ste sigurni da želite deaktivirati svoj profil?"),
-                      actions: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            "Otkaži",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                          },
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            "Deaktiviraj",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: () async {
-                            Navigator.of(dialogContext).pop(); 
-
-                            try {
-                              if (!mounted) return;
-                              await _provider.deaktiviraj(AuthProvider.korisnikId!);
-
-                              AuthProvider.username = null;
-                              AuthProvider.password = null;
-                              AuthProvider.korisnikId = null;
-                              AuthProvider.ime = null;
-                              AuthProvider.prezime = null;
-                              AuthProvider.email = null;
-                              AuthProvider.telefon = null;
-                              AuthProvider.uloge = null;
-                              AuthProvider.slika = null;
-                              AuthProvider.isSignedIn = false;
-
-                              if (!context.mounted) return;
-                              if (!mounted) return;
-                              await showDialog(           
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text("Uspjeh"),
-                                  content: const Text("Profil je uspješno deaktiviran."),
-                                  actions: [
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.deepPurple,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(); 
-                                      },
-                                      child: const Text(
-                                        "OK",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+              onPressed: _isDeactivating
+                  ? null
+                  : () async {
+                      final potvrda = await showDialog<bool>(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text("Deaktivacija profila"),
+                            content: const Text(
+                                "Da li ste sigurni da želite deaktivirati svoj profil?"),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                              );
+                                child: const Text(
+                                  "Otkaži",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(false);
+                                },
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Deaktiviraj",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop(true);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-                              if (!mounted) return;
-                               Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(builder: (_) => const LoginPage()),
-                                (route) => false,
-                              );
-                          
-                            } catch (e) {
-                              if (!mounted) return;
-                              if (context.mounted) {
-                                QuickAlert.show(
-                                  context: context,
-                                  type: QuickAlertType.error,
-                                  title: 'Greška',
-                                  text: e.toString(),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+                      if (potvrda != true) return;
+
+                      if (!mounted) return;
+                      setState(() => _isDeactivating = true);
+
+                      try {
+                        if (!mounted) return;
+                        await _provider.deaktiviraj(AuthProvider.korisnikId!);
+
+                        AuthProvider.username = null;
+                        AuthProvider.password = null;
+                        AuthProvider.korisnikId = null;
+                        AuthProvider.ime = null;
+                        AuthProvider.prezime = null;
+                        AuthProvider.email = null;
+                        AuthProvider.telefon = null;
+                        AuthProvider.uloge = null;
+                        AuthProvider.slika = null;
+                        AuthProvider.isSignedIn = false;
+
+                        if (!mounted) return;
+                        await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Uspjeh"),
+                            content:
+                                const Text("Profil je uspješno deaktiviran."),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text(
+                                  "OK",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (!mounted) return;
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (route) => false,
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+                        if (context.mounted) {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            title: 'Greška',
+                            text: e.toString(),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isDeactivating = false);
+                        }
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                 foregroundColor: const Color.fromARGB(199, 0, 0, 0),
@@ -549,12 +563,20 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                "Deaktiviraj profil",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600),
-              ),
+              child: _isDeactivating
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      "Deaktiviraj profil",
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
           const Spacer(),
@@ -570,61 +592,77 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () {
+              onPressed: _isSaving ? null : () {
                 showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text(
-                    "Uređivanje profila",
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Uređivanje profila"),
+                    content: const Text("Da li ste sigurni da želite sačuvati izmjene?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); 
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          "Ne",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          if (!mounted) return;
+                          setState(() => _isSaving = true);
+                          try {
+                            await _save();
+                          }
+                          finally {
+                            if (mounted) {
+                              setState(() => _isSaving = false);
+                            }
+                          } 
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          "Da",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-                  content: const Text("Da li ste sigurni da želite sačuvati izmjene?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); 
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Ne",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); 
-                        _save(); 
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Da",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+                );
               },
-              child: const Text(
-                "Sačuvaj",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      "Sačuvaj",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ],

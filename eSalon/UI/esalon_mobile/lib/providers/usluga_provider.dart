@@ -16,22 +16,29 @@ class UslugaProvider extends BaseProvider<Usluga> {
     var uri = Uri.parse(url);
     var headers = createHeaders();
 
-    var response = await http.get(uri, headers: headers);
-    if (response.body.isEmpty || response.body == 'null') {
-      return [];
-    }
-    if (isValidResponse(response)) {
-      var data = json.decode(response.body);
+    try {
+      var response = await http.get(uri, headers: headers);
+
+      if (response.body.isEmpty || response.body == 'null') {
+        return [];
+      }
+
+      if (!isValidResponse(response)) {
+        throw UserException("Greška prilikom dohvatanja preporučenih usluga.");
+      }
+
+      var data = jsonDecode(response.body);
 
       if (data is List) {
-        List<Usluga> dataList =
-            data.map((item) => Usluga.fromJson(item)).toList();
-        return dataList;
+        return data.map((item) => Usluga.fromJson(item)).toList();
       } else {
-        throw UserException("Greška");
+        throw UserException("Greška u formatu podataka.");
       }
+    } catch (e) {
+      if (e is UserException) rethrow;
+      throw UserException(
+          "Greška prilikom dohvatanja preporučenih usluga: ${e.toString()}");
     }
-    throw UserException("Greška");
   }
 
 }

@@ -364,7 +364,7 @@ class _AdminUpravljanjeUslugamaScreenState
                     columns: const [
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija naziva promocije (30 karaktera).",
+                          message: "Prikazuje se skraćena verzija naziva promocije (20 karaktera).",
                           child: Text("Naziv promocije"),
                         ),
                       ),
@@ -497,8 +497,8 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
           Tooltip(
             message: 'Klik za detalje',
             child: Text(
-              (item.naziv != null && item.naziv!.length > 30)
-                  ? '${item.naziv!.substring(0, 30)}...'
+              (item.naziv != null && item.naziv!.length > 20)
+                  ? '${item.naziv!.substring(0, 20)}...'
                   : (item.naziv ?? ''),
             ),
           ),

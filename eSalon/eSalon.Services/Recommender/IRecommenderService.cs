@@ -9,6 +9,6 @@ namespace eSalon.Services.Recommender
     public interface IRecommenderService
     {
         Task<List<Model.Usluga>> GetRecommendedServices(int uslugaId);
-        void TrainData();
+        Task TrainData();
     }
 }

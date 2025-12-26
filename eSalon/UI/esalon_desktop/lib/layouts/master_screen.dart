@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:esalon_desktop/providers/obavijest_provider.dart';
 import 'package:esalon_desktop/screens/admin_aktivirana_promocija_screen.dart';
 import 'package:esalon_desktop/screens/admin_korisnici_screen.dart';
 import 'package:esalon_desktop/screens/admin_promocija_screen.dart';
@@ -17,8 +15,6 @@ import 'package:esalon_desktop/main.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/screens/admin_home_screen.dart';
 import 'package:esalon_desktop/screens/frizer_home_screen.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class MasterScreen extends StatefulWidget {
   final String title;
@@ -29,7 +25,6 @@ class MasterScreen extends StatefulWidget {
   @override
   State<MasterScreen> createState() => _MasterScreenState();
 }
-int nepregledaneObavijesti = 0;
 
 class _MasterScreenState extends State<MasterScreen> {
   late Widget currentScreen;
@@ -41,18 +36,6 @@ class _MasterScreenState extends State<MasterScreen> {
     super.initState();
     currentScreen = widget.initialScreen;
     _selectedTitle = _getTitleForScreen(widget.initialScreen);
-
-    _loadNepregledaneObavijesti();
-
-    // // Timer za periodično provjeravanje novih obavijesti
-    // Timer.periodic(const Duration(seconds: 5), (timer) {//
-    //   if (!mounted) {
-    //     timer.cancel();
-    //     return;
-    //   }
-    //   _loadNepregledaneObavijesti();
-    // });
-    // //
 
   }
 
@@ -66,38 +49,6 @@ class _MasterScreenState extends State<MasterScreen> {
       currentScreen = screen;
       _selectedTitle = title;
     });
-  }
-
-  Future<void> _loadNepregledaneObavijesti() async {
-    if (!mounted) return;
-    if (AuthProvider.korisnikId == null) return; 
-
-    try {
-      late ObavijestProvider obavijestProvider = ObavijestProvider();
-      var result = await obavijestProvider.get(
-        filter: <String, dynamic>{
-          'KorisnikId': AuthProvider.korisnikId,
-          'JePogledana': false,
-        },
-      );
-
-      if (!mounted) return;
-      setState(() {
-        nepregledaneObavijesti = result.result.length;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      await QuickAlert.show(
-      context: context,
-      type: QuickAlertType.error,
-      title: 'Greška',
-      text: e.toString(),
-      confirmBtnText: 'OK',
-      confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-      textColor: Colors.black,
-      titleColor: Colors.black,
-      );
-    }
   }
 
   @override
@@ -169,15 +120,7 @@ class _MasterScreenState extends State<MasterScreen> {
                               _buildListTile(Icons.reviews_outlined, "Recenzije", const FrizerRecenzijaScreen()),
                               _buildListTile(Icons.content_cut, "Usluge", const FrizerUslugeScreen()),
                               _buildListTile(Icons.people_outline, "Korisnici", const FrizerKorisniciScreen()),
-                              _buildListTileObavijest(
-                                Icons.notifications_on_outlined,
-                                "Obavijesti",
-                                FrizerObavijestScreen(
-                                  onObavijestRead: () async {
-                                    await _loadNepregledaneObavijesti();
-                                  },
-                                ),
-                              ),
+                              _buildListTile(Icons.notifications_on_outlined, "Obavijesti", const FrizerObavijestScreen()),
                             ],
                           ],
                         ),
@@ -250,73 +193,6 @@ class _MasterScreenState extends State<MasterScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildListTileObavijest(IconData icon, String title, Widget? screen) { 
-    final bool isSelected = _selectedTitle == title;
-    final bool isHovered = _hoveredTitle == title;
-
-    final double iconSize = isHovered ? 30.0 : 28.0;
-    final double fontSize = isHovered ? 20.0 : 19.0;
-    final FontWeight fontWeight = isSelected ? FontWeight.bold : FontWeight.normal;
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 10),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hoveredTitle = title),
-        onExit: (_) => setState(() => _hoveredTitle = ""),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            if (screen != null) {
-              _setScreen(screen, title);
-            }
-          },
-          child: Stack(
-            children: [
-              ListTile(
-                contentPadding: const EdgeInsets.only(left: 0),
-                leading: Icon(
-                  icon,
-                  size: iconSize,
-                  color: Colors.black,
-                  weight: isSelected ? 800 : 400,
-                ),
-                title: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: fontSize,
-                    fontWeight: fontWeight,
-                  ),
-                ),
-              ),
-              if (nepregledaneObavijesti > 0)
-                Positioned(
-                  right: 10,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      nepregledaneObavijesti.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

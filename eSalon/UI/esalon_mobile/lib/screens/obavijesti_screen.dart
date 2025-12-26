@@ -501,13 +501,32 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          o.jePogledana ? Icons.notifications_active_outlined : Icons.notifications_active,
-                          color: o.jePogledana 
-                              ? Colors.black87
-                              : Colors.black87,
-                          size: 20,
-                        ),
+                        o.jePogledana
+                        ? const Icon(
+                            Icons.notifications_active_outlined,
+                            color: Colors.black87,
+                            size: 20,
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), 
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple, 
+                              borderRadius: BorderRadius.circular(4), 
+                              border: Border.all(
+                                color: Colors.black26, 
+                                width: 1,
+                              ),
+                            ),
+                            child: const Text(
+                              'NOVO',
+                              style: TextStyle(
+                                color: Colors.white, 
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -523,6 +542,7 @@ class _ObavijestiScreenState extends State<ObavijestiScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       formatirajDatum(o.datumObavijesti),
                       style: TextStyle(

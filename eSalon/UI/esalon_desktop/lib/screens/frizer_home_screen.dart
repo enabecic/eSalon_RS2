@@ -533,10 +533,10 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
               pw.Text("Ukupan broj rezervacija: $brojUkupno",
                   style: const pw.TextStyle(fontSize: 16)),
               pw.SizedBox(height: 20),
-              pw.Text("Broj zavrsenih rezervacija: $brojZavrsenih",
+              pw.Text("Ukupan broj zavrsenih rezervacija: $brojZavrsenih",
                   style: const pw.TextStyle(fontSize: 16)),
               pw.SizedBox(height: 20),
-              pw.Text("Broj otkazanih rezervacija: $brojOtkazanih",
+              pw.Text("Ukupan broj otkazanih rezervacija: $brojOtkazanih",
                   style: const pw.TextStyle(fontSize: 16)),
                   pw.SizedBox(height: 20),
               pw.Text(filterTekst,//

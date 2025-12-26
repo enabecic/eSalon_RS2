@@ -128,6 +128,9 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
         confirmBtnText: 'OK',
         confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
       );
+      setState(() {
+        _recommendedServices = [];
+      });
     } finally {
        if (mounted) {
          setState(() => _isLoadingRecommended = false);

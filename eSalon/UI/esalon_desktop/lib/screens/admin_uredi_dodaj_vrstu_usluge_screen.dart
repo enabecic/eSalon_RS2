@@ -36,6 +36,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
   File? _image;
   String? _base64Image;
   ImageProvider? _imageProvider;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -273,7 +274,9 @@ class _AdminUrediDodajVrstuUslugeScreenState
                     : const Color.fromARGB(255, 180, 140, 218),
               ),
               child: InkWell(
-              onTap: () async {
+              onTap: _isSaving
+                ? null
+                : () async {
                 var isValid = _formKey.currentState!.saveAndValidate();
                 if (isValid) {
                   if (!mounted) return;
@@ -325,6 +328,9 @@ class _AdminUrediDodajVrstuUslugeScreenState
                   );
 
                   if (potvrda == true) {
+                    if (!mounted) return;
+                    setState(() => _isSaving = true);
+
                     final req = Map.from(_formKey.currentState!.value);
                     req['slika'] = _base64Image;
 
@@ -352,18 +358,32 @@ class _AdminUrediDodajVrstuUslugeScreenState
                           titleColor: Colors.black,
                         );
                       }
+                      finally {
+                      if (mounted) {
+                        setState(() => _isSaving = false);
+                      }
+                    }
                   }
                 }
               },
-                child: const Center(
-                  child: Text(
-                    "Sačuvaj",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color.fromARGB(199, 0, 0, 0),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                child: Center(
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Sačuvaj",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color.fromARGB(199, 0, 0, 0),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),

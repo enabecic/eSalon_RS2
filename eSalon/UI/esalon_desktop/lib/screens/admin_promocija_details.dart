@@ -42,6 +42,8 @@ class _AdminPromocijaDetailsState
   String? _base64Image;
   ImageProvider? _imageProvider;
 
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -609,75 +611,77 @@ class _AdminPromocijaDetailsState
                     : const Color.fromARGB(255, 180, 140, 218),
               ),
               child: InkWell(
-              onTap: () async {
-                var isValid = _formKey.currentState!.saveAndValidate();
-                if (isValid) {
-                  if (!mounted) return;
-                  final potvrda = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: const Text("Potvrda"),
-                      content: Text(widget.promocija == null
-                          ? "Jeste li sigurni da želite dodati?"
-                          : "Jeste li sigurni da želite urediti?"),
-                      actions: [
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context, false), 
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                onTap: _isSaving ? null : () async { 
+                  var isValid = _formKey.currentState!.saveAndValidate();
+                  if (isValid) {
+                    try {
+                      if (!mounted) return;
+                      final potvrda = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Text(
-                            "Ne",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                          title: const Text("Potvrda"),
+                          content: Text(widget.promocija == null
+                              ? "Jeste li sigurni da želite dodati?"
+                              : "Jeste li sigurni da želite urediti?"),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                "Ne",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                "Da",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context, true), 
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            "Da",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (potvrda == true) {
-                    final req = Map.from(_formKey.currentState!.value);
-                    if (req.containsKey('popust')) {
-                      final popustString = req['popust'];
-                      if (popustString is String) {
-                        req['popust'] = double.tryParse(popustString) ?? 0.0;
-                      } else if (popustString is int) {
-                        req['popust'] = popustString.toDouble();
-                      }
-                    }
-                    if (req.containsKey('datumPocetka') && req['datumPocetka'] != null) {
-                      final DateTime datum = req['datumPocetka'];
-                      req['datumPocetka'] = datum.toIso8601String();
-                    }
-                    if (req.containsKey('datumKraja') && req['datumKraja'] != null) {
-                      final DateTime datum = req['datumKraja'];
-                      req['datumKraja'] = datum.toIso8601String();
-                    }
-                      try {
+                      );
+                      if (potvrda == true) {
+                        if (!mounted) return;
+                        setState(() => _isSaving = true);
+                        final req = Map.from(_formKey.currentState!.value);
+                        if (req.containsKey('popust')) {
+                          final popustString = req['popust'];
+                          if (popustString is String) {
+                            req['popust'] = double.tryParse(popustString) ?? 0.0;
+                          } else if (popustString is int) {
+                            req['popust'] = popustString.toDouble();
+                          }
+                        }
+                        if (req.containsKey('datumPocetka') && req['datumPocetka'] != null) {
+                          final DateTime datum = req['datumPocetka'];
+                          req['datumPocetka'] = datum.toIso8601String();
+                        }
+                        if (req.containsKey('datumKraja') && req['datumKraja'] != null) {
+                          final DateTime datum = req['datumKraja'];
+                          req['datumKraja'] = datum.toIso8601String();
+                        }
                         if (widget.promocija == null) {
                           if (!mounted) return;
                           await _provider.insert(req);
@@ -688,32 +692,46 @@ class _AdminPromocijaDetailsState
                         if (!mounted) return;
                         Navigator.pop(context, true);
                         clearInput();
-                      } catch (e) {
-                        if (!mounted) return;
-                        await QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.error,
-                          title: 'Greška!',
-                          text: e.toString(),
-                          confirmBtnText: 'OK',
-                          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
-                          textColor: Colors.black,
-                          titleColor: Colors.black,
-                        );
+                      }
+                    } catch (e) {
+                      if (!mounted) return;
+                      await QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.error,
+                        title: 'Greška!',
+                        text: e.toString(),
+                        confirmBtnText: 'OK',
+                        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                        textColor: Colors.black,
+                        titleColor: Colors.black,
+                      );
+                    } 
+                    finally {
+                        if (mounted) {
+                          setState(() => _isSaving = false);
+                        }
                       }
                   }
-                }
-              },
-                child: const Center(
-                  child: Text(
-                    "Sačuvaj",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color.fromARGB(199, 0, 0, 0),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                },
+                child: Center(
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Sačuvaj",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color.fromARGB(199, 0, 0, 0),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),            
               ),
             ),
           ),
@@ -721,6 +739,7 @@ class _AdminPromocijaDetailsState
       ),
     );
   }
+
   void clearInput() {
     _formKey.currentState?.reset();
     promocijaError = null;

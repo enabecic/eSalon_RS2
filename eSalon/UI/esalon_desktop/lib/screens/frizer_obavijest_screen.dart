@@ -8,8 +8,7 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 class FrizerObavijestScreen extends StatefulWidget {
-  final VoidCallback? onObavijestRead;//
-  const FrizerObavijestScreen({super.key , this.onObavijestRead});//
+  const FrizerObavijestScreen({super.key});
 
   @override
   State<FrizerObavijestScreen> createState() => _FrizerObavijestScreenState();
@@ -110,7 +109,6 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
           });
         }
 
-        widget.onObavijestRead?.call();//
       } catch (e) {
         if (!mounted) return;
         QuickAlert.show(
@@ -287,17 +285,48 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Obavijest: ${o.naslov.length > 70 ? '${o.naslov.substring(0, 70)}...' : o.naslov}",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: o.jePogledana
-                                          ? FontWeight.normal
-                                          : FontWeight.bold,
-                                      color: o.jePogledana
-                                          ? Colors.black87
-                                          : Colors.black,
-                                    ),
+                                  Row(
+                                    children: [
+                                      o.jePogledana
+                                          ? const Icon(
+                                              Icons.notifications_active_outlined,
+                                              color: Colors.black87,
+                                              size: 20,
+                                            )
+                                          : Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.deepPurple,
+                                                borderRadius: BorderRadius.circular(4),
+                                                border: Border.all(
+                                                  color: Colors.black26,
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'NOVO',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          o.naslov.length > 70
+                                              ? '${o.naslov.substring(0, 70)}...'
+                                              : o.naslov,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight:
+                                                o.jePogledana ? FontWeight.normal : FontWeight.bold,
+                                            color: o.jePogledana ? Colors.black87 : Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -314,15 +343,13 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    "Sadržaj: ${o.sadrzaj.length > 75 ? '${o.sadrzaj.substring(0, 75)}...' : o.sadrzaj}",
+                                    "Sadržaj: ${o.sadrzaj}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: o.jePogledana
-                                          ? FontWeight.normal
-                                          : FontWeight.bold,
-                                      color: o.jePogledana
-                                          ? Colors.black87
-                                          : Colors.black,
+                                      fontWeight: o.jePogledana ? FontWeight.normal : FontWeight.bold,
+                                      color: o.jePogledana ? Colors.black87 : Colors.black,
                                     ),
                                   ),
                                 ],

@@ -792,7 +792,7 @@ class _UslugeFilterScreenState extends State<UslugeFilterScreen> {
                       );
 
                       if (result is Map) {
-                        page = 1; 
+                        //page = 1; 
 
                         if (result['favorit'] == true) {
                           _loadFavoriti(); 
