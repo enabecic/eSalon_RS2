@@ -4,6 +4,7 @@ import 'package:esalon_desktop/models/usluga.dart';
 import 'package:esalon_desktop/providers/promocija_provider.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:esalon_desktop/models/search_result.dart';
@@ -150,7 +151,7 @@ class _AdminPromocijaDetailsState
                   child: Column(
                     children: [
                       const Text(
-                        "Slika usluge:", 
+                        "Slika usluge sa promocije:", 
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.normal,
@@ -169,7 +170,7 @@ class _AdminPromocijaDetailsState
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withAlpha((0.2 * 255).round()),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -242,6 +243,7 @@ class _AdminPromocijaDetailsState
                           decoration: InputDecoration(
                             labelText: 'Naziv promocije',
                             hintText: 'Unesite naziv promocije',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             errorText: promocijaError,
                             enabledBorder: OutlineInputBorder(
@@ -265,7 +267,7 @@ class _AdminPromocijaDetailsState
                           ),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.match(
-                              r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                              RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                               errorText: "Naziv mora početi velikim slovom i sadržavati samo slova.",
                             ),
                             FormBuilderValidators.required(errorText: "Obavezno polje."),
@@ -289,6 +291,7 @@ class _AdminPromocijaDetailsState
                           decoration: InputDecoration(
                             labelText: 'Opis promocije',
                             hintText: 'Unesite opis promocije',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             isDense: true,
                             alignLabelWithHint: true,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -313,7 +316,7 @@ class _AdminPromocijaDetailsState
                           ),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.match(
-                              r'^[A-ZČĆŽĐŠ][\sa-zA-ZčćžđšČĆŽĐŠ.,!?()\-]*$',
+                              RegExp(r'^[A-ZČĆŽĐŠ][\sa-zA-ZčćžđšČĆŽĐŠ.,!?()\-]*$'),
                               errorText: "Opis mora početi velikim slovom i sadržavati samo slova i razmake.",
                             ),
                             FormBuilderValidators.required(errorText: "Obavezno polje."),
@@ -332,9 +335,13 @@ class _AdminPromocijaDetailsState
                         onExit: (_) => setState(() => _isPopustFieldHovered = false),
                         child: FormBuilderTextField(
                           name: 'popust',
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: InputDecoration(
                             labelText: 'Popust (%)',
                             hintText: 'Unesite popust (5 - 100)',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -411,6 +418,7 @@ class _AdminPromocijaDetailsState
                               decoration: InputDecoration(
                                 labelText: 'Datum početka',
                                 hintText: 'Odaberite datum početka',
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
                                 contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                                 errorText: field.errorText,
                                 enabledBorder: OutlineInputBorder(
@@ -441,10 +449,10 @@ class _AdminPromocijaDetailsState
                               child: Text(
                                 field.value != null
                                     ? DateFormat('dd.MM.yyyy').format(field.value!)
-                                    : '',
-                                style: widget.promocija == null
-                                    ? null
-                                    : const TextStyle(color: Colors.black87),
+                                    : 'Odaberite datum početka', 
+                                style: field.value != null
+                                    ? const TextStyle(color: Colors.black87)
+                                    : TextStyle(color: Colors.grey.shade800), 
                               ),
                             ),
                           ),
@@ -467,6 +475,11 @@ class _AdminPromocijaDetailsState
 
                               final pocetak = _formKey.currentState?.fields['datumPocetka']?.value;
 
+                              if (widget.promocija != null) {
+                                if (pocetak != null && (val.isBefore(pocetak) || val.isAtSameMomentAs(pocetak))) {
+                                  return 'Datum kraja mora biti nakon datuma početka';
+                                }
+                              }
                               if (widget.promocija == null) {
                                 final today = DateTime.now();
 
@@ -502,6 +515,7 @@ class _AdminPromocijaDetailsState
                                 decoration: InputDecoration(
                                   labelText: 'Datum kraja',
                                   hintText: 'Odaberite datum kraja',
+                                  floatingLabelBehavior: FloatingLabelBehavior.always,
                                   contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                                   errorText: field.errorText,
                                   enabledBorder: OutlineInputBorder(
@@ -526,8 +540,10 @@ class _AdminPromocijaDetailsState
                                 child: Text(
                                   field.value != null
                                       ? DateFormat('dd.MM.yyyy').format(field.value!)
-                                      : '',
-                                  style: const TextStyle(color: Colors.black87),
+                                      : 'Odaberite datum kraja',
+                                  style: field.value != null
+                                      ? const TextStyle(color: Colors.black87)
+                                      : TextStyle(color: Colors.grey.shade800), 
                                 ),
                               ),
                             );
@@ -564,7 +580,7 @@ class _AdminPromocijaDetailsState
                           filled: true,
                           fillColor: _isDropdownHovered ? const Color(0xFFE0D7F5) : Colors.white,
                           errorStyle: const TextStyle(
-                            color: Colors.red,
+                            color: Color.fromARGB(255, 175, 46, 37),
                             backgroundColor: Colors.transparent,
                             fontSize: 12,
                             height: 1.2,
@@ -723,13 +739,13 @@ class _AdminPromocijaDetailsState
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          "Sačuvaj",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(199, 0, 0, 0),
-                            fontWeight: FontWeight.w600,
-                          ),
+                      : const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                            SizedBox(width: 8),
+                            Text('Sačuvaj', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,),),
+                          ],
                         ),
                 ),            
               ),

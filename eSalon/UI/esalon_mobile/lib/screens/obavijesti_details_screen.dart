@@ -130,32 +130,8 @@ class _ObavijestiDetailsScreenState extends State<ObavijestiDetailsScreen> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: _zatvoriDugme(),
-                      ),
                     ],
                   ),
-      ),
-    );
-  }
-
-  Widget _zatvoriDugme() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton.icon(
-        onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.close, color: Colors.black),
-        label: const Text(
-          "Zatvori",
-          style: TextStyle(
-              color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 210, 209, 210),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
       ),
     );
   }
@@ -167,11 +143,11 @@ class _ObavijestiDetailsScreenState extends State<ObavijestiDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const[
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),

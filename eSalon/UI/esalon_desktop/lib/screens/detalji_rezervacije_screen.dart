@@ -108,7 +108,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     borderRadius: BorderRadius.circular(10),       
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Colors.grey.withAlpha((0.3 * 255).round()),
                         spreadRadius: 2,
                         blurRadius: 5,
                         offset: const Offset(0, 2),
@@ -151,7 +151,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withAlpha((0.5 * 255).round()),
                 spreadRadius: 2,
                 blurRadius: 7,
                 offset:const Offset(0, 3),
@@ -246,7 +246,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
             const SizedBox(height: 10,),
             _buildLabelValue(
               label: "Aktivirana promocija:",
-              value: widget.rezervacija!.aktiviranaPromocijaNaziv ?? 'Nije aktivirana',
+              value: widget.rezervacija!.aktiviranaPromocijaNaziv ?? '/',
             ),
             const SizedBox(height: 10,),
             _buildLabelValue(
@@ -320,7 +320,7 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withAlpha((0.3 * 255).round()),
                   spreadRadius: 2,
                   blurRadius: 5,
                   offset:const Offset(0, 2),
@@ -360,8 +360,8 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                   Tooltip(
                     message: "Molimo odobrite rezervaciju što prije kako bi klijent dobio potvrdu i mogao planirati svoj dolazak.",
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(20), 
+                      color: const Color.fromARGB(221, 92, 87, 87),
+                      borderRadius: BorderRadius.circular(8), 
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     textStyle: const TextStyle(
@@ -493,21 +493,28 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        fixedSize: const Size(190, 50),
+                        fixedSize: const Size(220, 50),
                         textStyle: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const Text("Odobri rezervaciju"),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle_outline, size: 20),
+                          SizedBox(width: 8),
+                          Text('Odobri rezervaciju'),
+                        ],
+                      ),
                     ),
                   ),
                 if (widget.rezervacija?.stateMachine == "odobrena") ...[
                 Tooltip(
                   message: "Molimo označite rezervaciju kao završenu nakon termina.",
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20), 
+                    color: const Color.fromARGB(221, 92, 87, 87),
+                    borderRadius: BorderRadius.circular(8), 
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   textStyle: const TextStyle(
@@ -636,26 +643,33 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      fixedSize: const Size(190, 50),
+                      fixedSize: const Size(220, 50),
                       textStyle: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Text("Završi rezervaciju"),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                        SizedBox(width: 8),
+                        Text('Završi rezervaciju'),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 if (widget.rezervacija != null && sada.isBefore(datumVrijemeRezervacije)) ...[
                   Tooltip(
                     message: !dozvoljenoPonistavanje
-                      ? "Rezervacija se može otkazati samo ako je plaćena gotovinom."
+                      ? "Rezervacija se može otkazati samo ako je način plaćanja gotovina."
                       : razlikaUDanima < 3
                           ? "Rezervaciju je moguće otkazati najkasnije 3 dana prije termina."
-                          : "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima i to 3 dana prije termina i ako se plaća gotovinom.",
+                          : "Molimo da otkažete rezervaciju samo u izuzetnim slučajevima i to 3 dana prije termina i ako je način plaćanja gotovina.",
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(20), 
+                      color: const Color.fromARGB(221, 92, 87, 87),
+                      borderRadius: BorderRadius.circular(8), 
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     textStyle: const TextStyle(
@@ -762,10 +776,23 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        fixedSize: const Size(190, 50),
+                        fixedSize: const Size(220, 50),
                         textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
-                      child: const Text("Otkaži rezervaciju"),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.cancel_outlined,
+                            size: 20,
+                            color: mozeOtkazati
+                                ? const Color.fromARGB(199, 0, 0, 0) 
+                                : Colors.black.withAlpha(97),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Otkaži rezervaciju'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -788,7 +815,14 @@ class _DetaljiNarudzbeScreenState extends State<DetaljiRezervacijeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: const Text("OK"),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.done, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 8),
+                    Text('OK'),
+                  ],
+                ),
               ),
             ],
           )

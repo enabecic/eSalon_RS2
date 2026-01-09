@@ -349,4 +349,8 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-.github/
+eSalon/UI/esalon_mobile/.env
+eSalon/UI/esalon_desktop/.env
+eSalon/.env
+eSalon/eSalon.API/.env
+eSalon/eSalon.Services/.env

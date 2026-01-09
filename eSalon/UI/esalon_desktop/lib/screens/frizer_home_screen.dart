@@ -1,20 +1,16 @@
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
+import 'package:esalon_desktop/providers/report_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/models/search_result.dart';
-import 'package:esalon_desktop/providers/utils.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
-import 'package:flutter/rendering.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
-
 
 class FrizerHomeScreen extends StatefulWidget {
   const FrizerHomeScreen({super.key});
@@ -40,6 +36,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
+      if (!mounted) return;
       korisnikProvider = context.read<KorisnikProvider>();
       rezervacijaProvider = context.read<RezervacijaProvider>();
 
@@ -85,11 +82,11 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
   @override
   Widget build(BuildContext context) {
 
-  if (isLoading) {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     final brojOtkazanih = rezervacije.result
         .where((r) => r.stateMachine?.toLowerCase() == "ponistena")
@@ -118,11 +115,11 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildCard("Ukupan broj rezervacija", brojUkupno.toString())),
+                    Expanded(child: _buildCard("Ukupan broj rezervacija", brojUkupno.toString(), icon: Icons.calendar_today)),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Broj završenih rezervacija", brojZavrsenih.toString())),
+                    Expanded(child: _buildCard("Broj završenih rezervacija", brojZavrsenih.toString(), icon: Icons.check_circle)),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Broj otkazanih rezervacija", brojOtkazanih.toString())),      
+                    Expanded(child: _buildCard("Broj otkazanih rezervacija", brojOtkazanih.toString(), icon: Icons.cancel)),
                   ],
                 ),
                  const SizedBox(height: 40),
@@ -179,21 +176,37 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                             });
                           },
                           style: TextButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             minimumSize: const Size(100, 52), 
                           ),
-                          child: const Text(
-                            'Očisti filter',
-                            style: TextStyle(color: Colors.white),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                              SizedBox(width: 6),
+                              Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+                            ],
                           ),
                         ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+              if (_selectedState != null) 
+                Padding(
+                  padding: const EdgeInsets.only(top: 30, bottom: 0, left: 8),
+                  child: Text(
+                    'Broj rezervacija po filteru $_selectedState: '
+                    '${rezervacije.result.where((r) => r.stateMachine?.toLowerCase() == _selectedState).length}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                  _buildLineChart(),
                 const SizedBox(height: 20),
                 Align(
@@ -204,15 +217,22 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                         await _promptSaveReport();
                       },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                       foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(160, 53), 
                     ),
-                    child: const Text(
-                      "Sačuvaj izvještaj",
-                      style: TextStyle(color: Colors.white),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.download, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          "Sačuvaj izvještaj",
+                          style: TextStyle(color: Color.fromARGB(199, 0, 0, 0)),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -225,46 +245,59 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
     );
   }
 
-  Widget _buildCard(String label, String value) {
+  Widget _buildCard(String label, String value, {IconData? icon}) {
     return Container(
-      height: 100,
+      //height: 130,
+      constraints: const BoxConstraints(
+        minHeight: 130,
+      ),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 225, 205, 235),
         borderRadius: BorderRadius.circular(30),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(), 
-                child: Text(
-                  value,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
-                  ),
-                ),
-              ),
-            ),
-          ],
+        border: Border.all(
+          color: Colors.deepPurple,
+          width: 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(51),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              color: Colors.deepPurple,
+              size: 30,
+            ),
+            const SizedBox(height: 2),
+          ],
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
+          ),
+        ],
       ),
     );
   }
-
 
   final GlobalKey _chartKey = GlobalKey();
   
@@ -421,7 +454,7 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
                           barWidth: 3,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.deepPurple.withOpacity(0.2),
+                            color: Colors.deepPurple.withAlpha((0.2 * 255).round()),
                           ),
                           dotData: const FlDotData(show: true),
                         ),
@@ -435,26 +468,6 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
         ],
       ),
     );
-
-  }
-
-  Future<Uint8List?> _captureChartImage() async {
-    try {
-      if (_chartKey.currentContext == null) return null;
-
-      final renderObject = _chartKey.currentContext!.findRenderObject();
-      if (renderObject == null || renderObject is! RenderRepaintBoundary) return null;
-
-      RenderRepaintBoundary boundary = renderObject;
-      if (!mounted) return null;
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      if (!mounted) return null;
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      debugPrint("Greška kod konvertovanja grafa u sliku: $e");
-      return null;
-    }
   }
 
   Future<void> _promptSaveReport() async {
@@ -475,7 +488,8 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
             ),
             child: const Text(
               "Ne",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
           TextButton(
@@ -488,116 +502,87 @@ class _FrizerHomeScreenState extends State<FrizerHomeScreen> {
             ),
             child: const Text(
               "Da",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
     );
 
+    if (potvrda != true) return;
+
     if (potvrda == true) {
       if (!mounted) return;
-      await _exportPdf(); 
-    }
-  }
 
+      try {
+        if (!mounted) return;
+        final bytes =
+            await context.read<ReportProvider>().getFrizerStatistikaPdf(
+                  stateMachine: _selectedState,
+                );
 
-  Future<void> _exportPdf() async {
-    final pdf = pw.Document();
-    final brojZavrsenih = rezervacije.result
-        .where((r) => r.stateMachine?.toLowerCase() == "zavrsena")
-        .length;
-    final brojOtkazanih = rezervacije.result
-        .where((r) => r.stateMachine?.toLowerCase() == "ponistena")
-        .length;
-    final brojUkupno = rezervacije.result.length;
-    final String filterTekst = (_selectedState == null || _selectedState!.isEmpty) 
-    ? "Odabrano stanje filtera: Sve" 
-    : "Odabrano stanje filtera: ${_selectedState![0].toUpperCase()}${_selectedState!.substring(1)}";
+        if (bytes.isEmpty) return;
+        final name =
+            'FrizerStatistika_${DateFormat('ddMMyyyy_HHmm').format(DateTime.now().toLocal())}.pdf';
+        if (!mounted) return;
+        final location = await getSaveLocation(
+          suggestedName: name,
+          acceptedTypeGroups: [
+            const XTypeGroup(label: 'PDF', extensions: ['pdf']),
+          ],
+        );
 
-    try {
-      if (!mounted) return;
-      final chartImageBytes = await _captureChartImage();
+        if (location == null) return;
 
-      if (!mounted) return;
+        final file = XFile.fromData(
+          Uint8List.fromList(bytes),
+          name: name,
+          mimeType: 'application/pdf',
+        );
+        if (!mounted) return;
+        await file.saveTo(location.path);
 
-      pdf.addPage(
-        pw.Page(
-          build: (context) => pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Izvjestaj za salon:',
-                  style: pw.TextStyle(
-                      fontSize: 22, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 25),
-              pw.Text("Ukupan broj rezervacija: $brojUkupno",
-                  style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Ukupan broj zavrsenih rezervacija: $brojZavrsenih",
-                  style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Ukupan broj otkazanih rezervacija: $brojOtkazanih",
-                  style: const pw.TextStyle(fontSize: 16)),
-                  pw.SizedBox(height: 20),
-              pw.Text(filterTekst,//
-                      style: const pw.TextStyle(fontSize: 16)),
-              if (chartImageBytes != null) ...[
-                pw.SizedBox(height: 20),
-                pw.Text('Graf rezervacija po mjesecima:',
-                    style: const pw.TextStyle(fontSize: 16)),
-                pw.SizedBox(height: 10),
-                pw.Image(pw.MemoryImage(chartImageBytes)),
-              ]
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Uspjeh"),
+            content:
+                Text("PDF je uspješno preuzet na lokaciju:\n${location.path}."),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-      );
-      if (!mounted) return;
-      final dir = await getApplicationDocumentsDirectory();
-      if (!mounted) return;
-
-      final vrijeme = DateTime.now();
-      final path =
-          '${dir.path}/Izvjestaj-Rezervacija-Dana-${formatDateTimeForFilename(vrijeme.toString())}.pdf';
-      final file = File(path);
-      if (!mounted) return;
-      await file.writeAsBytes(await pdf.save());
-
-      if (!mounted) return; 
-
-      await showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Izvještaj uspješno sačuvan"),
-          content: Text("Lokacija izvještaja: ${file.path}"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                "OK",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Greška pri spremanju PDF-a: $e")),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        await QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Greška',
+          text: e.toString(),
+          confirmBtnText: 'OK',
+          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+          textColor: Colors.black,
+          titleColor: Colors.black,
         );
       }
     }

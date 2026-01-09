@@ -76,12 +76,14 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                   controller: _korisnickoImeController,
                   decoration: InputDecoration(
                     labelText: 'Korisničko ime',
+                    hintText: 'Unesite korisničko ime',
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                     filled: true,
-                    fillColor: MaterialStateColor.resolveWith((states) {
-                      if (states.contains(MaterialState.hovered)) {
+                    fillColor: WidgetStateColor.resolveWith((states) {
+                      if (states.contains(WidgetState.hovered)) {
                         return const Color(0xFFE0D7F5);
                       }
-                      if (states.contains(MaterialState.focused)) {
+                      if (states.contains(WidgetState.focused)) {
                         return const Color(0xFFF5F5F5);
                       }
                       return Colors.white;
@@ -119,15 +121,21 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   minimumSize: const Size(150, 63),
                 ),
-                child: const Text("Očisti"),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 6),
+                    Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 15),
           Row(
             children: [
-              Radio<PrikazTipa>(
-                value: PrikazTipa.recenzije,
+              RadioGroup<PrikazTipa>(
                 groupValue: _prikazTipa,
                 onChanged: (value) {
                   if (value != null) {
@@ -139,11 +147,13 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                     });
                   }
                 },
+                child: const Radio<PrikazTipa>(
+                  value: PrikazTipa.recenzije,
+                ),
               ),
               const Text("Prikaži recenzije"),
               const SizedBox(width: 20),
-              Radio<PrikazTipa>(
-                value: PrikazTipa.odgovori,
+              RadioGroup<PrikazTipa>(
                 groupValue: _prikazTipa,
                 onChanged: (value) {
                   if (value != null) {
@@ -155,8 +165,21 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                     });
                   }
                 },
+                child: const Radio<PrikazTipa>(
+                  value: PrikazTipa.odgovori,
+                ),
               ),
               const Text("Prikaži odgovore"),
+              const SizedBox(width: 15),
+
+              const Tooltip(
+                message: "Izaberite da prikažete korisničke recenzije ili odgovore na njih.",
+                child: Icon(
+                  Icons.info_outline,
+                  color: Colors.grey,
+                  size: 20,
+                ),
+              ),
             ],
           ),
         ],
@@ -179,7 +202,7 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -195,18 +218,18 @@ class _FrizerRecenzijaScreenState extends State<FrizerRecenzijaScreen> {
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija korisničkog imena (20 karaktera).",
-                          child: Text("Korisničko ime"),
+                          child: Text("KORISNIČKO IME"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija komentara (30 karaktera).",
-                          child: Text("Komentar"),
+                          child: Text("KOMENTAR"),
                         ),
                       ),
-                      DataColumn(label: Text('Broj lajkova')),
-                      DataColumn(label: Text('Broj dislajkova')),
-                      DataColumn(label: Text('Detalji')),
+                      DataColumn(label: Text('BROJ LAJKOVA')),
+                      DataColumn(label: Text('BROJ DISLAJKOVA')),
+                      DataColumn(label: Text('OPCIJE')),
                     ],
                   ),
                 ),
@@ -321,9 +344,9 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
     }
 
     return DataRow(
-   color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+   color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -394,7 +417,14 @@ class RecenzijaDataSource extends AdvancedDataTableSource<dynamic> {
               if (!context.mounted) return;
               await reset(); 
             },
-            child: const Text("Detalji"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline, size: 20),
+                SizedBox(width: 8),
+                Text('Detalji'),
+              ],
+            ),
           ),
         ),
       ],

@@ -146,11 +146,11 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const[
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -183,7 +183,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -305,7 +305,7 @@ class _DetaljiRezervacijeScreenState extends State<DetaljiRezervacijeScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withAlpha((0.3 * 255).round()),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),

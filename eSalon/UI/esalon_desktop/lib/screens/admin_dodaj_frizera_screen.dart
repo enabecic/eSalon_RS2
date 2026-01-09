@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
+import 'package:esalon_desktop/providers/report_provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -11,12 +13,10 @@ import 'package:esalon_desktop/models/korisnik.dart';
 import 'package:esalon_desktop/models/search_result.dart';
 import 'package:esalon_desktop/models/uloga.dart';
 import 'package:esalon_desktop/providers/uloga_provider.dart';
-import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 class AdminDodajFrizeraScreen extends StatefulWidget {
   const AdminDodajFrizeraScreen({super.key});
@@ -34,6 +34,14 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   SearchResult<Uloga>? ulogeResult;
 
   bool _isSaving = false;
+
+  bool _isUsernameHovered = false;
+  bool _isLozinkaHovered = false;
+  bool _isLozinkaPotvrdaHovered = false;
+  bool _isImeHovered = false; 
+  bool _isPrezimeHovered = false; 
+  bool _isEmailHovered = false; 
+  bool _isTelefonHovered = false; 
 
   @override
   void didChangeDependencies() {
@@ -77,9 +85,6 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
   
   @override
   Widget build(BuildContext context) {
-    // if (ulogeResult == null) {
-    //   return const Center(child: CircularProgressIndicator());
-    // }
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 251, 240, 255),
       body: Column(
@@ -143,51 +148,65 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: FormBuilderTextField(
-                      name: 'korisnickoIme',
-                      decoration: InputDecoration(
-                        labelText: 'Korisničko ime',
-                        hintText: 'Unesite korisničko ime',
-                        errorText: usernameError,
-                        labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 108, 108, 108),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(
-                            errorText: "Obavezno polje."),
-                        FormBuilderValidators.minLength(4,
-                            errorText: "Minimalno 4 karaktera."),
-                        FormBuilderValidators.maxLength(30,
-                            errorText: "Maksimalno 30 karaktera."),
-                      ]),
-                      onChanged: (value) async {
-                        if (value != null && korisniciResult != null) {
-                          var username =  korisniciResult!.result
-                              .map((e) => e.korisnickoIme == value)
-                              .toList();
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isUsernameHovered = true),
+                      onExit: (_) => setState(() => _isUsernameHovered = false),
+                        child: FormBuilderTextField(
+                          name: 'korisnickoIme',
+                          inputFormatters: [
+                            FilteringTextInputFormatter.deny(RegExp(r'\s')), 
+                          ],
+                          decoration: InputDecoration(
+                            labelText: 'Korisničko ime',
+                            hintText: 'Unesite korisničko ime',
+                            errorText: usernameError,
+                            labelStyle: const TextStyle(
+                              color: Color.fromARGB(255, 108, 108, 108),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: _isUsernameHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                          ),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(
+                                errorText: "Obavezno polje."),
+                            FormBuilderValidators.minLength(4,
+                                errorText: "Minimalno 4 karaktera."),
+                            FormBuilderValidators.maxLength(30,
+                                errorText: "Maksimalno 30 karaktera."),
 
-                          if (username.contains(true)) {
-                            usernameError =
-                                "Korisnik s tim imenom već postoji.";
-                                if (!mounted) return;
+                            (val) {
+                              if (val != null && val.contains(' ')) {
+                                return 'Korisničko ime ne smije sadržavati razmake.';
+                              }
+                              return null;
+                            },
+                          ]),
+                          onChanged: (value) async {
+                            if (value != null && korisniciResult != null) {
+                              var username =  korisniciResult!.result
+                                  .map((e) => e.korisnickoIme == value)
+                                  .toList();
+
+                              if (username.contains(true)) {
+                                usernameError =
+                                    "Korisnik s tim imenom već postoji.";
+                                    if (!mounted) return;
+                                setState(() {});
+                              } else {
+                                usernameError = null;
+                              }
+                            }
+                            if (!mounted) return;
                             setState(() {});
-                          } else {
-                            usernameError = null;
-                          }
-                        }
-                        if (!mounted) return;
-                        setState(() {});
-                      },
-                    ),
+                          },
+                        ),
+                    ),  
                   ),
                 ],
               ),
@@ -195,90 +214,98 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: FormBuilderTextField(
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Lozinka',
-                        errorText: confirmPasswordError,
-                        labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 108, 108, 108),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: "Lozinka",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureLozinka ? Icons.visibility_off : Icons.visibility,
+                    child: MouseRegion( 
+                      onEnter: (_) => setState(() => _isLozinkaHovered = true), 
+                      onExit: (_) => setState(() => _isLozinkaHovered = false),
+                        child: FormBuilderTextField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: 'Lozinka',
+                            errorText: confirmPasswordError,
+                            labelStyle: const TextStyle(
+                              color: Color.fromARGB(255, 108, 108, 108),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintText: "Lozinka",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: _isLozinkaHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureLozinka ? Icons.visibility_off : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                if (!mounted) return;
+                                setState(() {
+                                  _obscureLozinka = !_obscureLozinka;
+                                });
+                              },
+                            ),
                           ),
-                          onPressed: () {
-                            if (!mounted) return;
-                            setState(() {
-                              _obscureLozinka = !_obscureLozinka;
-                            });
-                          },
+                          name: 'lozinka',
+                          obscureText: _obscureLozinka,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: "Obavezno polje."),
+                          ]),
                         ),
-                      ),
-                      name: 'lozinka',
-                      obscureText: _obscureLozinka,
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(errorText: "Obavezno polje."),
-                      ]),
-                    ),
+                    ),  
                   ),
                   const SizedBox(width: 15),
                   Expanded(
-                    child: FormBuilderTextField(
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        errorText: confirmPasswordError,
-                        labelText: 'Lozinka potvrda',
-                        labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 108, 108, 108),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: "Lozinka potvrda",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureLozinkaPotvrda ? Icons.visibility_off : Icons.visibility,
+                    child: MouseRegion( 
+                      onEnter: (_) => setState(() => _isLozinkaPotvrdaHovered = true), 
+                      onExit: (_) => setState(() => _isLozinkaPotvrdaHovered = false),
+                        child: FormBuilderTextField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            errorText: confirmPasswordError,
+                            labelText: 'Lozinka potvrda',
+                            labelStyle: const TextStyle(
+                              color: Color.fromARGB(255, 108, 108, 108),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintText: "Lozinka potvrda",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: _isLozinkaPotvrdaHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureLozinkaPotvrda ? Icons.visibility_off : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                if (!mounted) return;
+                                setState(() {
+                                  _obscureLozinkaPotvrda = !_obscureLozinkaPotvrda;
+                                });
+                              },
+                            ),
                           ),
-                          onPressed: () {
+                          name: 'lozinkaPotvrda',
+                          obscureText: _obscureLozinkaPotvrda,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: "Obavezno polje."),
+                          ]),
+                          onChanged: (value) {
+                            if (value != null &&
+                                _formKey.currentState!.fields['lozinka']?.value != value) {
+                              confirmPasswordError =
+                                  "Lozinka potvrda se mora podudarati sa unesenom lozinkom.";
+                            } else {
+                              confirmPasswordError = null;
+                            }
                             if (!mounted) return;
-                            setState(() {
-                              _obscureLozinkaPotvrda = !_obscureLozinkaPotvrda;
-                            });
+                            setState(() {});
                           },
                         ),
-                      ),
-                      name: 'lozinkaPotvrda',
-                      obscureText: _obscureLozinkaPotvrda,
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(errorText: "Obavezno polje."),
-                      ]),
-                      onChanged: (value) {
-                        if (value != null &&
-                            _formKey.currentState!.fields['lozinka']?.value != value) {
-                          confirmPasswordError =
-                              "Lozinka potvrda se mora podudarati sa unesenom lozinkom.";
-                        } else {
-                          confirmPasswordError = null;
-                        }
-                        if (!mounted) return;
-                        setState(() {});
-                      },
-                    ),
+                    ),   
                   ),
                   const SizedBox(width: 15),
                   Expanded(
@@ -305,13 +332,24 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                             }
                           },
                           child: const Center(
-                            child: Text(
-                              "Generiši lozinku",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(199, 0, 0, 0),
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min, 
+                              children: [
+                                Icon(
+                                  Icons.lock_open, 
+                                  size: 18,
+                                  color: Color.fromARGB(199, 0, 0, 0),
+                                ),
+                                SizedBox(width: 6), 
+                                Text(
+                                  "Generiši lozinku",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(199, 0, 0, 0),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -324,46 +362,60 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: buildFormBuilderTextField(
-                      name: 'ime',
-                      labelText: 'Ime',
-                      hintText: "Unesite ime",
-                      validators: [
-                        FormBuilderValidators.required(
-                            errorText: "Obavezno polje."),
-                        FormBuilderValidators.minLength(1,
-                            errorText: "Ime ne može biti prazno."),
-                        FormBuilderValidators.maxLength(50,
-                            errorText:
-                                "Maksimalna dužina imena je 50 znakova."),
-                        FormBuilderValidators.match(
-                            r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ]*$',
-                            errorText:
-                                "Ime mora počinjati sa velikim slovom i smije sadržavati samo slova.")
-                      ],
-                    ),
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isImeHovered = true), 
+                      onExit: (_) => setState(() => _isImeHovered = false), 
+                        child: buildFormBuilderTextField(
+                          name: 'ime',
+                          labelText: 'Ime',
+                          hintText: "Unesite ime",
+                          fillColor: _isImeHovered
+                            ? const Color(0xFFE0D7F5)
+                            : Colors.white,
+                          validators: [
+                            FormBuilderValidators.required(
+                                errorText: "Obavezno polje."),
+                            FormBuilderValidators.minLength(1,
+                                errorText: "Ime ne može biti prazno."),
+                            FormBuilderValidators.maxLength(50,
+                                errorText:
+                                    "Maksimalna dužina imena je 50 znakova."),
+                            FormBuilderValidators.match(
+                                RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ]*$'),
+                                errorText:
+                                    "Ime mora počinjati sa velikim slovom i smije sadržavati samo slova.")
+                          ],
+                        ),
+                    ),   
                   ),
                   const SizedBox(width: 15),
                   Expanded(
-                    child: buildFormBuilderTextField(
-                      name: 'prezime',
-                      labelText: 'Prezime',
-                      hintText: "Unesite prezime",
-                      validators: [
-                        FormBuilderValidators.required(
-                            errorText: "Obavezno polje."),
-                        FormBuilderValidators.minLength(1,
-                            errorText:
-                                "Prezime ne može biti prazno."),
-                        FormBuilderValidators.maxLength(50,
-                            errorText:
-                                "Maksimalna dužina prezimena je 50 znakova."),
-                        FormBuilderValidators.match(
-                            r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ]*$',
-                            errorText:
-                                "Prezime mora počinjati sa velikim slovom i smije sadržavati samo slova.")
-                      ],
-                    ),
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isPrezimeHovered = true), 
+                      onExit: (_) => setState(() => _isPrezimeHovered = false),
+                        child: buildFormBuilderTextField(
+                          name: 'prezime',
+                          labelText: 'Prezime',
+                          hintText: "Unesite prezime",
+                          fillColor: _isPrezimeHovered
+                            ? const Color(0xFFE0D7F5)
+                            : Colors.white,
+                          validators: [
+                            FormBuilderValidators.required(
+                                errorText: "Obavezno polje."),
+                            FormBuilderValidators.minLength(1,
+                                errorText:
+                                    "Prezime ne može biti prazno."),
+                            FormBuilderValidators.maxLength(50,
+                                errorText:
+                                    "Maksimalna dužina prezimena je 50 znakova."),
+                            FormBuilderValidators.match(
+                                RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ]*$'),
+                                errorText:
+                                    "Prezime mora počinjati sa velikim slovom i smije sadržavati samo slova.")
+                          ],
+                        ),
+                    ),  
                   ),
                 ],
               ),
@@ -371,31 +423,46 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: buildFormBuilderTextField(
-                      name: 'email',
-                      labelText: 'Email',
-                      hintText: "Unesite email",
-                      validators: [
-                        FormBuilderValidators.required(errorText: "Obavezno polje."),
-                        FormBuilderValidators.email(errorText: "Email nije validan."),
-                        FormBuilderValidators.maxLength(100,
-                          errorText: "Email može imati najviše 100 karaktera."),
-                      ],
-                    ),
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isEmailHovered = true), 
+                      onExit: (_) => setState(() => _isEmailHovered = false),
+                        child: buildFormBuilderTextField(
+                          name: 'email',
+                          labelText: 'Email',
+                          hintText: "Unesite email",
+                          fillColor: _isEmailHovered
+                                ? const Color(0xFFE0D7F5)
+                                : Colors.white,
+                          validators: [
+                            FormBuilderValidators.required(errorText: "Obavezno polje."),
+                            FormBuilderValidators.email(errorText: "Email nije validan."),
+                            FormBuilderValidators.maxLength(100,
+                              errorText: "Email može imati najviše 100 karaktera."),
+                          ],
+                        ),
+                    ),  
                   ),
                   const SizedBox(width: 15), 
                   Expanded(
-                    child: buildFormBuilderTextField(
-                      name: 'telefon',
-                      labelText: 'Broj telefona',
-                      hintText: "Unesite telefon (npr. +387...)",
-                      validators: [
-                        FormBuilderValidators.required(errorText: "Obavezno polje."),
-                        FormBuilderValidators.match(r'^\+\d{7,15}$',
-                            errorText:
-                                "Telefon mora imati od 7 do 15 cifara i počinjati znakom +."),
-                      ],
-                    ),
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isTelefonHovered = true), 
+                      onExit: (_) => setState(() => _isTelefonHovered = false),
+                        child: buildFormBuilderTextField(
+                          name: 'telefon',
+                          labelText: 'Broj telefona',
+                          hintText: "Unesite telefon (npr. +387...)",
+                          fillColor: _isTelefonHovered
+                                  ? const Color(0xFFE0D7F5)
+                                  : Colors.white,
+                          validators: [
+                            FormBuilderValidators.required(errorText: "Obavezno polje."),
+                            FormBuilderValidators.match( 
+                              RegExp(r'^\+\d{7,15}$'),
+                                errorText:
+                                    "Telefon mora imati od 7 do 15 cifara i počinjati znakom +."),
+                          ],
+                        ),
+                    ),  
                   ),
                 ],
               ),
@@ -423,7 +490,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                               ),
                               filled: true,
                               fillColor: _isImageFieldHovered
-                                  ? const Color.fromARGB(255, 244, 243, 243)
+                                  ? const Color(0xFFE0D7F5)
                                   : Colors.white,
                             ),
                             child: ListTile(
@@ -450,7 +517,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withAlpha((0.2 * 255).round()),
                           spreadRadius: 5,
                           blurRadius: 7,
                           offset: const Offset(0, 3),
@@ -473,17 +540,18 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                         decoration: InputDecoration(
                           labelText: 'Uloga',
                           hintText: 'Odaberite ulogu',
+                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 108, 108, 108),
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           filled: true,
-                          fillColor: _isHovered ? const Color.fromARGB(255, 244, 243, 243) : Colors.white,
+                          fillColor: _isHovered ? const Color(0xFFE0D7F5) : Colors.white,
                         ),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: "Obavezno polje."),
@@ -560,6 +628,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
     required String labelText,
     String? hintText,
     List<String? Function(String?)>? validators,
+    Color? fillColor,
   }) {
     return FormBuilderTextField(
       name: name,
@@ -576,7 +645,7 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: fillColor ?? Colors.white,
       ),
       validator: FormBuilderValidators.compose(validators ?? []),
     );
@@ -669,7 +738,9 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   req['slika'] = _base64Image;
                   req['uloge'] = [_formKey.currentState!.fields['uloge']?.value];
                   if (!mounted) return;
-                  await korisnikProvider.insert(req);
+
+                  Korisnik noviFrizer = await korisnikProvider.insert(req); 
+
                   if (!mounted) return;
                   bool shouldPrint = await showDialog(
                     context: context,
@@ -709,7 +780,79 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                   );
 
                   if (shouldPrint == true) {
-                    createPdfFile(req);
+                    try {
+                      final frizerId = noviFrizer.korisnikId; 
+                      final plainPassword = _formKey.currentState!.fields['lozinka']?.value ?? '';
+
+                      if (frizerId != null && plainPassword.isNotEmpty) {
+                        if (!mounted) return;
+                        final bytes = await context.read<ReportProvider>().getFrizerKreiranPdf(
+                          frizerId: frizerId,
+                          plainPassword: plainPassword,
+                        );
+
+                        if (bytes.isEmpty) return;
+
+                        final name = 'Frizer_ID${frizerId}_${DateFormat('ddMMyyyy_HHmm').format(DateTime.now().toLocal())}.pdf';
+
+                        if (!mounted) return;
+                        final location = await getSaveLocation(
+                          suggestedName: name,
+                          acceptedTypeGroups: [
+                            const XTypeGroup(label: 'PDF', extensions: ['pdf']),
+                          ],
+                        );
+
+                        if (location == null) return;
+
+                        final file = XFile.fromData(
+                          Uint8List.fromList(bytes),
+                          name: name,
+                          mimeType: 'application/pdf',
+                        );
+                        if (!mounted) return;
+                        await file.saveTo(location.path);
+
+                        if (!mounted) return;
+                        await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Uspjeh"),
+                            content: Text("PDF sa podacima frizera je preuzet na lokaciju:\n${location.path}."),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (!mounted) return;
+                      await QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.error,
+                        title: 'Greška',
+                        text: e.toString(),
+                        confirmBtnText: 'OK',
+                        confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+                        textColor: Colors.black,
+                        titleColor: Colors.black,
+                      );
+                    }
+                    finally {
+                      if (mounted) setState(() => _isSaving = false); 
+                    }
                   }
                   if (!mounted) return;
                   Navigator.pop(context, true);
@@ -744,13 +887,13 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
-                      "Sačuvaj",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color.fromARGB(199, 0, 0, 0),
-                        fontWeight: FontWeight.w600,
-                      ),
+                  : const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                        SizedBox(width: 8),
+                        Text('Sačuvaj', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,),),
+                      ],
                     ),
             ),
           ),
@@ -765,75 +908,4 @@ class _AdminDodajFrizeraScreenState extends State<AdminDodajFrizeraScreen> {
     confirmPasswordError = null;
   }
 
-  void createPdfFile(Map req) async {
-    final pdf = pw.Document();
-    if (!mounted) return;
-    final img = await rootBundle.load('assets/images/logo.png');
-    final imageBytes = img.buffer.asUint8List();
-    pw.Image image1 = pw.Image(pw.MemoryImage(imageBytes));
-
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Center(
-                child: pw.Column(
-                  mainAxisAlignment: pw.MainAxisAlignment.center,
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  children: [
-                    pw.Container(
-                      alignment: pw.Alignment.center,
-                      height: 150,
-                      width: 100,
-                      child: image1,
-                    ),
-                    pw.SizedBox(height: 20),
-                    pw.Text('Podaci o frizeru:',
-                        style: const pw.TextStyle(fontSize: 24)),
-                    pw.SizedBox(height: 20),
-                    pw.Text('Ime: ${req['ime']}',
-                        style: const pw.TextStyle(fontSize: 18)),
-                    pw.Text('Prezime: ${req['prezime']}',
-                        style: const pw.TextStyle(fontSize: 18)),
-                    pw.Text('Email: ${req['email']}',
-                        style: const pw.TextStyle(fontSize: 18)),
-                    pw.Text(
-                      'Korisnicko ime: ${req['korisnickoIme']}',
-                      style: pw.TextStyle(
-                        fontSize: 18,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.Text(
-                      'Lozinka: ${req['lozinka']}',
-                      style: pw.TextStyle(
-                        fontSize: 18,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.SizedBox(height: 40),
-                    pw.Divider(thickness: 1),
-                    pw.Text(
-                      'Hvala sto koristite nas sistem!\nMolimo Vas da nakon prijave promijenite svoju lozinku.',
-                      style: const pw.TextStyle(fontSize: 20),
-                      textAlign: pw.TextAlign.center,
-                    ),
-                    pw.Divider(thickness: 1),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    if (!mounted) return;
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
-  }
 }
-
-

@@ -169,11 +169,13 @@ class _AdminRecenzijeDetailsScreenState extends State<AdminRecenzijeDetailsScree
                               ),
                               minimumSize: const Size(190, 50),
                             ),
-                            child: const Text(
-                              "OK",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.done, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                                SizedBox(width: 8),
+                                Text('OK', style: TextStyle(fontSize: 16,),),
+                              ],
                             ),
                           ),
                         ),
@@ -313,11 +315,13 @@ class _AdminRecenzijeDetailsScreenState extends State<AdminRecenzijeDetailsScree
                             ),
                             child: _isDeleting
                                 ? const CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                                : const Text(
-                                    "Obriši",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                    ),
+                                : const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.delete_outline, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('Obriši', style: TextStyle(fontSize: 16,),),
+                                    ],
                                   ),
                           ),
                         ),

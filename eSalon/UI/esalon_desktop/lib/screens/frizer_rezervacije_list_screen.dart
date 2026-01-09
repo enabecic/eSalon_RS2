@@ -441,8 +441,8 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                   });
                 },
                 decoration: InputDecoration(
-                  labelText: 'Sifra rezervacije',
-                  hintText: 'Sifra rezervacije',
+                  labelText: 'Šifra rezervacije',
+                  hintText: 'Šifra rezervacije',
                   labelStyle: const TextStyle(
                     color: Color.fromARGB(255, 108, 108, 108),
                     fontSize: 18,
@@ -584,7 +584,14 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                   });
                   _firstLoad();
                 },
-                child: const Text('Očisti filtere'),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_outline, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 8),
+                    Text('Očisti filtere'),
+                  ],
+                ),
               ),
             ],
           )
@@ -673,7 +680,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withAlpha((0.3 * 255).round()),
                             spreadRadius: 2,
                             blurRadius: 6,
                             offset: const Offset(0, 2),
@@ -796,8 +803,8 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(20),
+                            color: const Color.fromARGB(221, 92, 87, 87),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                           () {
@@ -851,7 +858,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withAlpha((0.5 * 255).round()),
                     spreadRadius: 2,
                     blurRadius: 7,
                     offset: const Offset(0, 3),
@@ -993,7 +1000,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withAlpha((0.3 * 255).round()),
                             spreadRadius: 2,
                             blurRadius: 6,
                             offset: const Offset(0, 2),
@@ -1109,8 +1116,8 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(20),
+                              color: const Color.fromARGB(221, 92, 87, 87),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
                               "Klikni za detalje",
@@ -1138,7 +1145,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withAlpha((0.5 * 255).round()),
                     spreadRadius: 2,
                     blurRadius: 7,
                     offset: const Offset(0, 3),
@@ -1207,7 +1214,7 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
+                          color: Colors.grey.withAlpha((0.5 * 255).round()),
                           spreadRadius: 2,
                           blurRadius: 7,
                           offset: const Offset(0, 3),
@@ -1269,13 +1276,17 @@ class _FrizerRezervacijeListScreenState extends State<FrizerRezervacijeListScree
                     setState(() {});
                   },
                   child:const Center(
-                    child: Text(
-                      "Očisti filter",
-                      style: TextStyle(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.delete_outline, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                        SizedBox(width: 8),
+                        Text('Očisti filter', style: TextStyle(
                         fontSize: 16,
                         color:  Color.fromARGB(199, 0, 0, 0),
                         fontWeight: FontWeight.w600,
-                      ),
+                        ),),
+                      ],
                     ),
                   ),
                 ),

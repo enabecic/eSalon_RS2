@@ -131,7 +131,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withAlpha((0.2 * 255).round()),
                     spreadRadius: 5,
                     blurRadius: 7,
                     offset: const Offset(0, 3),
@@ -184,7 +184,8 @@ class _AdminUrediDodajVrstuUslugeScreenState
                   decoration: InputDecoration(
                     labelText: 'Naziv vrste usluge',
                     hintText: 'Unesite naziv vrste usluge',
-                    contentPadding: const EdgeInsets.symmetric(vertical: 29, horizontal: 12),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 17, horizontal: 12),
                     errorText: nazivError,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -208,7 +209,7 @@ class _AdminUrediDodajVrstuUslugeScreenState
                   ),
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.match(
-                      r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                      RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                       errorText:
                           "Naziv mora početi velikim slovom i sadržavati samo slova.",
                     ),
@@ -376,13 +377,13 @@ class _AdminUrediDodajVrstuUslugeScreenState
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          "Sačuvaj",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(199, 0, 0, 0),
-                            fontWeight: FontWeight.w600,
-                          ),
+                      : const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                            SizedBox(width: 8),
+                            Text('Sačuvaj', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,),),
+                          ],
                         ),
                 ),
               ),

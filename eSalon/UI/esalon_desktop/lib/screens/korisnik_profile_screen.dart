@@ -83,7 +83,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                             ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withAlpha((0.2 * 255).round()),
                           spreadRadius: 5,
                           blurRadius: 7,
                           offset: const Offset(0, 3),
@@ -115,7 +115,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withAlpha((0.5 * 255).round()),
                     spreadRadius: 2,
                     blurRadius: 7,
                     offset: const Offset(0, 3),
@@ -134,7 +134,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                   hintText: AuthProvider.username,
                   hintStyle: const TextStyle(color: Colors.black),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  prefixIcon: const Icon(Icons.account_circle_outlined),
+                  prefixIcon: const Icon(Icons.account_circle_outlined, color: Color.fromARGB(255, 108, 108, 108),),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
@@ -152,7 +152,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withAlpha((0.5 * 255).round()),
                     spreadRadius: 2,
                     blurRadius: 7,
                     offset: const Offset(0, 3),
@@ -171,7 +171,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
                   hintText: AuthProvider.email,
                   hintStyle: const TextStyle(color: Colors.black),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(Icons.email_outlined, color: Color.fromARGB(255, 108, 108, 108),),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,

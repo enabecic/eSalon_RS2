@@ -223,7 +223,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).round()),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -306,14 +306,14 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                   decoration: BoxDecoration(
                     color: isPastSlot
-                        ? Colors.grey.withOpacity(0.5)
+                        ? Colors.grey.withAlpha((0.5 * 255).round())
                         : isPauza
-                            ? Colors.grey.withOpacity(0.5)   
+                            ? Colors.grey.withAlpha((0.5 * 255).round())
                             : isZauzet
-                                ? Colors.red.withOpacity(0.5)
+                                ? Colors.red.withAlpha((0.5 * 255).round())
                                 : isSelected
                                     ? const Color.fromARGB(255, 210, 193, 214)
-                                    : Colors.green.withOpacity(0.5),
+                                    : Colors.green.withAlpha((0.5 * 255).round()),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -446,7 +446,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
           return Container(
             margin: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.5),
+              color: color.withAlpha((0.5 * 255).round()),
               borderRadius: BorderRadius.circular(8),
             ),
             alignment: Alignment.center,
@@ -519,7 +519,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
             width: 18,
             height: 18,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.5),
+              color: color.withAlpha((0.5 * 255).round()),
               shape: BoxShape.circle,
             ),
           ),
@@ -550,7 +550,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).round()),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -695,7 +695,7 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withAlpha((0.1 * 255).round()),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),
@@ -828,11 +828,11 @@ class _RezervacijaTerminaScreenState extends State<RezervacijaTerminaScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),

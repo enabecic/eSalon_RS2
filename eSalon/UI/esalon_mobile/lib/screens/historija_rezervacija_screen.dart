@@ -336,11 +336,11 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -608,7 +608,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withAlpha((0.5 * 255).round()),
                         spreadRadius: 2,
                         blurRadius: 7,
                         offset: const Offset(0, 3),
@@ -718,7 +718,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withAlpha((0.5 * 255).round()),
                         spreadRadius: 2,
                         blurRadius: 7,
                         offset: const Offset(0, 3),
@@ -977,7 +977,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withAlpha((0.5 * 255).round()),
                         spreadRadius: 2,
                         blurRadius: 7,
                         offset: const Offset(0, 3),
@@ -1085,7 +1085,7 @@ class _HistorijaRezervacijaScreenState extends State<HistorijaRezervacijaScreen>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
+                      color: Colors.grey.withAlpha((0.5 * 255).round()),
                       spreadRadius: 2,
                       blurRadius: 7,
                       offset: const Offset(0, 3),

@@ -91,12 +91,14 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
               controller: _korisnickoImeController,
               decoration: InputDecoration(
                 labelText: 'Korisničko ime',
+                hintText: 'Unesite korisničko ime',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -166,7 +168,14 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(150, 63),
             ),
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filtere', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -188,7 +197,7 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -204,22 +213,22 @@ class _FrizerKorisniciScreenState extends State<FrizerKorisniciScreen> {
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija korisničkog imena (20 karaktera).",
-                          child: Text("Korisničko ime"),
+                          child: Text("KORISNIČKO IME"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija email-a (20 karaktera).",
-                          child: Text("Email"),
+                          child: Text("EMAIL"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija uloga (25 karaktera).",
-                          child: Text("Uloge"),
+                          child: Text("ULOGE"),
                         ),
                       ),
-                      DataColumn(label: Text("Detalji")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -323,9 +332,9 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
     final ulogeText = item.uloge?.join(', ') ?? '';
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -392,7 +401,14 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 minimumSize: const Size(120, 50),
               ),
-              child: const Text("Detalji"),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Detalji'),
+                ],
+              ),
             ),
           ],
          )

@@ -210,7 +210,14 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
               });
               _loadObavijesti();
             },
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -275,7 +282,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                                 borderRadius: BorderRadius.circular(15),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
+                                    color: Colors.grey.withAlpha((0.3 * 255).round()),
                                     spreadRadius: 2,
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
@@ -373,7 +380,7 @@ class _FrizerObavijestScreenState extends State<FrizerObavijestScreen> {
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
+                                color: Colors.grey.withAlpha((0.5 * 255).round()),
                                 spreadRadius: 2,
                                 blurRadius: 6,
                                 offset: const Offset(0, 3),

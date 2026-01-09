@@ -151,7 +151,7 @@ class _FrizerUslugeDetailsScreenState
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withAlpha((0.2 * 255).round()),
                           spreadRadius: 5,
                           blurRadius: 7,
                           offset: const Offset(0, 3),
@@ -322,7 +322,14 @@ class _FrizerUslugeDetailsScreenState
                       borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text("OK"),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.done, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 8),
+                    Text('OK', style: TextStyle(fontSize: 16,),),
+                  ],
+                ),
               ),
             ),
           ),                    

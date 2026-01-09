@@ -1,21 +1,18 @@
+import 'dart:typed_data';
 import 'package:esalon_desktop/models/usluga.dart';
 import 'package:esalon_desktop/providers/arhiva_provider.dart';
 import 'package:esalon_desktop/providers/korisnik_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_odgovor_provider.dart';
 import 'package:esalon_desktop/providers/recenzija_provider.dart';
+import 'package:esalon_desktop/providers/report_provider.dart';
 import 'package:esalon_desktop/providers/rezervacija_provider.dart';
 import 'package:esalon_desktop/models/search_result.dart';
 import 'package:esalon_desktop/providers/usluga_provider.dart';
-import 'package:esalon_desktop/providers/utils.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
-import 'package:flutter/rendering.dart';
 import 'package:esalon_desktop/providers/auth_provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -51,11 +48,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String? _selectedState; 
   final List<String> _states = ['odobrena', 'ponistena', 'zavrsena','kreirana'];
 
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
+      if (!mounted) return;
       korisnikProvider = context.read<KorisnikProvider>();
       rezervacijaProvider = context.read<RezervacijaProvider>();
       arhivaProvider = context.read<ArhivaProvider>();
@@ -150,22 +147,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildCard("Broj korisnika", brojKorisnika.toString())),
+                    Expanded(child: _buildCard("Broj korisnika aplikacije", brojKorisnika.toString(), icon: Icons.people)),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Stopa otkazanih rezervacija", "${stopaOtkaza.toStringAsFixed(1)}%")),
+                    Expanded(child: _buildCard("Stopa otkazanih rezervacija", "${stopaOtkaza.toStringAsFixed(1)}%", icon: Icons.percent)),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Ukupan broj rezervacija", brojUkupno.toString())),
+                    Expanded(child: _buildCard("Ukupan broj rezervacija", brojUkupno.toString(), icon: Icons.calendar_today)),
                   ],
                 ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Expanded(child: _buildCard("Broj arhiviranih usluga", brojArhiviranih.toString())),
+                    Expanded(
+                    child: _buildCard("Broj arhiviranih usluga", brojArhiviranih.toString(), icon: Icons.bookmark,),),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Trenutno najtraženija usluga",najtrazenijaUslugaNaziv ?? '',),),
+                    Expanded(
+                    child: _buildCardUsluga("Trenutno najtraženija usluga", najtrazenijaUslugaNaziv ?? '', icon: Icons.content_cut, ),),
                     const SizedBox(width: 20),
-                    Expanded(child: _buildCard("Broj napisanih recenzija", (brojRecenzija + brojRecenzijaOdgovor).toString())),
-
+                    Expanded(
+                    child: _buildCard("Broj napisanih recenzija", (brojRecenzija + brojRecenzijaOdgovor).toString(), icon: Icons.rate_review, ),),
                   ],
                 ),
                 const SizedBox(height: 40),
@@ -222,18 +221,34 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                             });
                           },
                           style: TextButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             minimumSize: const Size(160, 53),
                           ),
-                          child: const Text(
-                            'Očisti filter',
-                            style: TextStyle(color: Colors.white),
+                           child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                              SizedBox(width: 6),
+                              Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+                            ],
                           ),
                         ),
                     ],
+                  ),
+                ),
+                if (_selectedState != null) 
+                Padding(
+                  padding: const EdgeInsets.only(top: 30, bottom: 0, left: 8),
+                  child: Text(
+                    'Broj rezervacija po filteru $_selectedState: '
+                    '${rezervacije.result.where((r) => r.stateMachine?.toLowerCase() == _selectedState).length}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -247,15 +262,22 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         await _promptSaveReport();
                       },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: const Color.fromARGB(255, 180, 140, 218),
                       foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(160, 53), 
                     ),
-                    child: const Text(
-                      "Sačuvaj izvještaj",
-                      style: TextStyle(color: Colors.white),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.download, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          "Sačuvaj izvještaj",
+                          style: TextStyle(color: Color.fromARGB(199, 0, 0, 0)),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -268,42 +290,116 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Widget _buildCard(String label, String value) {
+  Widget _buildCard(String label, String value, {IconData? icon}) {
     return Container(
-      height: 100,
+      //height: 130,
+      constraints: const BoxConstraints(
+        minHeight: 130,
+      ),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 225, 205, 235),
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Colors.deepPurple,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(51),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              color: Colors.deepPurple,
+              size: 30,
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Text(
-                  value,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+            const SizedBox(height: 2),
+          ],
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardUsluga(String label, String value, {IconData? icon}) {
+    return Container(
+      height: 130, 
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 225, 205, 235),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Colors.deepPurple,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(51),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              color: Colors.deepPurple,
+              size: 30,
+            ),
+            const SizedBox(height: 2),
+          ],
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: [
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -497,7 +593,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           barWidth: 3,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.deepPurple.withOpacity(0.2),
+                            color: Colors.deepPurple.withAlpha((0.2 * 255).round()),
                           ),
                           dotData: const FlDotData(show: true),
                         ),
@@ -511,29 +607,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ],
       ),
     );
-
   }
-
-  Future<Uint8List?> _captureChartImage() async {
-    try {
-      if (_chartKey.currentContext == null) return null;
-
-      final renderObject = _chartKey.currentContext!.findRenderObject();
-      if (renderObject == null || renderObject is! RenderRepaintBoundary) return null;
-
-      RenderRepaintBoundary boundary = renderObject;
-      if (!mounted) return null;
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      if (!mounted) return null;
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      //print("Greška kod konvertovanja grafa u sliku: $e");
-      debugPrint("Greška kod konvertovanja grafa u sliku: $e");
-      return null;
-    }
-  }
-
 
   Future<void> _promptSaveReport() async {
     if (!mounted) return;
@@ -544,11 +618,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         content: const Text("Jeste li sigurni da želite sačuvati izvještaj?"),
         actions: [
           TextButton(
-                onPressed: () {
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-        },
+            onPressed: () {
+              if (mounted) {
+                Navigator.of(context).pop();
+              }
+            },
             style: TextButton.styleFrom(
               backgroundColor: Colors.deepPurple,
               shape: RoundedRectangleBorder(
@@ -557,7 +631,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             ),
             child: const Text(
               "Ne",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
           TextButton(
@@ -570,126 +645,86 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             ),
             child: const Text(
               "Da",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
     );
 
+    if (potvrda != true) return;
+
     if (potvrda == true) {
       if (!mounted) return;
-      await _exportPdf(); 
-    }
-  }
+      try {
+        if (!mounted) return;
+        final bytes =
+            await context.read<ReportProvider>().getAdminStatistikaPdf(
+                  stateMachine: _selectedState,
+                );
 
-  Future<void> _exportPdf() async {
-    final pdf = pw.Document();
-    final brojOtkazanih = rezervacije.result
-        .where((r) => r.stateMachine?.toLowerCase() == "ponistena")
-        .length;
-    final brojUkupno = rezervacije.result.length;
-    final stopaOtkaza = brojUkupno > 0 ? (brojOtkazanih / brojUkupno) * 100 : 0;
-    final String filterTekst = (_selectedState == null || _selectedState!.isEmpty) 
-    ? "Odabrano stanje filtera: Sve" 
-    : "Odabrano stanje filtera: ${_selectedState![0].toUpperCase()}${_selectedState!.substring(1)}";
-    final int zbirRecenzija = brojRecenzija + brojRecenzijaOdgovor;
+        if (bytes.isEmpty) return;
 
-    try{
-      if (!mounted) return;
-      final chartImageBytes = await _captureChartImage();   
-      if (!mounted) return;   
-      pdf.addPage(
-        pw.Page(
-          build: (context) => pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Izvjestaj za salon:',
-                      style: pw.TextStyle(
-                          fontSize: 22, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 30),
-              pw.Text("Ukupan broj korisnika: $brojKorisnika",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Stopa otkazanih rezervacija: ${stopaOtkaza.toStringAsFixed(1)}%",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Ukupan broj rezervacija: $brojUkupno",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Ukupan broj arhiviranih usluga: $brojArhiviranih",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Trenutno najtrazenija usluga: $najtrazenijaUslugaNaziv",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text("Ukupan broj napisanih recenzija: $zbirRecenzija",
-                      style: const pw.TextStyle(fontSize: 16)),
-              pw.SizedBox(height: 20),
-              pw.Text(filterTekst,
-                      style: const pw.TextStyle(fontSize: 16)),
+        final name = 'AdminStatistika_${DateFormat('ddMMyyyy_HHmm').format(DateTime.now().toLocal())}.pdf';
+        if (!mounted) return;
+        final location = await getSaveLocation(
+          suggestedName: name,
+          acceptedTypeGroups: [
+            const XTypeGroup(label: 'PDF', extensions: ['pdf']),
+          ],
+        );
 
-              if (chartImageBytes != null)
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.SizedBox(height: 20),
-                    pw.Text('Graf rezervacija po mjesecima:',
-                        style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.normal)),
-                    pw.SizedBox(height: 10),
-                    pw.Image(pw.MemoryImage(chartImageBytes)),
-                  ],
+        if (location == null) return;
+
+        final file = XFile.fromData(
+          Uint8List.fromList(bytes),
+          name: name,
+          mimeType: 'application/pdf',
+        );
+        if (!mounted) return;
+        await file.saveTo(location.path);
+
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Uspjeh"),
+            content:
+                Text("PDF je uspješno preuzet na lokaciju:\n${location.path}."),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-      );
-      if (!mounted) return;
-      final dir = await getApplicationDocumentsDirectory();
-      if (!mounted) return;
-      final vrijeme = DateTime.now();
-
-      String path =
-            '${dir.path}/Izvjestaj-Dana-${formatDateTimeForFilename(vrijeme.toString())}.pdf';
-        File file = File(path);
+        );
+      } catch (e) {
         if (!mounted) return;
-        file.writeAsBytes(await pdf.save());
-        
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Izvještaj uspješno sačuvan"),
-          content: Text("Lokacija izvještaja: ${file.path}"),
-          actions: [
-            TextButton(
-                onPressed: () {
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                "OK",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    }
-    catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Greška pri spremanju PDF-a: $e")),
+        await QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Greška',
+          text: e.toString(),
+          confirmBtnText: 'OK',
+          confirmBtnColor: const Color.fromRGBO(220, 201, 221, 1),
+          textColor: Colors.black,
+          titleColor: Colors.black,
         );
       }
     }

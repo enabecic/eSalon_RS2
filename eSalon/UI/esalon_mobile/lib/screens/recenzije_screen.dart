@@ -170,11 +170,11 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const[
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -1025,7 +1025,7 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withAlpha((0.2 * 255).round()),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1116,7 +1116,7 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withAlpha((0.2 * 255).round()),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

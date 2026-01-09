@@ -63,12 +63,14 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               controller: _nazivController,
               decoration: InputDecoration(
                 labelText: 'Naziv vrste usluge',
+                hintText: 'Unesite naziv vrste usluge',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -101,7 +103,14 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(130, 63),
             ),
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
           const SizedBox(width: 10),
           ElevatedButton(
@@ -157,7 +166,14 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(150, 63),
             ),
-            child: const Text("Dodaj novu"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Dodaj novu', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -179,7 +195,7 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -195,11 +211,11 @@ class _AdminUpravljanjeVrstamaUslugaScreenState
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija naziva (40 karaktera).",
-                          child: Text("Naziv"),
+                          child: Text("NAZIV"),
                         ),
                       ),
-                      DataColumn(label: Text("Slika")),
-                      DataColumn(label: Text("Obriši")),
+                      DataColumn(label: Text("SLIKA")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -255,9 +271,9 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
     final item = data[index];
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -322,8 +338,8 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.memory(
                       base64Decode(item.slika!),
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.broken_image),
@@ -333,8 +349,8 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       "assets/images/praznaVrstaUsluge.png",
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -437,7 +453,14 @@ class VrstaUslugeDataSource extends AdvancedDataTableSource<VrstaUsluge> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(120, 50),
             ),
-            child: const Text("Obriši"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 20),
+                SizedBox(width: 8),
+                Text('Obriši'),
+              ],
+            ),
           ),
         ),
       ],

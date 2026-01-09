@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:esalon_mobile/screens/korisnik_profile_edit_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -174,11 +175,11 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15),
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -251,7 +252,7 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -261,6 +262,35 @@ class _KorisnikProfileScreenState extends State<KorisnikProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
+        Center(
+          child: Container(
+            width: 115,
+            height: 115,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: AuthProvider.slika != null
+                  ? DecorationImage(
+                      image: MemoryImage(base64Decode(AuthProvider.slika!)),
+                      fit: BoxFit.cover,
+                    )
+                  : const DecorationImage(
+                      image: AssetImage("assets/images/prazanProfil.png"),
+                      fit: BoxFit.cover,
+                    ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.2 * 255).round()),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 30), 
+
           _buildInfoRow("Ime:", _korisnikPodaci['ime'] ?? "/", Icons.person),
           _buildInfoRow("Prezime:", _korisnikPodaci['prezime'] ?? "/",
               Icons.person_outline),

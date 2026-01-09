@@ -184,11 +184,11 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -232,13 +232,13 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
       borderRadius: BorderRadius.circular(15),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withAlpha((0.3 * 255).round()),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -730,7 +730,7 @@ class _BuducePromocijeScreenState extends State<BuducePromocijeScreen> {
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
+                                  color: Colors.grey.withAlpha((0.5 * 255).round()),
                                   spreadRadius: 2,
                                   blurRadius: 7,
                                   offset: const Offset(0, 3),

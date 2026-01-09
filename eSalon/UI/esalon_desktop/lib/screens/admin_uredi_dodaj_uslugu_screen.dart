@@ -7,6 +7,7 @@ import 'package:esalon_desktop/providers/utils.dart';
 import 'package:esalon_desktop/providers/vrsta_usluge_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:esalon_desktop/models/search_result.dart';
@@ -171,7 +172,7 @@ class _AdminUrediDodajUsluguScreenState
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withAlpha((0.2 * 255).round()),
                             spreadRadius: 5,
                             blurRadius: 7,
                             offset: const Offset(0, 3),
@@ -233,6 +234,7 @@ class _AdminUrediDodajUsluguScreenState
                           decoration: InputDecoration(
                             labelText: 'Naziv usluge',
                             hintText: 'Unesite naziv usluge',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             errorText: uslugaError,
                             enabledBorder: OutlineInputBorder(
@@ -256,7 +258,7 @@ class _AdminUrediDodajUsluguScreenState
                           ),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.match(
-                              r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                              RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                               errorText:
                                   "Naziv mora početi velikim slovom i sadržavati samo slova.",
                             ),
@@ -297,6 +299,7 @@ class _AdminUrediDodajUsluguScreenState
                           decoration: InputDecoration(
                             labelText: 'Opis usluge',
                             hintText: 'Unesite opis usluge',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             isDense: true,
                             alignLabelWithHint: true,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -321,7 +324,7 @@ class _AdminUrediDodajUsluguScreenState
                           ),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.match(
-                              r'^[A-ZČĆŽĐŠ][\sa-zA-ZčćžđšČĆŽĐŠ.,!?()\-]*$',
+                              RegExp(r'^[A-ZČĆŽĐŠ][\sa-zA-ZčćžđšČĆŽĐŠ.,!?()\-]*$'),
                               errorText: "Opis mora početi velikim slovom i sadržavati samo slova i razmake.",
                             ),
                             FormBuilderValidators.required(errorText: "Obavezno polje."),
@@ -343,6 +346,7 @@ class _AdminUrediDodajUsluguScreenState
                           decoration: InputDecoration(
                             labelText: 'Cijena (KM)',
                             hintText: 'Cijena (npr. 34 ili 34.00)',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -380,10 +384,14 @@ class _AdminUrediDodajUsluguScreenState
                         onExit: (_) => setState(() => _isTrajanjeFieldHovered = false),
                         child: FormBuilderTextField(
                           name: 'trajanje',
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Trajanje (u minutama)',
                             hintText: 'Trajanje (npr. 30 ili 100)',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
                             contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -449,7 +457,7 @@ class _AdminUrediDodajUsluguScreenState
                           filled: true,
                           fillColor: _isDropdownHovered ? const Color(0xFFE0D7F5) : Colors.white,
                           errorStyle: const TextStyle(
-                            color: Colors.red,
+                            color: Color.fromARGB(255, 175, 46, 37),
                             backgroundColor: Colors.transparent,
                             fontSize: 12,
                             height: 1.2,
@@ -628,14 +636,13 @@ class _AdminUrediDodajUsluguScreenState
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
-                        )
-                      : const Text(
-                          "Sačuvaj",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(199, 0, 0, 0),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        ) : const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                            SizedBox(width: 8),
+                            Text('Sačuvaj', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,),),
+                          ],
                         ),
                 ),
               ),

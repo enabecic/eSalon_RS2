@@ -159,11 +159,13 @@ class FrizerRecenzijeDetailsScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            "OK",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.done, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                              SizedBox(width: 8),
+                              Text('OK', style: TextStyle(fontSize: 16,),),
+                            ],
                           ),
                         ),
                       ),

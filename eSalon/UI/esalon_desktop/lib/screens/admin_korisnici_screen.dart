@@ -93,12 +93,14 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
               controller: _korisnickoImeController,
               decoration: InputDecoration(
                 labelText: 'Korisničko ime',
+                hintText: 'Unesite korisničko ime',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -168,7 +170,14 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(130, 63),
             ),
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filtere', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
           const SizedBox(width: 10),
           ElevatedButton(
@@ -195,6 +204,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     Future.delayed(const Duration(seconds: 3), () {
+                      if (!context.mounted) return;
                       if (Navigator.of(context).canPop()) {
                         Navigator.of(context).pop();
                       }
@@ -233,7 +243,14 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(150, 63),
             ),
-            child: const Text("Dodaj frizera"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Dodaj frizera', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -255,7 +272,7 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -271,22 +288,22 @@ class _AdminKorisniciScreenState extends State<AdminKorisniciScreen> {
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija korisničkog imena (20 karaktera).",
-                          child: Text("Korisničko ime"),
+                          child: Text("KORISNIČKO IME"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija email-a (20 karaktera).",
-                          child: Text("Email"),
+                          child: Text("EMAIL"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija uloga (25 karaktera).",
-                          child: Text("Uloge"),
+                          child: Text("ULOGE"),
                         ),
                       ),
-                      DataColumn(label: Text("Opcije")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -390,9 +407,9 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
     final ulogeText = item.uloge?.join(', ') ?? '';
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -557,13 +574,35 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
               }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                fixedSize: const Size(150, 43),
+                backgroundColor: item.jeAktivan == true
+                    ? Colors.grey[500]
+                    : const Color.fromARGB(255, 180, 140, 218),
                 foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                minimumSize: const Size(120, 50),
               ),
-              child: Text(item.jeAktivan == true ? "Deaktiviraj" : "Aktiviraj"),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    item.jeAktivan == true
+                        ? Icons.block_outlined 
+                        : Icons.check_circle_outline,
+                    size: 18,
+                    color: const Color.fromARGB(199, 0, 0, 0),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    item.jeAktivan == true ? "Deaktiviraj" : "Aktiviraj",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color.fromARGB(199, 0, 0, 0),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
@@ -584,7 +623,14 @@ class KorisnikDataSource extends AdvancedDataTableSource<Korisnik> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 minimumSize: const Size(120, 50),
               ),
-              child: const Text("Detalji"),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Detalji'),
+                ],
+              ),
             ),
           ],
         )),

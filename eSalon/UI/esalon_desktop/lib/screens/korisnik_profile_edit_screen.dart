@@ -30,6 +30,14 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
   bool _isSaving = false; 
   bool _isDeactivating = false; 
 
+  bool _isImeHovered = false;
+  bool _isPrezimeHovered = false;
+  bool _isTelefonHovered = false;
+  bool _isSlikaHovered = false;
+  bool _isLozinkaHovered = false;
+  bool _isPotvrdaLozinkaHovered = false;
+  bool _isStaraLozinkaHovered = false;
+
   Map<String, dynamic> _initialValue = {};
   bool _isLoading = true;
   late Widget _profileImageWidget;
@@ -149,14 +157,14 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
     );
   }
 
-  InputDecoration _decoration(String label, String hint) {
+  InputDecoration _decoration(String label, String hint, {Color? fillColor}) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: fillColor ?? Colors.white,
     );
   }
 
@@ -171,44 +179,52 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
             Row(
               children: [
                 Expanded(
-                  child: FormBuilderTextField(
-                    name: 'ime',
-                    decoration: _decoration('Ime', 'Unesite ime'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(
-                          errorText: "Ime je obavezno."),
-                      FormBuilderValidators.minLength(1,
-                          errorText: "Ime ne može biti prazno."),
-                      FormBuilderValidators.maxLength(50,
-                          errorText: "Ime može imati najviše 50 karaktera."),
-                      FormBuilderValidators.match(
-                        r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
-                        errorText:
-                            "Ime mora početi velikim slovom i sadržavati samo slova.",
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => _isImeHovered = true),
+                    onExit: (_) => setState(() => _isImeHovered = false),
+                    child: FormBuilderTextField(
+                      name: 'ime',
+                      decoration: _decoration(
+                        'Ime',
+                        'Unesite ime',
+                        fillColor: _isImeHovered ? const Color(0xFFE0D7F5) : Colors.white,
                       ),
-                    ]),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(errorText: "Ime je obavezno."),
+                        FormBuilderValidators.minLength(1, errorText: "Ime ne može biti prazno."),
+                        FormBuilderValidators.maxLength(50, errorText: "Ime može imati najviše 50 karaktera."),
+                        FormBuilderValidators.match(
+                          RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
+                          errorText: "Ime mora početi velikim slovom i sadržavati samo slova.",
+                        ),
+                      ]),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 15),
                 Expanded(
-                  child: FormBuilderTextField(
-                    name: 'prezime',
-                    decoration: _decoration('Prezime', 'Unesite prezime'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(
-                          errorText: "Prezime je obavezno."),
-                      FormBuilderValidators.minLength(1,
-                          errorText: "Prezime ne može biti prazno."),
-                      FormBuilderValidators.maxLength(50,
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => _isPrezimeHovered = true),
+                    onExit: (_) => setState(() => _isPrezimeHovered = false),
+                    child: FormBuilderTextField(
+                      name: 'prezime',
+                      decoration: _decoration('Prezime', 'Unesite prezime', fillColor: _isPrezimeHovered ? const Color(0xFFE0D7F5) : Colors.white,),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(
+                            errorText: "Prezime je obavezno."),
+                        FormBuilderValidators.minLength(1,
+                            errorText: "Prezime ne može biti prazno."),
+                        FormBuilderValidators.maxLength(50,
+                            errorText:
+                                "Prezime može imati najviše 50 karaktera."),
+                        FormBuilderValidators.match(
+                          RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                           errorText:
-                              "Prezime može imati najviše 50 karaktera."),
-                      FormBuilderValidators.match(
-                        r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
-                        errorText:
-                            "Prezime mora početi velikim slovom i sadržavati samo slova.",
-                      ),
-                    ]),
-                  ),
+                              "Prezime mora početi velikim slovom i sadržavati samo slova.",
+                        ),
+                      ]),
+                    ),
+                  ),  
                 ),
               ],
             ),
@@ -216,22 +232,26 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
             Row(
               children: [
                 Expanded(
-                  child: FormBuilderTextField(
-                    name: 'telefon',
-                    decoration: _decoration(
-                        'Telefon', 'Unesite telefon (npr. +387...)'),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(
-                          errorText: "Telefon je obavezan."),
-                      FormBuilderValidators.match(
-                        r'^\+\d{7,15}$',
-                        errorText:
-                            'Telefon mora početi sa + i imati 7-15 cifara.',
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => _isTelefonHovered = true),
+                    onExit: (_) => setState(() => _isTelefonHovered = false),
+                      child: FormBuilderTextField(
+                        name: 'telefon',
+                        decoration: _decoration(
+                            'Telefon', 'Unesite telefon (npr. +387...)',fillColor: _isTelefonHovered ? const Color(0xFFE0D7F5) : Colors.white,),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(
+                              errorText: "Telefon je obavezan."),
+                          FormBuilderValidators.match(
+                            RegExp(r'^\+\d{7,15}$'),
+                            errorText:
+                                'Telefon mora početi sa + i imati 7-15 cifara.',
+                          ),
+                          FormBuilderValidators.maxLength(20,
+                              errorText: 'Maksimalno 20 karaktera.'),
+                        ]),
                       ),
-                      FormBuilderValidators.maxLength(20,
-                          errorText: 'Maksimalno 20 karaktera.'),
-                    ]),
-                  ),
+                   ),
                 ),
               ],
             ),
@@ -240,31 +260,34 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
             FormBuilderField(
               name: "slika",
               builder: (field) {
-                return InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Odaberite sliku',
-                    labelStyle: const TextStyle(
-                      color: Color.fromARGB(255, 108, 108, 108),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                return MouseRegion(
+                  onEnter: (_) => setState(() => _isSlikaHovered = true),
+                  onExit: (_) => setState(() => _isSlikaHovered = false),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Odaberite sliku',
+                      labelStyle: const TextStyle(
+                        color: Color.fromARGB(255, 108, 108, 108),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      filled: true,
+                      fillColor: _isSlikaHovered ? const Color(0xFFE0D7F5) : Colors.white,
                     ),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                    child: ListTile(
+                      leading: const Icon(Icons.image),
+                      title: const Text("Select image"),
+                      trailing: const Icon(Icons.file_upload),
+                      onTap: getImage,
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  child: ListTile(
-                    leading:const Icon(Icons.image),
-                    title:const Text("Select image"),
-                    trailing: const Icon(Icons.file_upload),
-                    onTap: getImage,
                   ),
                 );
               },
             ),
-
             const SizedBox(height: 15),
             FormBuilderCheckbox(
               name: 'promijeniLozinku',
@@ -282,77 +305,91 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: FormBuilderTextField(
-                      name: 'staraLozinka',
-                      obscureText: _isOldPasswordHidden,
-                      decoration: _decoration('Stara lozinka', '').copyWith(
-                        suffixIcon: IconButton(
-                          icon: Icon(_isOldPasswordHidden
-                              ? Icons.visibility_off
-                              : Icons.visibility),
-                          onPressed: () {
-                            if (!mounted) return;
-                            setState(() {
-                              _isOldPasswordHidden = !_isOldPasswordHidden;
-                            });
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isStaraLozinkaHovered = true),
+                      onExit: (_) => setState(() => _isStaraLozinkaHovered = false),
+                        child: FormBuilderTextField(
+                          name: 'staraLozinka',
+                          obscureText: _isOldPasswordHidden,
+                          decoration: _decoration('Stara lozinka', '').copyWith(
+                            fillColor: _isStaraLozinkaHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                            suffixIcon: IconButton(
+                              icon: Icon(_isOldPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                              onPressed: () {
+                                if (!mounted) return;
+                                setState(() {
+                                  _isOldPasswordHidden = !_isOldPasswordHidden;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.isEmpty) {
+                              return 'Stara lozinka je obavezna.';
+                            }
+
+                            if (val != AuthProvider.password) {
+                              return 'Unesite ispravnu lozinku.';
+                            }
+
+                            return null;
                           },
                         ),
-                      ),
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return 'Stara lozinka je obavezna.';
-                        }
-
-                        if (val != AuthProvider.password) {
-                          return 'Unesite ispravnu lozinku.';
-                        }
-
-                        return null;
-                      },
                     ),
                   ),
                   const SizedBox(width: 15),
                   Expanded(
-                    child: FormBuilderTextField(
-                      name: 'lozinka',
-                      obscureText: _isNewPasswordHidden,
-                      decoration: _decoration('Nova lozinka', '').copyWith(
-                        suffixIcon: IconButton(
-                          icon: Icon(_isNewPasswordHidden
-                              ? Icons.visibility_off
-                              : Icons.visibility),
-                          onPressed: () {
-                            if (!mounted) return;
-                            setState(() {
-                              _isNewPasswordHidden = !_isNewPasswordHidden;
-                            });
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isLozinkaHovered = true),
+                      onExit: (_) => setState(() => _isLozinkaHovered = false),
+                        child: FormBuilderTextField(
+                          name: 'lozinka',
+                          obscureText: _isNewPasswordHidden,
+                          decoration: _decoration('Nova lozinka', '').copyWith(
+                            fillColor: _isLozinkaHovered ? const Color(0xFFE0D7F5) : Colors.white,
+                            suffixIcon: IconButton(
+                              icon: Icon(_isNewPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                              onPressed: () {
+                                if (!mounted) return;
+                                setState(() {
+                                  _isNewPasswordHidden = !_isNewPasswordHidden;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (val) {
+                            final oldPassword = _formKey.currentState?.fields['staraLozinka']?.value ?? '';
+                            if (val == null || val.isEmpty) {
+                              return 'Nova lozinka je obavezna.';
+                            }
+                            if (val.length < 6) {
+                              return 'Najmanje 6 karaktera.';
+                            }
+                              if (val.length > 40) {
+                              return 'Najviše 40 karaktera.';
+                            }
+                            if (val == oldPassword) {
+                              return 'Nova lozinka ne može biti ista kao stara.';
+                            }
+                            return null;
                           },
                         ),
-                      ),
-                      validator: (val) {
-                        final oldPassword = _formKey.currentState?.fields['staraLozinka']?.value ?? '';
-                        if (val == null || val.isEmpty) {
-                          return 'Nova lozinka je obavezna.';
-                        }
-                        if (val.length < 6) {
-                          return 'Najmanje 6 karaktera.';
-                        }
-                          if (val.length > 40) {
-                          return 'Najviše 40 karaktera.';
-                        }
-                        if (val == oldPassword) {
-                          return 'Nova lozinka ne može biti ista kao stara.';
-                        }
-                        return null;
-                      },
-                    ),
+                    ),  
                   ),
                   const SizedBox(width: 15),
                   Expanded(
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isPotvrdaLozinkaHovered = true),
+                      onExit: (_) => setState(() => _isPotvrdaLozinkaHovered = false),
                     child: FormBuilderTextField(
                       name: 'lozinkaPotvrda',
                       obscureText: _isConfirmPasswordHidden,
                       decoration: _decoration('Potvrda lozinke', '').copyWith(
+                        fillColor: _isPotvrdaLozinkaHovered ? const Color(0xFFE0D7F5) : Colors.white,
                         suffixIcon: IconButton(
                           icon: Icon(_isConfirmPasswordHidden
                               ? Icons.visibility_off
@@ -377,6 +414,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                         }
                         return null;
                       },
+                    ),
                     ),
                   ),
                 ],
@@ -413,7 +451,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                     ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withAlpha((0.2 * 255).round()),
               spreadRadius: 5,
               blurRadius: 7,
               offset: const Offset(0, 3),
@@ -430,7 +468,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
       child: Row(
         children: [
           SizedBox(
-            width: 190,
+            width: 220,
             height: 50,
             child: ElevatedButton(
               onPressed: _isDeactivating
@@ -557,7 +595,7 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 180, 140, 218),
+                backgroundColor: Colors.grey[500],
                 foregroundColor: const Color.fromARGB(199, 0, 0, 0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -572,11 +610,14 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
-                      "Deaktiviraj profil",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+                  :  const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.block, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                            SizedBox(width: 8),
+                            Text('Deaktiviraj profil', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
+                          ],
+                        ),
             ),
           ),
           const Spacer(),
@@ -656,13 +697,14 @@ class _KorisnikProfilEditScreenState extends State<KorisnikProfilEditScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
-                      "Sačuvaj",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  : const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.task_alt, size: 20, color: Color.fromARGB(199, 0, 0, 0)),
+                      SizedBox(width: 8),
+                      Text('Sačuvaj', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,),),
+                    ],
+                  ),
             ),
           ),
         ],

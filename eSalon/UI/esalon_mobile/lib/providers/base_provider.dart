@@ -172,19 +172,6 @@ abstract class BaseProvider<T> with ChangeNotifier {
     }
   }
 
-  // Map<String, String> createHeaders() {
-  //   final headers = {"Content-Type": "application/json"};
-
-  //   if (AuthProvider.username != null && AuthProvider.username!.isNotEmpty &&
-  //       AuthProvider.password != null && AuthProvider.password!.isNotEmpty) {
-  //     final basicAuth =
-  //         "Basic ${base64Encode(utf8.encode('${AuthProvider.username}:${AuthProvider.password}'))}";
-  //     headers["Authorization"] = basicAuth;
-  //   }
-
-  //   return headers;
-  // }
-
   Map<String, String> createHeaders() {
     String username = AuthProvider.username ?? "";
     String password = AuthProvider.password ?? "";
@@ -219,7 +206,7 @@ abstract class BaseProvider<T> with ChangeNotifier {
         }
         query += '$prefix$key=$encoded';
       } else if (value is DateTime) {
-        query += '$prefix$key=${(value as DateTime).toIso8601String()}';
+        query += '$prefix$key=${value.toIso8601String()}';
       } else if (value is List || value is Map) {
         if (value is List) value = value.asMap();
         value.forEach((k, v) {

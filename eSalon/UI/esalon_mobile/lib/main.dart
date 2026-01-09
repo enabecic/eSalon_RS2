@@ -18,12 +18,17 @@ import 'package:esalon_mobile/providers/vrsta_usluge_provider.dart';
 import 'package:esalon_mobile/screens/registracija_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 
-void main() {
-   runApp(
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
+  
+  runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => KorisnikProvider()),

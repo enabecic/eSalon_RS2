@@ -355,8 +355,8 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
+                            child: SizedBox(
+                            height: 140,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -364,18 +364,20 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
+                                        const SizedBox(height: 20),
                                         Text(
                                           usluga.naziv!,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 15,
                                           ),
-                                          maxLines: 1,
+                                          maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 6),
                                         Text(
                                           '${formatNumber(usluga.cijena)} KM',
                                           overflow: TextOverflow.ellipsis,
@@ -387,7 +389,9 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                                       ],
                                     ),
                                   ),
-                                  IconButton(
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: IconButton(
                                     icon: const Icon(
                                       Icons.add_circle,
                                       size: 38,
@@ -467,6 +471,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                                         setState(() {});
                                       },
                                   ),
+                              ),
                                 ],
                               ),
                             ),
@@ -554,7 +559,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 6, offset: const Offset(0, 3))],
+                  boxShadow: [BoxShadow(color: Colors.black.withAlpha((0.08 * 255).round()), blurRadius: 6, offset: const Offset(0, 3))],
                 ),
                 padding: const EdgeInsets.all(18),
                 child: Column(
@@ -586,11 +591,11 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15), 
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -1063,12 +1068,12 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                   ),
                 ),
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+              backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
                 if (_isInKorpa) return const Color.fromARGB(255, 210, 193, 214); 
-                if (states.contains(MaterialState.pressed)) return const Color.fromARGB(255, 210, 193, 214); 
+                if (states.contains(WidgetState.pressed)) return const Color.fromARGB(255, 210, 193, 214); 
                 return const Color.fromARGB(255, 210, 193, 214); 
               }),
-              shape: MaterialStateProperty.all(
+              shape: WidgetStateProperty.all(
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
@@ -1340,17 +1345,16 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
   }
 
   Widget buildRecommendedImage(Usluga usluga) {
-    const double size = 70;
     final borderRadius = BorderRadius.circular(10);
 
     if (_recommendedImageCache.containsKey(usluga.uslugaId)) {
-      return ClipRRect(
-        borderRadius: borderRadius,
-        child: SizedBox(
-          width: 100,
-          height: size,
-          child: FittedBox(
-            fit: BoxFit.cover, 
+      return Padding(
+        padding: const EdgeInsets.all(10), 
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: SizedBox(
+            width: 100,
+            height: 140, 
             child: _recommendedImageCache[usluga.uslugaId]!,
           ),
         ),
@@ -1358,7 +1362,6 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
     }
 
     Image image;
-
     if (usluga.slika != null && usluga.slika!.isNotEmpty) {
       image = imageFromString(usluga.slika!);
     } else {
@@ -1370,13 +1373,13 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
 
     _recommendedImageCache[usluga.uslugaId!] = image;
 
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: SizedBox(
-        width: 100,
-        height: size,
-        child: FittedBox(
-          fit: BoxFit.cover,
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: SizedBox(
+          width: 100,
+          height: 140,
           child: image,
         ),
       ),

@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:esalon_mobile/providers/base_provider.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -29,10 +32,15 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
   bool _isSaving = false;
   bool _isDeactivating = false;
 
+  File? _image; 
+  String? _base64Image;  
+  late Widget _profileImageWidget; 
+
   @override
   void initState() {
     super.initState();
     _provider = context.read<KorisnikProvider>();
+    _profileImageWidget = _buildProfileImage();
     _loadKorisnik();
   }
 
@@ -45,7 +53,12 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
         'prezime': korisnik.prezime ?? '',
         'telefon': korisnik.telefon ?? '',
         'promijeniLozinku': false,
+        'slika': AuthProvider.slika,
       };
+
+      _base64Image = AuthProvider.slika; 
+      _profileImageWidget = _buildProfileImage(); 
+
     } catch (e) {
       if (!mounted) return;
       await QuickAlert.show(
@@ -142,6 +155,8 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                             children: [
                               _buildHeader(),
                               const SizedBox(height: 28),
+                              _profileImageWidget,
+                              const SizedBox(height: 16),
                               _buildForm(),
                               const SizedBox(height: 28),
                               const Spacer(),
@@ -156,6 +171,78 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
               ),
       ),
     );
+  }
+
+  Widget _buildProfileImage() {
+    return Center(
+      child: GestureDetector(
+        onTap: getImage,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  image: _base64Image != null
+                      ? MemoryImage(base64Decode(_base64Image!))
+                      : AuthProvider.slika != null
+                          ? MemoryImage(base64Decode(AuthProvider.slika!))
+                          : const AssetImage("assets/images/prazanProfil.png")
+                              as ImageProvider,
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(50),
+                    blurRadius: 6,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+            ),
+
+            Container(
+              width: 150,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha((0.55 * 255).round()),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                  SizedBox(width: 6),
+                  Text(
+                    "Promijeni sliku",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void getImage() async {
+    var result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null && result.files.single.path != null) {
+      _image = File(result.files.single.path!);
+      _base64Image = base64Encode(_image!.readAsBytesSync());
+      if (!mounted) return;
+      setState(() {
+        _profileImageWidget = _buildProfileImage();
+      });
+    }
   }
 
   InputDecoration _decoration(String label, String hint) {
@@ -178,11 +265,11 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -216,7 +303,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
 
   Widget _buildForm() {
     return Padding(
-      padding: const EdgeInsets.all(0),//
+      padding: const EdgeInsets.all(0),
       child: FormBuilder(
         key: _formKey,
         initialValue: _initialValue,
@@ -230,7 +317,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                 FormBuilderValidators.maxLength(50,
                     errorText: "Maksimalno 50 karaktera."),
                 FormBuilderValidators.match(
-                  r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                  RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                   errorText:
                       "Ime mora početi velikim slovom i sadržavati samo slova.",
                 ),
@@ -246,7 +333,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                 FormBuilderValidators.maxLength(50,
                     errorText: "Maksimalno 50 karaktera."),
                 FormBuilderValidators.match(
-                  r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                  RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                   errorText:
                       "Prezime mora početi velikim slovom i sadržavati samo slova.",
                 ),
@@ -261,7 +348,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
                 FormBuilderValidators.required(
                     errorText: "Telefon je obavezan."),
                 FormBuilderValidators.match(
-                  r'^\+\d{7,15}$',
+                  RegExp(r'^\+\d{7,15}$'),
                   errorText: 'Telefon mora početi sa + i imati 7-15 cifara.',
                 ),
               ]),
@@ -495,7 +582,7 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
     );
   }
 
-   void _onDeaktivirajPressed() {
+  void _onDeaktivirajPressed() {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -619,6 +706,8 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
       'telefon': formValues['telefon'],
     };
 
+    request['slika'] = _base64Image ?? AuthProvider.slika;
+
     if (_promijeniLozinku) {
       request['staraLozinka'] = formValues['staraLozinka'];
       request['lozinka'] = formValues['lozinka'];
@@ -648,6 +737,9 @@ class _KorisnikProfileEditScreenState extends State<KorisnikProfileEditScreen> {
           ),
         ),
       );
+
+      AuthProvider.slika = request['slika'];
+
       if (!mounted) return;
       await Future.delayed(const Duration(milliseconds: 1500));
 

@@ -274,11 +274,11 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -355,7 +355,7 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+          BoxShadow(color: Colors.black.withAlpha((0.1 * 255).round()), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -520,7 +520,7 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
 
   Widget _buildActionButtons() {
     if (_jeBuducaPromocija) {
-      return _zatvoriDugme();
+      return const SizedBox.shrink();
     }
     return SizedBox(
       width: double.infinity,
@@ -539,25 +539,6 @@ class _PromocijaDetailsScreenState extends State<PromocijaDetailsScreen> {
           backgroundColor: _jeAktivirana
             ? const Color.fromARGB(255, 210, 209, 210)
             : const Color.fromARGB(255, 210, 193, 214),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      ),
-    );
-  }
-
-  Widget _zatvoriDugme() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton.icon(
-        onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.close, color: Colors.black),
-        label: const Text(
-          "Zatvori",
-          style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 210, 209, 210),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),

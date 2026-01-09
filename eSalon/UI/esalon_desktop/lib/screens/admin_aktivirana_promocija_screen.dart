@@ -63,12 +63,14 @@ class _AdminAktiviranaPromocijaScreenState
               controller: _klijentController,
               decoration: InputDecoration(
                 labelText: 'Ime ili prezime korisnika',
+                hintText: 'Ime ili prezime korisnika',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -94,12 +96,14 @@ class _AdminAktiviranaPromocijaScreenState
               controller: _promocijaNazivController,
               decoration: InputDecoration(
                 labelText: 'Naziv promocije',
+                hintText: 'Naziv promocije',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -181,7 +185,14 @@ class _AdminAktiviranaPromocijaScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(150, 63),
             ),
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filtere', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -203,7 +214,7 @@ class _AdminAktiviranaPromocijaScreenState
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -218,19 +229,19 @@ class _AdminAktiviranaPromocijaScreenState
                     columns: const [
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija naziva promocije (40 karaktera).",
-                          child: Text("Naziv promocije"),
+                          message: "Prikazuje se skraćena verzija naziva promocije (20 karaktera).",
+                          child: Text("NAZIV PROMOCIJE"),
                         ),
                       ),
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija imena i prezimena korisnika (25 karaktera).",
-                          child: Text("Ime i prezime korisnika"),
+                          message: "Prikazuje se skraćena verzija imena i prezimena korisnika (20 karaktera).",
+                          child: Text("IME I PREZIME KORISNIKA"),
                         ),
                       ),
-                      DataColumn(label: Text('Iskorištena')),
-                      DataColumn(label: Text("Slika usluge")),
-                      DataColumn(label: Text("Detalji")),
+                      DataColumn(label: Text('ISKORIŠTENA')),
+                      DataColumn(label: Text("SLIKA USLUGE")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -290,9 +301,9 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
     final item = data[index];
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -311,8 +322,8 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
           Tooltip(
             message: 'Klik za detalje',
             child: Text(
-              (item.promocijaNaziv != null && item.promocijaNaziv!.length > 40)
-                  ? '${item.promocijaNaziv!.substring(0, 40)}...'
+              (item.promocijaNaziv != null && item.promocijaNaziv!.length > 20)
+                  ? '${item.promocijaNaziv!.substring(0, 20)}...'
                   : item.promocijaNaziv ?? '',
             ),
           ),
@@ -321,8 +332,8 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
           Tooltip(
             message: 'Klik za detalje',
             child: Text(
-              (item.korisnikImePrezime != null && item.korisnikImePrezime!.length > 25)
-                  ? '${item.korisnikImePrezime!.substring(0, 25)}...'
+              (item.korisnikImePrezime != null && item.korisnikImePrezime!.length > 20)
+                  ? '${item.korisnikImePrezime!.substring(0, 20)}...'
                   : item.korisnikImePrezime ?? '',
             ),
           ),
@@ -341,8 +352,8 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
                     borderRadius: BorderRadius.circular(8),
                     child: Image.memory(
                       base64Decode(item.slikaUsluge!),
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.broken_image),
@@ -352,8 +363,8 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
                     borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       "assets/images/praznaUsluga.png",
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -379,12 +390,13 @@ class AktiviranaPromocijaDataSource extends AdvancedDataTableSource<AktiviranaPr
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              "Detalji",
-              style: TextStyle(
-                fontWeight: FontWeight.w500, 
-                fontSize: 14,
-              ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline, size: 20),
+                SizedBox(width: 8),
+                Text('Detalji'),
+              ],
             ),
           ),
         ),

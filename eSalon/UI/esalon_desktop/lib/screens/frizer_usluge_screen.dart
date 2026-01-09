@@ -62,12 +62,14 @@ class _FrizerUslugeScreenState
               controller: _nazivController,
               decoration: InputDecoration(
                 labelText: 'Naziv ili opis usluge',
+                hintText: 'Unesite naziv ili opis usluge',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: MaterialStateColor.resolveWith((states) {
-                  if (states.contains(MaterialState.hovered)) {
+                fillColor: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.hovered)) {
                     return const Color(0xFFE0D7F5);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return const Color(0xFFF5F5F5);
                   }
                   return Colors.white;
@@ -100,7 +102,14 @@ class _FrizerUslugeScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(150, 63),
             ),
-            child: const Text("Očisti"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                SizedBox(width: 6),
+                Text('Očisti filter', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+              ],
+            ),
           ),
         ],
       ),
@@ -122,7 +131,7 @@ class _FrizerUslugeScreenState
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -137,20 +146,20 @@ class _FrizerUslugeScreenState
                     columns: const [
                       DataColumn(
                         label: Tooltip(
-                          message: "Prikazuje se skraćena verzija naziva (25 karaktera).",
-                          child: Text("Naziv"),
+                          message: "Prikazuje se skraćena verzija naziva (20 karaktera).",
+                          child: Text("NAZIV"),
                         ),
                       ),
-                      DataColumn(label: Text("Cijena")),
-                      DataColumn(label: Text("Trajanje")),
-                      DataColumn(label: Text("Slika")),
+                      DataColumn(label: Text("CIJENA")),
+                      DataColumn(label: Text("TRAJANJE")),
+                      DataColumn(label: Text("SLIKA")),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija opisa (20 karaktera).",
-                          child: Text("Opis"),
+                          child: Text("OPIS"),
                         ),
                       ),
-                      DataColumn(label: Text("Detalji")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -206,9 +215,9 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
     final item = data[index];
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -226,8 +235,8 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
           Tooltip(
             message: 'Klik za detalje',
             child: Text(
-              (item.naziv != null && item.naziv!.length > 25)
-                  ? '${item.naziv!.substring(0, 25)}...'
+              (item.naziv != null && item.naziv!.length > 20)
+                  ? '${item.naziv!.substring(0, 20)}...'
                   : (item.naziv ?? ''),
             ),
           ),
@@ -252,8 +261,8 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.memory(
                       base64Decode(item.slika!),
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.broken_image),
@@ -263,8 +272,8 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.asset(
                       "assets/images/praznaUsluga.png",
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -297,7 +306,14 @@ class UslugaDataSource extends AdvancedDataTableSource<Usluga> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(120, 50),
             ),
-            child: const Text("Detalji"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline, size: 20),
+                SizedBox(width: 8),
+                Text('Detalji'),
+              ],
+            ),
           ),
         ),
       ],

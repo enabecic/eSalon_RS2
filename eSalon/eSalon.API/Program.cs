@@ -12,10 +12,12 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddTransient<IUlogaService, UlogaService>();
 builder.Services.AddTransient<IVrstaUslugeService, VrstaUslugeService>();
@@ -56,7 +58,7 @@ builder.Services.AddTransient<ICodeGenerator, CodeGenerator>();
 builder.Services.AddTransient<IActiveUserServiceAsync, ActiveUserServiceAsync>();
 builder.Services.AddScoped<IRecommenderService, RecommenderService>();
 
-
+builder.Services.AddScoped<IReportService, ReportService>();
 
 builder.Services.AddControllers(x =>
 {

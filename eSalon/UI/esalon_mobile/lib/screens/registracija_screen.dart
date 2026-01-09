@@ -1,5 +1,6 @@
 import 'package:esalon_mobile/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:provider/provider.dart';
@@ -133,7 +134,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                   errorText:
                                       "Ime može imati najviše 50 karaktera."),
                               FormBuilderValidators.match(
-                                r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                                RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                                 errorText:
                                     "Ime mora početi velikim slovom i sadržavati samo slova.",
                               ),
@@ -153,7 +154,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                   errorText:
                                       "Prezime može imati najviše 50 karaktera."),
                               FormBuilderValidators.match(
-                                r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$',
+                                RegExp(r'^[A-ZČĆŽĐŠ][a-zA-ZčćžđšČĆŽĐŠ\s]*$'),
                                 errorText:
                                     "Prezime mora početi velikim slovom i sadržavati samo slova.",
                               ),
@@ -162,6 +163,9 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                           const SizedBox(height: 12),
                           FormBuilderTextField(
                             name: "korisnickoIme",
+                            inputFormatters: [//
+                              FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                            ],//
                             decoration: _decoration(
                                 'Korisničko ime', 'Unesite korisničko ime'),
                             validator: FormBuilderValidators.compose([
@@ -171,6 +175,12 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                   errorText: "Minimalno 4 karaktera."),
                               FormBuilderValidators.maxLength(30,
                                   errorText: "Maksimalno 30 karaktera."),
+                              (val) {//
+                                if (val != null && val.contains(' ')) {
+                                  return 'Korisničko ime ne smije sadržavati razmake.';
+                                }
+                                return null;
+                              },//
                             ]),
                           ),
                           const SizedBox(height: 12),
@@ -197,7 +207,7 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                               FormBuilderValidators.required(
                                   errorText: "Telefon je obavezan."),
                               FormBuilderValidators.match(
-                                r'^\+\d{7,15}$',
+                                RegExp(r'^\+\d{7,15}$'),
                                 errorText:
                                     'Telefon mora početi sa + i imati 7-15 cifara.',
                               ),
@@ -329,22 +339,22 @@ class _RegistracijaScreenState extends State<RegistracijaScreen> {
                                     },
                               style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.resolveWith<Color>((states) {
-                                  if (states.contains(MaterialState.hovered)) {
+                                    WidgetStateProperty.resolveWith<Color>((states) {
+                                  if (states.contains(WidgetState.hovered)) {
                                     return Colors.deepPurple;
                                   }
                                   return Colors.deepPurple;
                                 }),
-                                shape: MaterialStateProperty.all(
+                                shape: WidgetStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                elevation: MaterialStateProperty.all(4),
-                                padding: MaterialStateProperty.all(
+                                elevation: WidgetStateProperty.all(4),
+                                padding: WidgetStateProperty.all(
                                   const EdgeInsets.symmetric(horizontal: 16),
                                 ),
-                                shadowColor: MaterialStateProperty.all(Colors.black54),
+                                shadowColor: WidgetStateProperty.all(Colors.black54),
                               ),
                               child: _isSaving
                                   ? const SizedBox(

@@ -315,11 +315,11 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
@@ -396,13 +396,13 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
         }
       },
       child: Container(
-        height: 95,
+        height: 140,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
+              color: Colors.grey.withAlpha((0.5 * 255).round()),
               spreadRadius: 2,
               blurRadius: 7,
               offset: const Offset(0, 3),
@@ -444,9 +444,9 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                 padding: const EdgeInsets.all(12.0),
                 child: SizedBox(
                   width: 100,
-                  height: 100,
+                  height: 140,
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                     child: FittedBox(
                       fit: BoxFit.cover,
                       child: _buildImage(e.slika),
@@ -456,7 +456,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.fromLTRB(4, 10, 10, 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -469,9 +469,9 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                           fontWeight: FontWeight.w600,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         e.cijena != null ? "${formatNumber(e.cijena)} KM" : "",
                         style: const TextStyle(
@@ -480,7 +480,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -669,7 +669,7 @@ class _UslugaArhivaScreenState extends State<UslugaArhivaScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withAlpha((0.5 * 255).round()),
                             spreadRadius: 2,
                             blurRadius: 7,
                             offset: const Offset(0, 3),

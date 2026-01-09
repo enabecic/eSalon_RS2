@@ -1,4 +1,3 @@
-import 'dart:convert'; 
 import 'package:advanced_datatable/advanced_datatable_source.dart';
 import 'package:advanced_datatable/datatable.dart';
 import 'package:esalon_desktop/models/promocija.dart';
@@ -68,12 +67,14 @@ class _AdminUpravljanjeUslugamaScreenState
                   controller: _nazivController,
                   decoration: InputDecoration(
                     labelText: 'Naziv ili opis promocije',
+                    hintText: 'Unesite naziv ili opis promocije',
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                     filled: true,
-                    fillColor: MaterialStateColor.resolveWith((states) {
-                      if (states.contains(MaterialState.hovered)) {
+                    fillColor: WidgetStateColor.resolveWith((states) {
+                      if (states.contains(WidgetState.hovered)) {
                         return const Color(0xFFE0D7F5);
                       }
-                      if (states.contains(MaterialState.focused)) {
+                      if (states.contains(WidgetState.focused)) {
                         return const Color(0xFFF5F5F5);
                       }
                       return Colors.white;
@@ -119,7 +120,14 @@ class _AdminUpravljanjeUslugamaScreenState
                       borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(130, 63),
                 ),    
-                child: const Text("Očisti"),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_outline, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 6),
+                    Text('Očisti filtere', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+                  ],
+                ),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
@@ -189,7 +197,14 @@ class _AdminUpravljanjeUslugamaScreenState
                       borderRadius: BorderRadius.circular(12)),
                   minimumSize: const Size(150, 63),
                 ),
-                child: const Text("Dodaj novu"),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 18, color: Color.fromARGB(199, 0, 0, 0)),
+                    SizedBox(width: 6),
+                    Text('Dodaj novu', style: TextStyle(color: Color.fromARGB(199, 0, 0, 0))),
+                  ],
+                ),
               ),
             ],
           ),
@@ -349,7 +364,7 @@ class _AdminUpravljanjeUslugamaScreenState
                   data: Theme.of(context).copyWith(
                     cardColor: const Color(0xFFF0F4F8),
                     dataTableTheme: DataTableThemeData(
-                      headingRowColor: MaterialStateProperty.all(
+                      headingRowColor: WidgetStateProperty.all(
                         const Color.fromARGB(255, 180, 140, 218),
                       ),
                     ),
@@ -365,24 +380,23 @@ class _AdminUpravljanjeUslugamaScreenState
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija naziva promocije (20 karaktera).",
-                          child: Text("Naziv promocije"),
+                          child: Text("NAZIV PROMOCIJE"),
                         ),
                       ),
-                      DataColumn(label: Text("Popust")),
+                      DataColumn(label: Text("POPUST")),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija naziva usluge (20 karaktera).",
-                          child: Text("Naziv usluge"),
+                          child: Text("NAZIV USLUGE"),
                         ),
                       ),
-                      DataColumn(label: Text("Slika usluge")),
                       DataColumn(
                         label: Tooltip(
                           message: "Prikazuje se skraćena verzija opisa (20 karaktera).",
-                          child: Text("Opis"),
+                          child: Text("OPIS"),
                         ),
                       ),
-                      DataColumn(label: Text("Obriši")),
+                      DataColumn(label: Text("OPCIJE")),
                     ],
                   ),
                 ),
@@ -444,9 +458,9 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
     final item = data[index];
 
     return DataRow(
-      color: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.selected) ||
-            states.contains(MaterialState.hovered)) {
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected) ||
+            states.contains(WidgetState.hovered)) {
           return const Color(0xFFE0D7F5);
         }
         return null;
@@ -519,32 +533,6 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
             ),
           ),
         ),  
-        DataCell(
-          Tooltip(
-            message: 'Klik za detalje',
-            child: item.slikaUsluge != null && item.slikaUsluge!.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.memory(
-                      base64Decode(item.slikaUsluge!),
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
-                    ),
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      "assets/images/praznaUsluga.png",
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-          ),
-        ),
         DataCell(
           Tooltip(
             message: 'Klik za detalje',
@@ -644,7 +632,14 @@ class PromocijaDataSource extends AdvancedDataTableSource<Promocija> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(120, 50),
             ),
-            child: const Text("Obriši"),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.delete_outline, size: 20),
+                SizedBox(width: 8),
+                Text('Obriši'),
+              ],
+            ),
           ),
         ),
       ],

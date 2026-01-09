@@ -7,10 +7,13 @@ import 'package:esalon_mobile/providers/rezervacija_cart_provider.dart';
 import 'package:esalon_mobile/providers/rezervacija_provider.dart';
 import 'package:esalon_mobile/providers/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:flutter_paypal_payment_checkout_v2/flutter_paypal_payment_checkout_v2.dart' as paypal;
 
+// ignore: must_be_immutable
 class RezervacijaDetailsScreen extends StatefulWidget {
   final int frizerId;
   final DateTime datumRezervacije;
@@ -18,14 +21,23 @@ class RezervacijaDetailsScreen extends StatefulWidget {
   final String? kodPromocije;
   final RezervacijaCartProvider rezervacijaCartProvider;
 
-  const RezervacijaDetailsScreen({
+  String? secret;
+  String? public;
+  String? sandBoxMode;
+
+  RezervacijaDetailsScreen({
     super.key,
     required this.frizerId,
     required this.datumRezervacije,
     required this.vrijemePocetka,
     this.kodPromocije,
-     required this.rezervacijaCartProvider,
-  });
+    required this.rezervacijaCartProvider,
+  }) {
+    secret = const String.fromEnvironment("_paypalSecret", defaultValue: "");
+    public = const String.fromEnvironment("_paypalPublic", defaultValue: "");
+    sandBoxMode =
+        const String.fromEnvironment("_sandBoxMode", defaultValue: "true");
+  }
 
   @override
   State<RezervacijaDetailsScreen> createState() =>
@@ -152,8 +164,8 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
     }
   }
 
-  Future<bool> _saveGotovina() async {
-    if (!mounted) return false;
+  Future<void> _saveGotovina() async {
+    if (!mounted) return;
     setState(() => _isSaving = true);
 
     try {
@@ -167,11 +179,11 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
         "kodPromocije": widget.kodPromocije?.isEmpty ?? true ? null : widget.kodPromocije,
         "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
       };
-      if (!mounted) return false;
+      if (!mounted) return;
       await rezervacijaProvider.insert(request);
-      if (!mounted) return false;
+      if (!mounted) return;
       await rezervacijaCartProvider?.clearRezervacijaList();
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Color.fromARGB(255, 138, 182, 140),
@@ -185,9 +197,17 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           ),
         ),
       );
-      return true;
+
+      if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MasterScreen(),
+          ),
+        );
+     
     } catch (e) {
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
@@ -201,22 +221,173 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           ),
         ),
       );
-      return false;
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  Future<bool> _savePaypal() async {
-    // 
-    return false; //
+  Future<void> _savePaypal() async {
+    if (!mounted) return;
+    setState(() => _isSaving = true);
+
+    try {
+      var secret = dotenv.env['_paypalSecret'];
+      var public  = dotenv.env['_paypalPublic'];
+
+      var valueSecret = (widget.secret == "" || widget.secret == null)
+          ? secret
+          : widget.secret;
+      var valuePublic = (widget.public == "" || widget.public == null)
+          ? public
+          : widget.public;
+
+      if ((valueSecret?.isEmpty ?? true) || (valuePublic?.isEmpty ?? true)) {
+        if (!mounted) return;
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: "Greška",
+          text: "Greška sa plaćanjem.",
+        );
+        if (mounted) setState(() => _isSaving = false);
+        return;
+      }
+      final total = _ukupnaCijena.toStringAsFixed(2).replaceAll(',', '.');
+
+      final items = usluge.values.map((u) {
+        double cijena = (u['cijena'] as double);
+        if (rezervacijaCartProvider?.popustUslugaId == u['id']) {
+          final popust = rezervacijaCartProvider?.popustIznos ?? 0;
+          cijena = cijena - (cijena * popust / 100);
+        }
+        cijena = double.parse(cijena.toStringAsFixed(2));
+
+        return paypal.PaypalTransactionV2Item(
+          name: u['naziv'],
+          description: "Usluga",
+          quantity: 1,
+          unitAmount: cijena,
+          currency: 'USD',
+          category: paypal.PayPalItemCategoryV2.digitalGoods, 
+          sku: u['id'].toString(), 
+        );
+      }).toList();
+
+      final order = paypal.PayPalOrderRequestV2(
+        intent: paypal.PayPalOrderIntentV2.capture,
+        paymentSource: paypal.PayPalPaymentSourceV2(
+          paymentMethodPreference: paypal.PayPalPaymentMethodPreferenceV2.immediatePaymentRequired,
+          shippingPreference: paypal.PayPalShippingPreferenceV2.noShipping,
+        ),
+
+        purchaseUnits: [
+          paypal.PayPalPurchaseUnitV2(
+            amount: paypal.PayPalAmountV2(
+              currency: 'USD',
+              value: double.parse(total),
+              itemTotal: double.parse(total),
+              taxTotal: 0.0,
+            ),
+            items: items,
+          ),
+        ],
+      );
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => paypal.PaypalCheckoutView(
+            version: paypal.PayPalApiVersion.v2,
+            sandboxMode: true,
+            clientId: valuePublic!,
+            secretKey: valueSecret!,
+            getAccessToken: null,
+            approvalUrl: null,
+            payPalOrder: order,
+            
+            onUserPayment: (success, payment) async {
+
+              try {
+                final request = {
+                  "korisnikId": AuthProvider.korisnikId,
+                  "frizerId": widget.frizerId,
+                  "datumRezervacije": widget.datumRezervacije.toIso8601String(),
+                  "vrijemePocetka":
+                      "${widget.vrijemePocetka.hour.toString().padLeft(2,'0')}:${widget.vrijemePocetka.minute.toString().padLeft(2,'0')}:00",
+                  "nacinPlacanjaId": _selectedNacinPlacanjaId,
+                  "kodPromocije": widget.kodPromocije?.isEmpty ?? true ? null : widget.kodPromocije,
+                  "stavkeRezervacije": usluge.values.map((u) => {"uslugaId": u['id']}).toList(),
+                };
+
+                await rezervacijaProvider.insert(request);
+                await rezervacijaCartProvider?.clearRezervacijaList();
+
+                if (!context.mounted) return const paypal.Right<paypal.PayPalErrorModel, dynamic>(null);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Color.fromARGB(255, 138, 182, 140),
+                    duration: Duration(milliseconds: 2500),
+                    content: Center(
+                      child: Text(
+                        "Uspješno kreirana rezervacija.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MasterScreen(),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red,
+                    duration: const Duration(milliseconds: 1800),
+                    content: Center(
+                      child: Text(
+                        e.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+              } finally {
+                if (mounted) setState(() => _isSaving = false);
+              }
+
+              return const paypal.Right<paypal.PayPalErrorModel, dynamic>(null);
+            },
+            onError: (error) {
+              if (mounted) setState(() => _isSaving = false);
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
+            onCancel: () {
+              if (mounted) setState(() => _isSaving = false);
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
+          ),
+        ),
+      );
+
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+
+    } catch (e) {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
-  
-  Future<bool> _saveRezervaciju() async {
-    if (_isSaving) return false;
+
+  Future<void> _saveRezervaciju() async {
+    if (_isSaving) return;
 
     if (_selectedNacinPlacanjaId == null) {
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.red,
@@ -230,11 +401,11 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           ),
         ),
       );
-      return false;
+      return;
     }
 
     if (usluge.isEmpty) {
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.red,
@@ -248,21 +419,22 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
           ),
         ),
       );
-      return false;
+      return;
     }
 
     final odabraniNacin = _naciniPlacanja.firstWhere((x) => x.nacinPlacanjaId == _selectedNacinPlacanjaId,);
     final nazivPlacanja = (odabraniNacin.naziv ?? "").toLowerCase();
 
     if (nazivPlacanja == "gotovina") {
-      if (!mounted) return false;
-      return await _saveGotovina();
+      if (!mounted) return;
+      await _saveGotovina();
     } else if (nazivPlacanja.contains("paypal")) {
-      if (!mounted) return false;
-      return await _savePaypal();
-    } else {
-      return false;
-    }
+      if (!mounted) return;
+      await _savePaypal();
+    } 
+    // else {
+    //   return;
+    // }
   }
 
   Widget _buildNaciniPlacanja() {
@@ -304,7 +476,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withAlpha((0.2 * 255).round()),
                   spreadRadius: 2,
                   blurRadius: 7,
                   offset: const Offset(0, 3),
@@ -324,15 +496,6 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
                     ),
                   ),
                 ),
-                if ((nacin.naziv ?? "").toLowerCase().contains("paypal"))
-                  const Text(
-                    '>',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -402,17 +565,9 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
 
                     if (potvrda == true) {
                       if (!mounted) return;
-                      bool ok = await _saveRezervaciju();
-                      if (!mounted) return;
-                      if (ok) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MasterScreen(),
-                          ),
-                        );
-                      }
+                      await _saveRezervaciju();
                     }
+
                   }
                 : null,
             style: ElevatedButton.styleFrom(
@@ -464,7 +619,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -671,7 +826,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withAlpha((0.2 * 255).round()),
             spreadRadius: 2,
             blurRadius: 7,
             offset: const Offset(0, 3),
@@ -817,7 +972,7 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withAlpha((0.1 * 255).round()),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),
@@ -854,11 +1009,11 @@ class _RezervacijaDetailsScreenState extends State<RezervacijaDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 210, 193, 214),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), 
+          color: Color.fromRGBO(0, 0, 0, 0.15),
           blurRadius: 8, 
-          offset: const Offset(0, 4), 
+          offset: Offset(0, 4), 
         ),
       ],
       ),
