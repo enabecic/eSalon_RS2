@@ -1,10 +1,12 @@
 ﻿using Azure.Core;
 using eSalon.Model.Exceptions;
+using eSalon.Model.Messages;
 using eSalon.Model.Requests;
 using eSalon.Model.SearchObjects;
 using eSalon.Services.Auth;
 using eSalon.Services.BaseServicesImplementation;
 using eSalon.Services.Database;
+using eSalon.Services.RabbitMQ;
 using eSalon.Services.Validator.Interfaces;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -24,14 +26,18 @@ namespace eSalon.Services
         private readonly ILogger<KorisnikService> _logger;
         private readonly IPasswordService _passwordService;
         private readonly IActiveUserServiceAsync _activeUserService;
+        private readonly IRabbitMQService _rabbitMQService;
+
         public KorisnikService(ESalonContext context, IMapper mapper, IUlogaValidator ulogaValidator, IKorisnikValidator korisnikValidator,
-            ILogger<KorisnikService> logger, IPasswordService passwordService, IActiveUserServiceAsync activeUserService) : base(context, mapper)
+            ILogger<KorisnikService> logger, IPasswordService passwordService, IActiveUserServiceAsync activeUserService,
+            IRabbitMQService rabbitMQService) : base(context, mapper)
         {
             _ulogaValidator = ulogaValidator;
             _korisnikValidator = korisnikValidator;
             _logger = logger;
             _passwordService = passwordService;
             _activeUserService = activeUserService;
+            _rabbitMQService = rabbitMQService;
         }
 
         public override IQueryable<Korisnik> AddFilter(KorisnikSearchObject search, IQueryable<Korisnik> query)
@@ -159,6 +165,21 @@ namespace eSalon.Services
 
             _logger.LogInformation("Dodavanje korisnika sa korisničkim imenom: {KorisnickoIme}", entity.KorisnickoIme);
 
+
+            var emailDto = new Email
+            {
+                EmailTo = entity.Email,
+                ReceiverName = $"{entity.Ime} {entity.Prezime}",
+                Subject = "Dobrodošli u eSalon",
+                Message =
+                    $"Poštovani {entity.Ime},<br><br>" +
+                    $"Vaš profil je uspješno kreiran.<br>" +
+                    $"Sada se možete prijaviti i koristiti sve funkcionalnosti sistema.<br><br>" +
+                    $"Lijep pozdrav,<br>" +
+                    $"Vaš eSalon tim"
+            };
+
+            await _rabbitMQService.SendAnEmail(emailDto);
 
             await base.BeforeInsertAsync(request, entity, cancellationToken);
         }

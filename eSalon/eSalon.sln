@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36109.1 d17.14
+VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eSalon.API", "eSalon.API\eSalon.API.csproj", "{D822E980-9F47-470E-8027-83D2C7C81284}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eSalon.Model", "eSalon.Model\eSalon.Model.csproj", "{2279B941-6DC0-49E5-A145-8CA91F315230}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eSalon.Services", "eSalon.Services\eSalon.Services.csproj", "{D6BA0D75-009C-4A99-B7F1-AC01F8E6CC2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eSalon.Subscriber", "eSalon.Subscriber\eSalon.Subscriber.csproj", "{1E12C8AE-4EF6-4DA4-9678-215FD9CF1198}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{D6BA0D75-009C-4A99-B7F1-AC01F8E6CC2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6BA0D75-009C-4A99-B7F1-AC01F8E6CC2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6BA0D75-009C-4A99-B7F1-AC01F8E6CC2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E12C8AE-4EF6-4DA4-9678-215FD9CF1198}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E12C8AE-4EF6-4DA4-9678-215FD9CF1198}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E12C8AE-4EF6-4DA4-9678-215FD9CF1198}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E12C8AE-4EF6-4DA4-9678-215FD9CF1198}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

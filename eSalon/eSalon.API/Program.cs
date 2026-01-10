@@ -4,6 +4,7 @@ using eSalon.Services;
 using eSalon.Services.Auth;
 using eSalon.Services.Database;
 using eSalon.Services.Helpers;
+using eSalon.Services.RabbitMQ;
 using eSalon.Services.Recommender;
 using eSalon.Services.RezervacijaStateMachine;
 using eSalon.Services.Validator.Implementation;
@@ -56,6 +57,7 @@ builder.Services.AddTransient<IRezervacijaValidator, RezervacijaValidator>();
 builder.Services.AddTransient<IPasswordService, PasswordService>();
 builder.Services.AddTransient<ICodeGenerator, CodeGenerator>();
 builder.Services.AddTransient<IActiveUserServiceAsync, ActiveUserServiceAsync>();
+builder.Services.AddTransient<IRabbitMQService, RabbitMQService>();
 builder.Services.AddScoped<IRecommenderService, RecommenderService>();
 
 builder.Services.AddScoped<IReportService, ReportService>();

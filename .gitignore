@@ -354,3 +354,4 @@ eSalon/UI/esalon_desktop/.env
 eSalon/.env
 eSalon/eSalon.API/.env
 eSalon/eSalon.Services/.env
+eSalon/eSalon.Subscriber/.env
