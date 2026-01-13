@@ -163,6 +163,22 @@ namespace eSalon.Services
 
         public override async Task BeforeUpdateAsync(PromocijaUpdateRequest request, Promocija entity, CancellationToken cancellationToken = default)
         {
+            if (entity.DatumKraja.Date < DateTime.Now.Date)
+            {
+                throw new UserException("Nije moguće uređivati prošle promocije.");
+            }
+
+            bool imaAktivacijaIliIskoristenje = await Context.AktiviranaPromocijas.AnyAsync(
+                x => x.PromocijaId == entity.PromocijaId
+                     && !x.IsDeleted
+                     && (x.Aktivirana || x.Iskoristena),
+                cancellationToken);
+
+            if (imaAktivacijaIliIskoristenje)
+            {
+                throw new UserException("Promociju nije moguće uređivati jer je već aktivirana ili iskorištena od strane klijenta.");
+            }
+
             await _promocijaValidator.ValidateUpdateAsync(entity.PromocijaId, request, cancellationToken);
 
             await _uslugaValidator.ValidateEntityExistsAsync(request.UslugaId, cancellationToken);
@@ -172,18 +188,16 @@ namespace eSalon.Services
 
         public override async Task BeforeDeleteAsync(Promocija entity, CancellationToken cancellationToken)
         {
-            bool uUpotrebi =
-               await Context.AktiviranaPromocijas.AnyAsync(x => x.PromocijaId == entity.PromocijaId && x.Iskoristena && !x.IsDeleted, cancellationToken);
+            bool imaAktivacijaIliIskoristenje = await Context.AktiviranaPromocijas.AnyAsync(
+                x => x.PromocijaId == entity.PromocijaId
+                     && !x.IsDeleted
+                     && (x.Aktivirana || x.Iskoristena),
+                cancellationToken);
 
-            if (uUpotrebi)
+            if (imaAktivacijaIliIskoristenje)
             {
-                throw new UserException("Promocija je iskorištena i ne može biti obrisana.");
+                throw new UserException("Promociju nije moguće obrisati jer je već aktivirana ili iskorištena od strane klijenta.");
             }
-
-            //if (entity.DatumKraja > DateTime.Now)
-            //{
-            //    throw new UserException("Promociju nije moguće obrisati jer još uvijek nije istekla.");
-            //}
 
             await base.BeforeDeleteAsync(entity, cancellationToken);
         }

@@ -78,6 +78,13 @@ namespace eSalon.Services
                              .ThenInclude(ku => ku.Uloga);
             }
 
+            if (search.JeFrizer == true)
+            {
+                query = query.Include(k => k.KorisniciUloges)
+                        .ThenInclude(ku => ku.Uloga)
+                    .Where(k => k.KorisniciUloges.Any(ku => ku.Uloga.Naziv == "Frizer"));
+            }
+
             return query;
         }
 

@@ -56,6 +56,8 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
       if (!mounted) return;
       final recenzije = await recenzijaProvider.get(filter: {
         "UslugaId": widget.uslugaId,
+        'orderBy': 'DatumDodavanja',
+        'sortDirection': 'desc',
       });
 
       if (AuthProvider.korisnikId != null) {
@@ -134,6 +136,8 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
       if (!mounted) return;
       final odgovori = await recenzijaOdgovorProvider.get(filter: {
         "RecenzijaId": recenzijaId,
+        'orderBy': 'DatumDodavanja',
+        'sortDirection': 'asc',
       });
 
       if (!mounted) return;

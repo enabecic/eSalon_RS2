@@ -12,5 +12,6 @@ namespace eSalon.Model.SearchObjects
         public string? Telefon { get; set; }
         public int? UlogaId { get; set; }
         public bool? JeAktivan { get; set; }
+        public bool? JeFrizer { get; set; }
     }
 }

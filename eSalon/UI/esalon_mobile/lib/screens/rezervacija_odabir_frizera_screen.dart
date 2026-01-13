@@ -34,7 +34,8 @@ class _RezervacijaOdabirFrizeraScreenState extends State<RezervacijaOdabirFrizer
       if (!mounted) return;
       final frizeriData = await provider.get(filter: {
         "JeAktivan": true,
-        "UlogaId": 2,
+        //"UlogaId": 2,
+        "JeFrizer": true,
       });
       if (!mounted) return;
       setState(() {

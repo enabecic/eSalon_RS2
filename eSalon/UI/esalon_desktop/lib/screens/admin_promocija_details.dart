@@ -609,6 +609,18 @@ class _AdminPromocijaDetailsState
   );
 }
   Widget _saveRow() {
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final bool isPastPromotion =
+      widget.promocija?.datumKraja != null &&
+      widget.promocija!.datumKraja!.isBefore(today);
+
+    // final bool isPastPromotion = widget.promocija != null &&
+    //   widget.promocija!.datumKraja != null &&
+    //   widget.promocija!.datumKraja!.isBefore(DateTime.now());
+
     return Padding(
       padding: const EdgeInsets.only(top: 15.0),
       child: Row(
@@ -622,12 +634,16 @@ class _AdminPromocijaDetailsState
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: _isSaveHovered
-                    ? const Color.fromARGB(255, 160, 120, 200)
-                    : const Color.fromARGB(255, 180, 140, 218),
+                color: isPastPromotion
+                  ? Colors.grey
+                  : (_isSaveHovered
+                      ? const Color.fromARGB(255, 160, 120, 200)
+                      : const Color.fromARGB(255, 180, 140, 218)),
               ),
               child: InkWell(
-                onTap: _isSaving ? null : () async { 
+                onTap: (isPastPromotion || _isSaving)
+                ? null 
+                : () async { 
                   var isValid = _formKey.currentState!.saveAndValidate();
                   if (isValid) {
                     try {
