@@ -273,6 +273,7 @@ class _KorpaScreenState extends State<KorpaScreen> {
           ],
         ),
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () async {
             try {
               if (!mounted) return;

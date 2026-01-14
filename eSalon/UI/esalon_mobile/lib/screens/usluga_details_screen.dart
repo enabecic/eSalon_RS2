@@ -361,7 +361,7 @@ class _UslugaDetailsScreenState extends State<UslugaDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   buildRecommendedImage(usluga),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: 5),
                                   Expanded(
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.start,

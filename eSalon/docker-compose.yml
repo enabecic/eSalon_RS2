@@ -1,0 +1,94 @@
+version: '3' 
+services:
+
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: rabbitmq
+    hostname: "rabbitmq"
+    labels:
+      NAME: "rabbitmq"
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${_rabbitMqUser}
+      - RABBITMQ_DEFAULT_PASS=${_rabbitMqPassword}
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    expose:
+      - 5672
+      - 15672
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks:
+      - esalonnet
+
+  esalon-sql:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    restart: unless-stopped
+    user: root
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${_saPassword}
+      - MSSQL_PID=Developer
+    ports:
+      - "1401:1433"
+    expose:
+      - 1433
+    networks:
+      - esalonnet
+
+  esalon-api:
+    restart: unless-stopped
+    build:
+      context: .
+    environment:
+      - ConnectionStrings:eSalonConnection=Server=${_source},1433;Database=${_catalog};User=sa;Password=${_saPassword};ConnectRetryCount=0;TrustServerCertificate=True
+      - ASPNETCORE_ENVIRONMENT=Development
+      - _fromAddress=${_fromAddress}
+      - _password=${_password}
+      - _host=${_host}
+      - _enableSSL=${_enableSSL}
+      - _displayName=${_displayName}
+      - _port=${_port}
+      - _rabbitMqHost=${_rabbitMqHost}
+      - _rabbitMqUser=${_rabbitMqUser}
+      - _rabbitMqPassword=${_rabbitMqPassword}
+      - _rabbitMqPort=${_rabbitMqPort}
+      - _saPassword=${_saPassword}
+    ports:
+      - "5224:5224"
+    networks:
+      - esalonnet
+    links:
+      - esalon-sql
+    depends_on:
+      - esalon-sql
+      - rabbitmq
+
+  esalon-subscriber:
+    restart: on-failure
+    build:
+      context: ./eSalon.Subscriber
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - _fromAddress=${_fromAddress}
+      - _password=${_password}
+      - _host=${_host}
+      - _enableSSL=${_enableSSL}
+      - _displayName=${_displayName}
+      - _port=${_port}
+      - _rabbitMqHost=${_rabbitMqHost}
+      - _rabbitMqUser=${_rabbitMqUser}
+      - _rabbitMqPassword=${_rabbitMqPassword}
+      - _rabbitMqPort=${_rabbitMqPort}
+    networks:
+      - esalonnet
+
+networks:
+  esalonnet:
+    driver: bridge

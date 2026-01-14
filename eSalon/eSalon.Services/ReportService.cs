@@ -62,7 +62,7 @@ namespace eSalon.Services
 
                     page.Header()
                         .PaddingBottom(30)
-                        .Text("📊 Frizer izvještaj sistema")
+                        .Text("Frizer izvještaj sistema")
                         .FontSize(22)
                         .SemiBold()
                         .FontColor(Colors.DeepPurple.Medium)
@@ -145,7 +145,7 @@ namespace eSalon.Services
 
                         col.Item().Padding(1);
 
-                        col.Item().Text("📊 Broj rezervacija po mjesecima")
+                        col.Item().Text("Broj rezervacija po mjesecima")
                             .FontSize(14).Bold();
 
                         col.Item().Table(table =>
@@ -268,7 +268,7 @@ namespace eSalon.Services
 
                     page.Header()
                         .PaddingBottom(30)
-                        .Text("📊 Admin izvještaj sistema")
+                        .Text("Admin izvještaj sistema")
                         .FontSize(22)
                         .SemiBold()
                         .FontColor(Colors.DeepPurple.Medium)
@@ -359,7 +359,7 @@ namespace eSalon.Services
 
                         col.Item().Padding(1);
 
-                        col.Item().Text("📊 Broj rezervacija po mjesecima")
+                        col.Item().Text("Broj rezervacija po mjesecima")
                             .FontSize(14).Bold();
 
                         col.Item().Table(table =>
@@ -436,16 +436,6 @@ namespace eSalon.Services
                     page.Header().AlignCenter().Column(header =>
                     {
                         header.Spacing(5);
-
-                        header.Item()
-                            .AlignCenter()
-                            .Text(text =>
-                            {
-                                text.AlignCenter();
-                                text.Span("✄")
-                                    .FontSize(36)
-                                    .FontColor(Colors.Black);
-                            });
 
                         header.Item()
                             .PaddingBottom(10)

@@ -121,4 +121,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<ESalonContext>();
+    dataContext.Database.Migrate();
+}
+
 app.Run();

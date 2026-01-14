@@ -237,7 +237,7 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
     return Row(
       children: [
         Text(
-          formatDatumRecenzije(recenzija.datumDodavanja),
+          formatirajDatum(recenzija.datumDodavanja),
           style: const TextStyle(
             fontSize: 12,
             color: Colors.black54,
@@ -834,7 +834,7 @@ class _RecenzijeScreenState extends State<RecenzijeScreen> {
             Row(
               children: [
                 Text(
-                  formatDatumRecenzije(o.datumDodavanja),
+                  formatirajDatum(o.datumDodavanja),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.black54,
